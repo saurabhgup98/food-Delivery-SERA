@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, 
@@ -23,8 +23,27 @@ const Header: React.FC<HeaderProps> = ({
   onSearch 
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const { user, openLoginModal, openSignupModal, logout } = useAuth();
   const navigate = useNavigate();
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   const handleSearch = (query: string) => {
     onSearch?.(query);
@@ -34,6 +53,11 @@ const Header: React.FC<HeaderProps> = ({
     logout();
     // Navigate to home page after logout
     navigate('/');
+    setIsProfileDropdownOpen(false);
+  };
+
+  const handleProfileOptionClick = () => {
+    setIsProfileDropdownOpen(false);
   };
 
   // Get first letter of user's name for profile circle
@@ -121,7 +145,13 @@ const Header: React.FC<HeaderProps> = ({
               {/* User Menu / Auth Buttons */}
               {user ? (
                 <div className="relative group">
-                  <button className="flex items-center space-x-2 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-105">
+                  <button 
+                    className="flex items-center space-x-2 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-105"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen);
+                    }}
+                  >
                     {/* User Profile Circle with First Letter */}
                     <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full flex items-center justify-center border-2 border-white/40 hover:border-white/60 transition-all duration-200 shadow-lg hover:shadow-xl">
                       <span className="text-white font-bold text-sm">
@@ -132,7 +162,14 @@ const Header: React.FC<HeaderProps> = ({
                   </button>
                   
                   {/* Enhanced Dropdown Menu */}
-                  <div className="absolute right-0 mt-3 w-64 bg-gradient-to-br from-dark-800 to-dark-900 rounded-xl shadow-2xl border border-dark-600/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 backdrop-blur-sm">
+                  <div 
+                    className={`absolute right-0 mt-3 w-64 bg-gradient-to-br from-dark-800 to-dark-900 rounded-xl shadow-2xl border border-dark-600/50 transition-all duration-300 transform scale-95 backdrop-blur-sm z-[60] ${
+                      isProfileDropdownOpen 
+                        ? 'opacity-100 visible scale-100' 
+                        : 'opacity-0 invisible scale-95'
+                    }`}
+                    ref={profileDropdownRef}
+                  >
                     {/* User Info Header */}
                     <div className="p-4 border-b border-dark-600/50 bg-gradient-to-r from-dark-700/50 to-dark-600/50 rounded-t-xl">
                       <div className="flex items-center space-x-3">
@@ -157,6 +194,7 @@ const Header: React.FC<HeaderProps> = ({
                       <Link 
                         to="/profile" 
                         className="flex items-center space-x-3 px-3 py-2.5 text-gray-300 hover:bg-gradient-to-r hover:from-sera-blue/20 hover:to-sera-blue/10 hover:text-white rounded-lg transition-all duration-200 group/item"
+                        onClick={handleProfileOptionClick}
                       >
                         <div className="w-5 h-5 bg-gradient-to-br from-sera-blue to-sera-blue/80 rounded-full flex items-center justify-center">
                           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,6 +207,7 @@ const Header: React.FC<HeaderProps> = ({
                       <Link 
                         to="/orders" 
                         className="flex items-center space-x-3 px-3 py-2.5 text-gray-300 hover:bg-gradient-to-r hover:from-sera-orange/20 hover:to-sera-orange/10 hover:text-white rounded-lg transition-all duration-200 group/item"
+                        onClick={handleProfileOptionClick}
                       >
                         <div className="w-5 h-5 bg-gradient-to-br from-sera-orange to-sera-orange/80 rounded-full flex items-center justify-center">
                           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,6 +220,7 @@ const Header: React.FC<HeaderProps> = ({
                       <Link 
                         to="/favorites" 
                         className="flex items-center space-x-3 px-3 py-2.5 text-gray-300 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-pink-500/10 hover:text-white rounded-lg transition-all duration-200 group/item"
+                        onClick={handleProfileOptionClick}
                       >
                         <div className="w-5 h-5 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center">
                           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,6 +233,7 @@ const Header: React.FC<HeaderProps> = ({
                       <Link 
                         to="/settings" 
                         className="flex items-center space-x-3 px-3 py-2.5 text-gray-300 hover:bg-gradient-to-r hover:from-gray-500/20 hover:to-gray-500/10 hover:text-white rounded-lg transition-all duration-200 group/item"
+                        onClick={handleProfileOptionClick}
                       >
                         <div className="w-5 h-5 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center">
                           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
