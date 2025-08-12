@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SignupFormProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface SignupFormProps {
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogin }) => {
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,6 +18,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,16 +26,39 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    setTimeout(() => {
+    setError('');
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       setIsLoading(false);
-      console.log('Signup attempt:', formData);
-    }, 2000);
+      return;
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const success = await register(formData.name, formData.email, formData.password);
+      if (!success) {
+        setError('Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -57,6 +83,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {error && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                <p className="text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label htmlFor="name" className="block text-sm font-medium text-gray-300">Full Name</label>
               <input

@@ -26,7 +26,6 @@ const App: React.FC = () => {
         <Router>
           <div className="min-h-screen bg-dark-900">
             <Header 
-              user={mockUser} 
               cartItemCount={cartItemCount}
               onSearch={handleSearch}
             />

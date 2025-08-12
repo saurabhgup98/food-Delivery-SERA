@@ -26,7 +26,7 @@ const RestaurantDetail: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isFavorite, setIsFavorite] = useState(false);
-  const { state: cartState, addItem, getItemQuantity } = useCart();
+  const { state: cartState, addItem, getItemQuantity, updateQuantity } = useCart();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterSelections | null>(null);
 
@@ -180,31 +180,37 @@ const RestaurantDetail: React.FC = () => {
   };
 
      const renderStars = (rating: number) => {
-     const stars: JSX.Element[] = [];
-     const fullStars = Math.floor(rating);
-     const hasHalfStar = rating % 1 !== 0;
+        const stars: JSX.Element[] = [];
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
 
-     for (let i = 0; i < fullStars; i++) {
-       stars.push(
-         <span key={i} className="text-yellow-400">⭐</span>
-       );
-     }
+        for (let i = 0; i < fullStars; i++) {
+          stars.push(
+            <span key={i} className="text-yellow-400 text-xs">
+              ⭐
+            </span>
+          );
+        }
 
-     if (hasHalfStar) {
-       stars.push(
-         <span key="half" className="text-yellow-400">⭐</span>
-       );
-     }
+        if (hasHalfStar) {
+          stars.push(
+            <span key="half" className="text-yellow-400 text-xs">
+              ⭐
+            </span>
+          );
+        }
 
-     const emptyStars = 5 - Math.ceil(rating);
-     for (let i = 0; i < emptyStars; i++) {
-       stars.push(
-         <span key={`empty-${i}`} className="text-gray-400">☆</span>
-       );
-     }
+        const emptyStars = 5 - Math.ceil(rating);
+        for (let i = 0; i < emptyStars; i++) {
+          stars.push(
+            <span key={`empty-${i}`} className="text-gray-500 text-xs">
+              ☆
+            </span>
+          );
+        }
 
-     return stars;
-   };
+        return stars;
+      };
 
   return (
     <div className="min-h-screen bg-dark-900">
@@ -478,21 +484,56 @@ const RestaurantDetail: React.FC = () => {
 
                    {/* Dish Info */}
                    <div className="p-4">
-                     <div className="flex items-start justify-between mb-2">
-                       <h3 className="text-white font-semibold text-lg group-hover:text-sera-blue transition-colors">
+                     {/* Name and Rating - ALWAYS 2 lines regardless of content */}
+                     <div className="flex items-start justify-between mb-3" style={{ height: '48px', minHeight: '48px' }}>
+                       <h3 
+                         className="text-white font-semibold text-lg group-hover:text-sera-blue transition-all duration-300 leading-tight"
+                         style={{
+                           height: '2.8rem',
+                           minHeight: '2.8rem',
+                           lineHeight: '1.4rem',
+                           overflow: 'hidden',
+                           display: '-webkit-box',
+                           WebkitLineClamp: 2,
+                           WebkitBoxOrient: 'vertical',
+                           margin: 0,
+                           flex: 1,
+                           marginRight: '12px'
+                         }}
+                       >
                          {item.name}
                        </h3>
-                       <div className="flex items-center space-x-1">
-                         {renderStars(item.rating)}
-                         <span className="text-white text-sm font-medium">{item.rating}</span>
+                       <div className="flex flex-col items-end space-y-1 flex-shrink-0">
+                         <div className="flex items-center space-x-1 bg-dark-700 px-2 py-1 rounded-lg border border-dark-600">
+                           <div className="flex items-center space-x-0">
+                             {renderStars(item.rating)}
+                           </div>
+                           <span className="text-white font-semibold text-xs ml-1">{item.rating}</span>
+                         </div>
+                         <span className="text-gray-400 text-xs">Rating</span>
                        </div>
                      </div>
 
-                     <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-                       {item.description}
-                     </p>
+                     {/* Description - Fixed height */}
+                     <div style={{ height: '40px', marginBottom: '12px', overflow: 'hidden' }}>
+                       <p 
+                         className="text-gray-400 text-sm"
+                         style={{
+                           margin: 0,
+                           lineHeight: '1.2rem',
+                           maxHeight: '2.4rem',
+                           overflow: 'hidden',
+                           display: '-webkit-box',
+                           WebkitLineClamp: 2,
+                           WebkitBoxOrient: 'vertical'
+                         }}
+                       >
+                         {item.description}
+                       </p>
+                     </div>
 
-                     <div className="flex items-center justify-between text-sm mb-3">
+                     {/* Prep Time and Price - Fixed height */}
+                     <div className="flex items-center justify-between text-sm mb-3" style={{ height: '20px', overflow: 'hidden' }}>
                        <div className="flex items-center space-x-2 text-gray-400">
                          <span>⏰ {item.prepTime}</span>
                          {item.calories && <span>🔥 {item.calories} cal</span>}
@@ -500,24 +541,50 @@ const RestaurantDetail: React.FC = () => {
                        <span className="text-sera-orange font-semibold">{item.price}</span>
                      </div>
 
-                     {quantity === 0 ? (
-                       <button
-                         onClick={() => handleAddToCart(item)}
-                         className="w-full bg-sera-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-sera-blue/80 transition-colors"
-                       >
-                         Add to Cart
-                       </button>
-                     ) : (
-                       <div className="flex items-center justify-between">
-                         <span className="text-white text-sm">In cart: {quantity}</span>
+                     {/* Add to Cart Button - Fixed height */}
+                     <div style={{ height: '40px' }}>
+                       {quantity === 0 ? (
                          <button
                            onClick={() => handleAddToCart(item)}
-                           className="bg-sera-orange text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-sera-orange/80 transition-colors"
+                           className="w-full bg-gradient-to-r from-sera-blue to-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30"
                          >
-                           Add More
+                           Add to Cart
                          </button>
-                       </div>
-                     )}
+                       ) : (
+                         <div className="flex items-center justify-between h-full bg-gradient-to-r from-sera-orange via-orange-500 to-orange-600 rounded-lg p-2 shadow-xl border border-orange-400/40 relative overflow-hidden">
+                           {/* Animated background effect */}
+                           <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-pulse"></div>
+                           
+                           <div className="flex items-center space-x-3 relative z-10">
+                             <div className="w-7 h-7 bg-white/25 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                               </svg>
+                             </div>
+                             <div className="flex flex-col">
+                               <span className="text-white font-bold text-sm tracking-wide">IN CART</span>
+                               <span className="text-white/90 text-xs font-medium">{quantity} {quantity === 1 ? 'item' : 'items'}</span>
+                             </div>
+                           </div>
+                           
+                           <div className="flex items-center space-x-2 relative z-10">
+                             <button
+                               onClick={() => updateQuantity(item.id, quantity - 1)}
+                               className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
+                             >
+                               −
+                             </button>
+                             <span className="text-white font-bold text-base min-w-[24px] text-center bg-white/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/30">{quantity}</span>
+                             <button
+                               onClick={() => handleAddToCart(item)}
+                               className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
+                             >
+                               +
+                             </button>
+                           </div>
+                         </div>
+                       )}
+                     </div>
                    </div>
                  </div>
                );
@@ -535,12 +602,20 @@ const RestaurantDetail: React.FC = () => {
 
              {/* Floating Cart Button */}
        {cartState.totalItems > 0 && (
-         <div className="fixed bottom-6 right-6">
-           <button className="relative w-14 h-14 bg-sera-blue text-white rounded-full shadow-lg hover:bg-sera-blue/80 transition-colors flex items-center justify-center">
-             <ShoppingCart className="w-6 h-6" />
-             <span className="absolute -top-2 -right-2 w-6 h-6 bg-sera-orange text-white rounded-full text-xs flex items-center justify-center font-bold">
+         <div className="fixed bottom-6 right-6 z-50">
+           <button className="relative w-16 h-16 bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center group border-2 border-white/20">
+             <ShoppingCart className="w-7 h-7 group-hover:scale-110 transition-transform duration-200" />
+             <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-sera-orange to-orange-500 text-white rounded-full text-sm flex items-center justify-center font-bold shadow-lg border-2 border-white animate-pulse">
                {cartState.totalItems}
-             </span>
+             </div>
+             {/* Cart total amount tooltip */}
+             <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-dark-800 text-white text-sm rounded-lg shadow-lg border border-dark-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+               <div className="flex items-center space-x-2">
+                 <span>Total:</span>
+                 <span className="font-bold text-sera-orange">₹{cartState.totalAmount}</span>
+               </div>
+               <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-dark-800"></div>
+             </div>
            </button>
          </div>
        )}

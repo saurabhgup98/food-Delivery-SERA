@@ -119,33 +119,83 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 
       {/* Restaurant Info */}
       <div className="p-4">
-        {/* Name and Rating */}
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-white font-semibold text-lg group-hover:text-sera-blue transition-colors">
+        {/* Name and Rating - ALWAYS 2 lines regardless of content */}
+        <div className="flex items-start justify-between mb-2" style={{ height: '40px', minHeight: '40px' }}>
+          <h3 
+            className="text-white font-semibold text-lg group-hover:text-sera-blue transition-colors"
+            style={{
+              height: '2.4rem',
+              minHeight: '2.4rem',
+              lineHeight: '1.2rem',
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              margin: 0,
+              flex: 1,
+              marginRight: '8px'
+            }}
+          >
             {restaurant.name}
           </h3>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 flex-shrink-0">
             {renderStars(restaurant.rating)}
             <span className="text-white text-sm font-medium">{restaurant.rating}</span>
           </div>
         </div>
 
-        {/* Cuisine and Reviews */}
-        <p className="text-gray-400 text-sm mb-2">
-          {restaurant.cuisine.slice(0, 2).join(' • ')}
-          {restaurant.cuisine.length > 2 && ' • More'}
-        </p>
-        <p className="text-gray-500 text-xs mb-3">
-          {restaurant.reviewCount.toLocaleString()} reviews
-        </p>
-
-        {/* Popular Dishes */}
-        <div className="mb-3">
-          <p className="text-gray-500 text-xs mb-1">Popular: {restaurant.popularDishes.slice(0, 2).join(', ')}</p>
+        {/* Cuisine and Reviews - Fixed height */}
+        <div style={{ height: '20px', marginBottom: '8px', overflow: 'hidden' }}>
+          <p 
+            className="text-gray-400 text-sm"
+            style={{
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              lineHeight: '1.25rem'
+            }}
+          >
+            {restaurant.cuisine.slice(0, 2).join(' • ')}
+            {restaurant.cuisine.length > 2 && ' • More'}
+          </p>
+        </div>
+        
+        <div style={{ height: '16px', marginBottom: '8px', overflow: 'hidden' }}>
+          <p 
+            className="text-gray-500 text-xs"
+            style={{
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              lineHeight: '1rem'
+            }}
+          >
+            {restaurant.reviewCount.toLocaleString()} reviews
+          </p>
         </div>
 
-        {/* Delivery Info */}
-        <div className="flex items-center justify-between text-sm mb-3">
+        {/* Popular Dishes - Fixed height */}
+        <div style={{ height: '32px', marginBottom: '12px', overflow: 'hidden' }}>
+          <p 
+            className="text-gray-500 text-xs"
+            style={{
+              margin: 0,
+              lineHeight: '1rem',
+              maxHeight: '2rem',
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical'
+            }}
+          >
+            Popular: {restaurant.popularDishes.slice(0, 2).join(', ')}
+          </p>
+        </div>
+
+        {/* Delivery Info - Fixed height */}
+        <div className="flex items-center justify-between text-sm mb-3" style={{ height: '20px', overflow: 'hidden' }}>
           <div className="flex items-center space-x-2 text-gray-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10"></circle>
@@ -162,8 +212,8 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
           </div>
         </div>
 
-        {/* Price and Delivery Fee */}
-        <div className="flex items-center justify-between text-sm mb-4">
+        {/* Price and Delivery Fee - Fixed height */}
+        <div className="flex items-center justify-between text-sm mb-4" style={{ height: '20px', overflow: 'hidden' }}>
           <span className="text-gray-400">Min. {restaurant.minimumOrder}</span>
           <span className="text-gray-400">{restaurant.deliveryFee} delivery</span>
         </div>

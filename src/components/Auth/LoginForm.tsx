@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface LoginFormProps {
   isOpen: boolean;
@@ -7,12 +8,14 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup }) => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -20,16 +23,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    setTimeout(() => {
+    try {
+      const success = await login(formData.email, formData.password);
+      if (!success) {
+        setError('Invalid email or password. Try john@example.com / password123');
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    } finally {
       setIsLoading(false);
-      console.log('Login attempt:', formData);
-    }, 2000);
+    }
   };
 
   if (!isOpen) return null;
@@ -54,6 +66,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Test User Info */}
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+              <p className="text-blue-300 text-sm font-medium mb-1">Test User:</p>
+              <p className="text-blue-200 text-xs">Email: john@example.com</p>
+              <p className="text-blue-200 text-xs">Password: password123</p>
+            </div>
+
+            {error && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                <p className="text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email Address</label>
               <input
