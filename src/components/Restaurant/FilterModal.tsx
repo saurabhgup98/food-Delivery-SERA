@@ -340,12 +340,12 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApply, onC
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-dark-800 border border-dark-700 rounded-xl shadow-xl overflow-hidden">
+      <div className="relative w-full max-w-4xl h-full max-h-[95vh] bg-dark-800 border border-dark-700 rounded-xl shadow-xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-dark-700 flex-shrink-0">
           <div className="flex items-center gap-2 text-white">
             <Menu className="w-5 h-5" />
             <span className="font-semibold">Filters</span>
@@ -355,53 +355,85 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApply, onC
           </button>
         </div>
 
-        {/* Body */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-          {/* Left nav - Now functional */}
-          <div className="md:border-r border-dark-700 p-4 space-y-2 bg-dark-750">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id as FilterCategory)}
-                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                  activeCategory === category.id
-                    ? 'bg-dark-700 text-white'
-                    : 'text-gray-300 hover:bg-dark-700'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span>{category.icon}</span>
-                  <span>{category.label}</span>
-                </div>
-              </button>
-            ))}
+        {/* Body - Responsive layout */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          {/* Left nav - Mobile: horizontal scroll, Desktop: vertical */}
+          <div className="md:w-64 md:border-r border-dark-700 bg-dark-750 flex-shrink-0">
+            {/* Mobile: Horizontal scroll */}
+            <div className="md:hidden overflow-x-auto">
+              <div className="flex space-x-2 p-4">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setActiveCategory(category.id as FilterCategory)}
+                    className={`flex-shrink-0 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                      activeCategory === category.id
+                        ? 'bg-dark-700 text-white'
+                        : 'text-gray-300 hover:bg-dark-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{category.icon}</span>
+                      <span className="text-sm">{category.label}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Desktop: Vertical layout */}
+            <div className="hidden md:block p-4 space-y-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id as FilterCategory)}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeCategory === category.id
+                      ? 'bg-dark-700 text-white'
+                      : 'text-gray-300 hover:bg-dark-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>{category.icon}</span>
+                    <span>{category.label}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Right content - Dynamic based on active category */}
-          <div className="md:col-span-2 p-6 space-y-8 overflow-y-auto max-h-[60vh]">
-            {renderContent()}
+          {/* Right content - Scrollable area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-6">
+              {renderContent()}
+            </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-dark-700">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-dark-700 flex-shrink-0">
           <button
             onClick={() => {
               setValues(defaultValues);
               onClear && onClear();
             }}
-            className="px-4 py-2 text-gray-300 hover:text-white"
+            className="px-4 py-2 text-gray-300 hover:text-white text-sm sm:text-base"
           >
             Clear All
           </button>
-          <div className="flex gap-3">
-            <button onClick={onClose} className="px-5 py-2 rounded-lg bg-dark-700 text-white hover:bg-dark-600">Cancel</button>
+          <div className="flex gap-2 sm:gap-3">
+            <button 
+              onClick={onClose} 
+              className="px-3 sm:px-5 py-2 rounded-lg bg-dark-700 text-white hover:bg-dark-600 text-sm sm:text-base"
+            >
+              Cancel
+            </button>
             <button
               onClick={() => {
                 onApply && onApply(values);
                 onClose();
               }}
-              className="px-5 py-2 rounded-lg bg-sera-blue text-white hover:bg-sera-blue/80"
+              className="px-3 sm:px-5 py-2 rounded-lg bg-sera-blue text-white hover:bg-sera-blue/80 text-sm sm:text-base"
             >
               Apply
             </button>
