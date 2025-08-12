@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Restaurant } from '../../data/restaurants';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface RestaurantListItemProps {
   restaurant: Restaurant;
@@ -14,6 +15,16 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
   onViewMenu 
 }) => {
   const navigate = useNavigate();
+  const { user, openLoginModal } = useAuth();
+
+  const handleFavoriteClick = () => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    onFavoriteToggle(restaurant.id);
+  };
+
   const renderStars = (rating: number) => {
     const stars: JSX.Element[] = [];
     const fullStars = Math.floor(rating);
@@ -95,7 +106,7 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
 
           {/* Favorite Button - Floating on image for mobile */}
           <button
-            onClick={() => onFavoriteToggle(restaurant.id)}
+            onClick={handleFavoriteClick}
             className="absolute bottom-2 right-2 p-2 bg-dark-800/90 rounded-full hover:bg-dark-700 transition-colors shadow-lg sm:hidden"
           >
             <svg 
@@ -129,7 +140,7 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
             
             {/* Desktop Favorite Button */}
             <button
-              onClick={() => onFavoriteToggle(restaurant.id)}
+              onClick={handleFavoriteClick}
               className="p-2 text-gray-400 hover:text-red-500 transition-colors hidden sm:block"
             >
               <svg 

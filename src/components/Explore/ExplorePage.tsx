@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { restaurants, cuisines, dietaryOptions, sortOptions, Restaurant } from '../../data/restaurants';
 import RestaurantCard from './RestaurantCard';
 import RestaurantListItem from './RestaurantListItem';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ExplorePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
@@ -14,6 +15,15 @@ const ExplorePage: React.FC = () => {
   const [showOffers, setShowOffers] = useState(false);
   const [selectedFavorites, setSelectedFavorites] = useState('all');
   const [restaurantData, setRestaurantData] = useState(restaurants);
+  const { user, openLoginModal } = useAuth();
+
+  const handleFavoritesChange = (value: 'all' | 'favorites' | 'recently-viewed' | 'popular') => {
+    if (value !== 'all' && !user) {
+      openLoginModal();
+      return;
+    }
+    setSelectedFavorites(value);
+  };
 
   // Filter and sort restaurants
   const filteredRestaurants = useMemo(() => {
@@ -193,7 +203,7 @@ const ExplorePage: React.FC = () => {
             {/* Favorites Dropdown */}
             <select 
               value={selectedFavorites}
-              onChange={(e) => setSelectedFavorites(e.target.value as 'all' | 'favorites' | 'recently-viewed' | 'popular')}
+              onChange={(e) => handleFavoritesChange(e.target.value as 'all' | 'favorites' | 'recently-viewed' | 'popular')}
               className="bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm sm:text-base"
             >
               <option value="all">All Restaurants</option>
