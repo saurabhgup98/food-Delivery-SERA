@@ -35,7 +35,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup
     try {
       const success = await login(formData.email, formData.password);
       if (!success) {
-        setError('Invalid email or password. Try john@example.com / password123');
+        setError('Invalid email or password. Please try again.');
       }
     } catch (err) {
       setError('Login failed. Please try again.');
@@ -66,13 +66,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Test User Info */}
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
-              <p className="text-blue-300 text-sm font-medium mb-1">Test User:</p>
-              <p className="text-blue-200 text-xs">Email: john@example.com</p>
-              <p className="text-blue-200 text-xs">Password: password123</p>
-            </div>
-
             {error && (
               <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
                 <p className="text-red-300 text-sm">{error}</p>
