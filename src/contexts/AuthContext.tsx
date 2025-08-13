@@ -1,11 +1,15 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
+
+// Backend API URL - Update this with your Vercel deployment URL
+const API_BASE_URL = (process.env.REACT_APP_API_URL as string) || 'https://your-backend-url.vercel.app';
 
 interface AuthContextType {
   user: User | null;
   isLoginModalOpen: boolean;
   isSignupModalOpen: boolean;
+  isLoading: boolean;
   openLoginModal: () => void;
   openSignupModal: () => void;
   closeLoginModal: () => void;
@@ -31,20 +35,67 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Test user data
-const testUser: User = {
-  id: '1',
-  name: 'John Doe',
-  email: 'john@example.com',
-  role: 'customer',
-  phone: '+1234567890',
-  avatar: undefined
+// Helper function to make API calls
+const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('authToken');
+  
+  const config: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'API request failed');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
 };
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for existing token on app load
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const data = await apiCall('/api/auth/me');
+          if (data.success && data.data.user) {
+            setUser({
+              id: data.data.user._id,
+              name: data.data.user.name,
+              email: data.data.user.email,
+              role: data.data.user.role,
+              phone: data.data.user.phone,
+              avatar: data.data.user.avatar,
+            });
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          localStorage.removeItem('authToken');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
 
   const openLoginModal = () => {
     setIsLoginModalOpen(true);
@@ -75,56 +126,73 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Test credentials
-    if (email === 'john@example.com' && password === 'password123') {
-      setUser(testUser);
-      closeLoginModal();
-      return true;
+    try {
+      const data = await apiCall('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (data.success && data.data.token) {
+        // Store token
+        localStorage.setItem('authToken', data.data.token);
+        
+        // Set user
+        setUser({
+          id: data.data.user._id,
+          name: data.data.user.name,
+          email: data.data.user.email,
+          role: data.data.user.role,
+          phone: data.data.user.phone,
+          avatar: data.data.user.avatar,
+        });
+        
+        closeLoginModal();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
     }
-    
-    // For demo purposes, also allow login with any email/password
-    if (email && password) {
-      const demoUser: User = {
-        id: '2',
-        name: email.split('@')[0], // Use email prefix as name
-        email: email,
-        role: 'customer',
-        phone: undefined,
-        avatar: undefined
-      };
-      setUser(demoUser);
-      closeLoginModal();
-      return true;
-    }
-    
-    return false;
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('authToken');
     // Note: Navigation will be handled in the Header component
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: name,
-      email: email,
-      role: 'customer',
-      phone: undefined,
-      avatar: undefined
-    };
-    
-    setUser(newUser);
-    closeSignupModal();
-    return true;
+    try {
+      const data = await apiCall('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (data.success && data.data.token) {
+        // Store token
+        localStorage.setItem('authToken', data.data.token);
+        
+        // Set user
+        setUser({
+          id: data.data.user._id,
+          name: data.data.user.name,
+          email: data.data.user.email,
+          role: data.data.user.role,
+          phone: data.data.user.phone,
+          avatar: data.data.user.avatar,
+        });
+        
+        closeSignupModal();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      return false;
+    }
   };
 
   const value = {
@@ -140,6 +208,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     register,
+    isLoading,
   };
 
   return (

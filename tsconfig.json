@@ -22,7 +22,7 @@
     "noImplicitAny": false,
     "noImplicitReturns": false,
     "noImplicitThis": false,
-    "types": []
+    "types": ["node"]
   },
   "include": [
     "src"
