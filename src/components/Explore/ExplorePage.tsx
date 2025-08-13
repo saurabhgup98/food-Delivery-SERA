@@ -308,10 +308,17 @@ const ExplorePage: React.FC = () => {
             <select 
               value={selectedSort}
               onChange={(e) => setSelectedSort(e.target.value)}
-              className="bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm sm:text-base"
+              className="bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm sm:text-base appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem'
+              }}
             >
               {sortOptions.map(option => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-dark-700 text-white">
                   {option.icon} {option.label}
                 </option>
               ))}
@@ -353,17 +360,26 @@ const ExplorePage: React.FC = () => {
                     {/* Filter Type */}
                     <div>
                       <label className="block text-white text-sm font-medium mb-2 sm:mb-3">Filter Type</label>
-                      <select 
-                        value={tempFilters.favorites}
-                        onChange={(e) => setTempFilters(prev => ({ ...prev, favorites: e.target.value }))}
-                        className="w-full bg-dark-700 border border-dark-600 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm"
-                      >
-                        <option value="all">🍽️ All Restaurants</option>
-                        <option value="favorites">❤️ Favorites</option>
-                        <option value="recently-viewed">🕒 Recently Viewed</option>
-                        <option value="popular">🔥 Popular</option>
-                        <option value="suggested">💡 Suggested</option>
-                      </select>
+                      <div className="relative">
+                        <select 
+                          value={tempFilters.favorites}
+                          onChange={(e) => setTempFilters(prev => ({ ...prev, favorites: e.target.value }))}
+                          className="w-full bg-dark-700 border border-dark-600 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm appearance-none cursor-pointer"
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                            backgroundPosition: 'right 0.5rem center',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: '1.5em 1.5em',
+                            paddingRight: '2.5rem'
+                          }}
+                        >
+                          <option value="all" className="bg-dark-700 text-white">🍽️ All Restaurants</option>
+                          <option value="favorites" className="bg-dark-700 text-white">❤️ Favorites</option>
+                          <option value="recently-viewed" className="bg-dark-700 text-white">🕒 Recently Viewed</option>
+                          <option value="popular" className="bg-dark-700 text-white">🔥 Popular</option>
+                          <option value="suggested" className="bg-dark-700 text-white">💡 Suggested</option>
+                        </select>
+                      </div>
                     </div>
 
                     {/* Divider */}
@@ -372,17 +388,26 @@ const ExplorePage: React.FC = () => {
                     {/* Status Filter */}
                     <div>
                       <label className="block text-white text-sm font-medium mb-2 sm:mb-3">Status</label>
-                      <select 
-                        value={tempFilters.status}
-                        onChange={(e) => setTempFilters(prev => ({ ...prev, status: e.target.value }))}
-                        className="w-full bg-dark-700 border border-dark-600 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm"
-                      >
-                        <option value="all">🟢 All Status</option>
-                        <option value="OPEN">🟢 Open</option>
-                        <option value="CLOSED">🔴 Closed</option>
-                        <option value="TEMPORARILY_CLOSED">🟣 Temporarily Closed</option>
-                        <option value="PERMANENTLY_CLOSED">⚫ Permanently Closed</option>
-                      </select>
+                      <div className="relative">
+                        <select 
+                          value={tempFilters.status}
+                          onChange={(e) => setTempFilters(prev => ({ ...prev, status: e.target.value }))}
+                          className="w-full bg-dark-700 border border-dark-600 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm appearance-none cursor-pointer"
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                            backgroundPosition: 'right 0.5rem center',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: '1.5em 1.5em',
+                            paddingRight: '2.5rem'
+                          }}
+                        >
+                          <option value="all" className="bg-dark-700 text-white">🟢 All Status</option>
+                          <option value="OPEN" className="bg-dark-700 text-white">🟢 Open</option>
+                          <option value="CLOSED" className="bg-dark-700 text-white">🔴 Closed</option>
+                          <option value="TEMPORARILY_CLOSED" className="bg-dark-700 text-white">🟣 Temporarily Closed</option>
+                          <option value="PERMANENTLY_CLOSED" className="bg-dark-700 text-white">⚫ Permanently Closed</option>
+                        </select>
+                      </div>
                     </div>
 
                     {/* Divider */}
@@ -391,17 +416,26 @@ const ExplorePage: React.FC = () => {
                     {/* Distance Filter */}
                     <div>
                       <label className="block text-white text-sm font-medium mb-2 sm:mb-3">Distance</label>
-                      <select 
-                        value={tempFilters.distance}
-                        onChange={(e) => setTempFilters(prev => ({ ...prev, distance: e.target.value }))}
-                        className="w-full bg-dark-700 border border-dark-600 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm"
-                      >
-                        <option value="all">📍 Any Distance</option>
-                        <option value="0-5">🚶‍♂️ 0-5 km</option>
-                        <option value="5-10">🚲 5-10 km</option>
-                        <option value="10-15">🚗 10-15 km</option>
-                        <option value="15+">🚚 15+ km</option>
-                      </select>
+                      <div className="relative">
+                        <select 
+                          value={tempFilters.distance}
+                          onChange={(e) => setTempFilters(prev => ({ ...prev, distance: e.target.value }))}
+                          className="w-full bg-dark-700 border border-dark-600 rounded-lg px-2 sm:px-3 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm appearance-none cursor-pointer"
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                            backgroundPosition: 'right 0.5rem center',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: '1.5em 1.5em',
+                            paddingRight: '2.5rem'
+                          }}
+                        >
+                          <option value="all" className="bg-dark-700 text-white">📍 Any Distance</option>
+                          <option value="0-5" className="bg-dark-700 text-white">🚶‍♂️ 0-5 km</option>
+                          <option value="5-10" className="bg-dark-700 text-white">🚲 5-10 km</option>
+                          <option value="10-15" className="bg-dark-700 text-white">🚗 10-15 km</option>
+                          <option value="15+" className="bg-dark-700 text-white">🚚 15+ km</option>
+                        </select>
+                      </div>
                     </div>
 
                     {/* Divider */}
