@@ -16,6 +16,14 @@ export interface Restaurant {
   isFavorite: boolean;
   priceRange: 'budget' | 'mid-range' | 'premium';
   features: string[];
+  // New status system
+  status: 'OPEN' | 'CLOSED' | 'TEMPORARILY_CLOSED' | 'PERMANENTLY_CLOSED';
+  subStatus?: 'NORMAL' | 'BUSY' | 'VERY_BUSY'; // Only for OPEN status
+  statusDetails?: {
+    nextOpenTime?: string; // For CLOSED status
+    tempCloseReason?: string; // For TEMPORARILY_CLOSED status
+    tempCloseDuration?: string; // For TEMPORARILY_CLOSED status
+  };
 }
 
 export const restaurants: Restaurant[] = [
@@ -36,7 +44,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'mid-range',
-    features: ['Pure veg available', 'Family restaurant', 'Fine dining']
+    features: ['Pure veg available', 'Family restaurant', 'Fine dining'],
+    status: 'OPEN',
+    subStatus: 'NORMAL'
   },
   {
     id: '2',
@@ -55,7 +65,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: true,
     priceRange: 'mid-range',
-    features: ['Wood-fired oven', 'Fresh ingredients']
+    features: ['Wood-fired oven', 'Fresh ingredients'],
+    status: 'OPEN',
+    subStatus: 'BUSY'
   },
   {
     id: '3',
@@ -74,7 +86,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'budget',
-    features: ['Pure vegetarian', 'Traditional recipes']
+    features: ['Pure vegetarian', 'Traditional recipes'],
+    status: 'OPEN',
+    subStatus: 'NORMAL'
   },
   {
     id: '4',
@@ -93,7 +107,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'mid-range',
-    features: ['Authentic Chinese', 'Spicy options']
+    features: ['Authentic Chinese', 'Spicy options'],
+    status: 'OPEN',
+    subStatus: 'VERY_BUSY'
   },
   {
     id: '5',
@@ -109,10 +125,14 @@ export const restaurants: Restaurant[] = [
     distance: '0.8 km',
     popularDishes: ['Classic Burger', 'Chicken Burger', 'French Fries', 'Milkshake'],
     offers: ['Combo deals available'],
-    isOpen: true,
+    isOpen: false,
     isFavorite: false,
     priceRange: 'budget',
-    features: ['Quick service', 'Fresh ingredients']
+    features: ['Quick service', 'Fresh ingredients'],
+    status: 'CLOSED',
+    statusDetails: {
+      nextOpenTime: 'tomorrow at 10:00 AM'
+    }
   },
   {
     id: '6',
@@ -128,10 +148,15 @@ export const restaurants: Restaurant[] = [
     distance: '4.1 km',
     popularDishes: ['California Roll', 'Salmon Nigiri', 'Miso Soup', 'Tempura'],
     offers: ['Premium delivery', 'Fresh fish guarantee'],
-    isOpen: true,
+    isOpen: false,
     isFavorite: true,
     priceRange: 'premium',
-    features: ['Fresh fish', 'Authentic Japanese']
+    features: ['Fresh fish', 'Authentic Japanese'],
+    status: 'TEMPORARILY_CLOSED',
+    statusDetails: {
+      tempCloseReason: 'Kitchen maintenance',
+      tempCloseDuration: '2 hours'
+    }
   },
   {
     id: '7',
@@ -150,7 +175,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'mid-range',
-    features: ['Authentic Mexican', 'Spicy options']
+    features: ['Authentic Mexican', 'Spicy options'],
+    status: 'OPEN',
+    subStatus: 'NORMAL'
   },
   {
     id: '8',
@@ -169,7 +196,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'mid-range',
-    features: ['Jain certified', 'No onion garlic']
+    features: ['Jain certified', 'No onion garlic'],
+    status: 'OPEN',
+    subStatus: 'BUSY'
   },
   {
     id: '9',
@@ -188,7 +217,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'premium',
-    features: ['100% vegan', 'Organic ingredients']
+    features: ['100% vegan', 'Organic ingredients'],
+    status: 'OPEN',
+    subStatus: 'NORMAL'
   },
   {
     id: '10',
@@ -207,7 +238,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'budget',
-    features: ['Street food', 'Quick bites']
+    features: ['Street food', 'Quick bites'],
+    status: 'OPEN',
+    subStatus: 'VERY_BUSY'
   },
   {
     id: '11',
@@ -226,7 +259,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: true,
     priceRange: 'mid-range',
-    features: ['Authentic Hyderabadi', 'Slow cooked']
+    features: ['Authentic Hyderabadi', 'Slow cooked'],
+    status: 'OPEN',
+    subStatus: 'NORMAL'
   },
   {
     id: '12',
@@ -245,7 +280,9 @@ export const restaurants: Restaurant[] = [
     isOpen: true,
     isFavorite: false,
     priceRange: 'mid-range',
-    features: ['Fresh baked', 'Artisan desserts']
+    features: ['Fresh baked', 'Artisan desserts'],
+    status: 'OPEN',
+    subStatus: 'BUSY'
   }
 ];
 
@@ -263,9 +300,9 @@ export const dietaryOptions = [
 ];
 
 export const sortOptions = [
-  { value: 'distance', label: 'Distance' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'delivery-time', label: 'Delivery Time' },
-  { value: 'price-low', label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' }
+  { value: 'distance', label: 'Distance', icon: '📍' },
+  { value: 'rating', label: 'Rating', icon: '⭐' },
+  { value: 'delivery-time', label: 'Delivery Time', icon: '⏱️' },
+  { value: 'price-low', label: 'Price: Low to High', icon: '💰' },
+  { value: 'price-high', label: 'Price: High to Low', icon: '💎' }
 ];

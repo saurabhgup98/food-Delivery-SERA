@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Restaurant } from '../../data/restaurants';
 import { useAuth } from '../../contexts/AuthContext';
+import RestaurantStatus from './RestaurantStatus';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -16,6 +17,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { user, openLoginModal } = useAuth();
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleFavoriteClick = () => {
     if (!user) {
@@ -66,16 +68,45 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 
   const getDietaryIcon = (dietary: string) => {
     switch (dietary) {
-      case 'veg': return '🌿';
-      case 'non-veg': return '🍖';
-      case 'jain': return '🕉️';
-      case 'vegan': return '🌱';
-      default: return '🍽️';
+      case 'veg': 
+        return (
+          <div className="w-4 h-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🌿
+          </div>
+        );
+      case 'non-veg': 
+        return (
+          <div className="w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🍖
+          </div>
+        );
+      case 'jain': 
+        return (
+          <div className="w-4 h-4 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🕉️
+          </div>
+        );
+      case 'vegan': 
+        return (
+          <div className="w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🌱
+          </div>
+        );
+      default: 
+        return (
+          <div className="w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🍽️
+          </div>
+        );
     }
   };
 
   return (
-    <div className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group">
+    <div 
+      className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Restaurant Image */}
       <div className="relative h-48 overflow-hidden">
         <img 
@@ -109,22 +140,21 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
         </button>
 
         {/* Dietary Badge */}
-        <div className="absolute bottom-3 left-3">
-          <div className="bg-white/90 text-dark-900 text-xs px-2 py-1 rounded-full font-medium flex items-center space-x-1">
-            <span>{getDietaryIcon(restaurant.dietary)}</span>
-            <span>{restaurant.dietary === 'both' ? 'Veg & Non-Veg' : restaurant.dietary.toUpperCase()}</span>
+        <div className="absolute bottom-3 left-3 z-10">
+          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 border backdrop-blur-sm shadow-sm bg-white/95 text-dark-900">
+            {getDietaryIcon(restaurant.dietary)}
+            <span className="font-bold">{restaurant.dietary === 'both' ? 'Veg & Non-Veg' : restaurant.dietary.toUpperCase()}</span>
           </div>
         </div>
 
-        {/* Open/Closed Badge */}
-        <div className="absolute bottom-3 right-3">
-          <div className={`text-xs px-2 py-1 rounded-full font-medium ${
-            restaurant.isOpen 
-              ? 'bg-green-500/90 text-white' 
-              : 'bg-red-500/90 text-white'
-          }`}>
-            {restaurant.isOpen ? 'Open' : 'Closed'}
-          </div>
+        {/* Restaurant Status */}
+        <div className="absolute bottom-3 right-3 z-10">
+          <RestaurantStatus 
+            status={restaurant.status}
+            subStatus={restaurant.subStatus}
+            statusDetails={restaurant.statusDetails}
+            isHovered={isHovered}
+          />
         </div>
       </div>
 

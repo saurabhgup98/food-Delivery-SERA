@@ -109,7 +109,9 @@ const RestaurantDetail: React.FC = () => {
     isOpen: true,
     isFavorite: false,
     priceRange: 'mid-range',
-    features: ['Pure veg available', 'Family restaurant', 'Fine dining']
+    features: ['Pure veg available', 'Family restaurant', 'Fine dining'],
+    status: 'OPEN',
+    subStatus: 'NORMAL'
   };
 
   // Menu categories

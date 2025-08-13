@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Restaurant } from '../../data/restaurants';
 import { useAuth } from '../../contexts/AuthContext';
+import RestaurantStatus from './RestaurantStatus';
 
 interface RestaurantListItemProps {
   restaurant: Restaurant;
@@ -16,6 +17,7 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
 }) => {
   const navigate = useNavigate();
   const { user, openLoginModal } = useAuth();
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleFavoriteClick = () => {
     if (!user) {
@@ -66,16 +68,45 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
 
   const getDietaryIcon = (dietary: string) => {
     switch (dietary) {
-      case 'veg': return '🌿';
-      case 'non-veg': return '🍖';
-      case 'jain': return '🕉️';
-      case 'vegan': return '🌱';
-      default: return '🍽️';
+      case 'veg': 
+        return (
+          <div className="w-4 h-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🌿
+          </div>
+        );
+      case 'non-veg': 
+        return (
+          <div className="w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🍖
+          </div>
+        );
+      case 'jain': 
+        return (
+          <div className="w-4 h-4 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🕉️
+          </div>
+        );
+      case 'vegan': 
+        return (
+          <div className="w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🌱
+          </div>
+        );
+      default: 
+        return (
+          <div className="w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            🍽️
+          </div>
+        );
     }
   };
 
   return (
-    <div className="bg-dark-800 rounded-xl border border-dark-700 p-5 hover:shadow-xl transition-all duration-300 hover:border-sera-blue/50 group relative overflow-hidden">
+    <div 
+      className="bg-dark-800 rounded-xl border border-dark-700 p-5 hover:shadow-xl transition-all duration-300 hover:border-sera-blue/50 group relative overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Mobile-optimized layout */}
       <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
         {/* Restaurant Image - Larger and more prominent on mobile */}
@@ -87,21 +118,20 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
           />
           
           {/* Dietary Badge - Repositioned for mobile */}
-          <div className="absolute top-2 left-2">
-            <div className="bg-white/95 text-dark-900 text-xs px-2 py-1 rounded-full font-semibold flex items-center space-x-1 shadow-sm">
-              <span>{getDietaryIcon(restaurant.dietary)}</span>
+          <div className="absolute top-2 left-2 z-10">
+            <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 border backdrop-blur-sm shadow-sm bg-white/95 text-dark-900">
+              {getDietaryIcon(restaurant.dietary)}
             </div>
           </div>
 
-          {/* Open/Closed Badge - Repositioned for mobile */}
-          <div className="absolute top-2 right-2">
-            <div className={`text-xs px-2 py-1 rounded-full font-semibold shadow-sm ${
-              restaurant.isOpen 
-                ? 'bg-green-500/95 text-white' 
-                : 'bg-red-500/95 text-white'
-            }`}>
-              {restaurant.isOpen ? 'Open' : 'Closed'}
-            </div>
+          {/* Restaurant Status - Repositioned for mobile */}
+          <div className="absolute bottom-3 right-3 z-10">
+            <RestaurantStatus 
+              status={restaurant.status}
+              subStatus={restaurant.subStatus}
+              statusDetails={restaurant.statusDetails}
+              isHovered={isHovered}
+            />
           </div>
 
           {/* Favorite Button - Floating on image for mobile */}
