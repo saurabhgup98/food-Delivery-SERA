@@ -1,7 +1,17 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { MenuItem } from '../data/menuItems';
 
+interface Customization {
+  size: string;
+  spiceLevel: string;
+  specialInstructions: string;
+  quantity: number;
+  totalPrice: number;
+}
+
 interface CartItem extends MenuItem {
+  customization?: Customization;
+  uniqueId: string;
   quantity: number;
 }
 
@@ -12,95 +22,189 @@ interface CartState {
 }
 
 type CartAction =
-  | { type: 'ADD_ITEM'; payload: MenuItem }
-  | { type: 'REMOVE_ITEM'; payload: number }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
+  | { type: 'ADD_ITEM'; payload: CartItem }
+  | { type: 'REMOVE_ITEM'; payload: string }
+  | { type: 'UPDATE_QUANTITY'; payload: { uniqueId: string; quantity: number } }
   | { type: 'CLEAR_CART' };
 
-const initialState: CartState = {
-  items: [],
-  totalItems: 0,
-  totalAmount: 0,
+const CartContext = createContext<{
+  state: CartState;
+  addItem: (item: MenuItem | CartItem) => void;
+  removeItem: (uniqueId: string) => void;
+  updateQuantity: (uniqueId: string, quantity: number) => void;
+  clearCart: () => void;
+  getItemQuantity: (itemId: number, customization?: Customization) => number;
+  getCustomizedItemQuantity: (uniqueId: string) => number;
+} | undefined>(undefined);
+
+// Generate unique ID for customized items
+const generateUniqueId = (item: MenuItem, customization?: Customization): string => {
+  if (!customization) {
+    return `item-${item.id}`;
+  }
+  
+  // Create a hash of the customization
+  const customizationHash = JSON.stringify({
+    size: customization.size,
+    spiceLevel: customization.spiceLevel,
+    specialInstructions: customization.specialInstructions
+  });
+  
+  return `item-${item.id}-${btoa(customizationHash).slice(0, 8)}`;
+};
+
+// Calculate total price for customized item
+const calculateItemPrice = (item: MenuItem, customization?: Customization): number => {
+  if (!customization) {
+    return parseInt(item.price.replace('₹', ''));
+  }
+  return customization.totalPrice;
 };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
+      const newItem = action.payload;
+      const existingItemIndex = state.items.findIndex(item => item.uniqueId === newItem.uniqueId);
       
-      if (existingItem) {
-        const updatedItems = state.items.map(item =>
-          item.id === action.payload.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+      if (existingItemIndex >= 0) {
+        // Item already exists, update quantity
+        const updatedItems = [...state.items];
+        updatedItems[existingItemIndex].quantity += newItem.quantity;
         
         return {
           ...state,
           items: updatedItems,
-          totalItems: state.totalItems + 1,
-          totalAmount: state.totalAmount + parseInt(action.payload.price.replace('₹', '')),
+          totalItems: state.totalItems + newItem.quantity,
+          totalAmount: state.totalAmount + (calculateItemPrice(newItem, newItem.customization) * newItem.quantity)
         };
       } else {
-        const newItem: CartItem = { ...action.payload, quantity: 1 };
+        // New item
         return {
           ...state,
           items: [...state.items, newItem],
-          totalItems: state.totalItems + 1,
-          totalAmount: state.totalAmount + parseInt(action.payload.price.replace('₹', '')),
+          totalItems: state.totalItems + newItem.quantity,
+          totalAmount: state.totalAmount + (calculateItemPrice(newItem, newItem.customization) * newItem.quantity)
         };
       }
     }
     
     case 'REMOVE_ITEM': {
-      const itemToRemove = state.items.find(item => item.id === action.payload);
+      const itemToRemove = state.items.find(item => item.uniqueId === action.payload);
       if (!itemToRemove) return state;
       
-      const updatedItems = state.items.filter(item => item.id !== action.payload);
       return {
         ...state,
-        items: updatedItems,
+        items: state.items.filter(item => item.uniqueId !== action.payload),
         totalItems: state.totalItems - itemToRemove.quantity,
-        totalAmount: state.totalAmount - (parseInt(itemToRemove.price.replace('₹', '')) * itemToRemove.quantity),
+        totalAmount: state.totalAmount - (calculateItemPrice(itemToRemove, itemToRemove.customization) * itemToRemove.quantity)
       };
     }
     
     case 'UPDATE_QUANTITY': {
-      const { id, quantity } = action.payload;
-      const item = state.items.find(item => item.id === id);
-      if (!item) return state;
+      const { uniqueId, quantity } = action.payload;
+      const itemIndex = state.items.findIndex(item => item.uniqueId === uniqueId);
       
-      const quantityDiff = quantity - item.quantity;
-      const updatedItems = state.items.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      );
+      if (itemIndex === -1) return state;
+      
+      const item = state.items[itemIndex];
+      const quantityDifference = quantity - item.quantity;
+      
+      if (quantity <= 0) {
+        // Remove item if quantity is 0 or negative
+        return {
+          ...state,
+          items: state.items.filter(item => item.uniqueId !== uniqueId),
+          totalItems: state.totalItems - item.quantity,
+          totalAmount: state.totalAmount - (calculateItemPrice(item, item.customization) * item.quantity)
+        };
+      }
+      
+      const updatedItems = [...state.items];
+      updatedItems[itemIndex] = { ...item, quantity };
       
       return {
         ...state,
         items: updatedItems,
-        totalItems: state.totalItems + quantityDiff,
-        totalAmount: state.totalAmount + (parseInt(item.price.replace('₹', '')) * quantityDiff),
+        totalItems: state.totalItems + quantityDifference,
+        totalAmount: state.totalAmount + (calculateItemPrice(item, item.customization) * quantityDifference)
       };
     }
     
     case 'CLEAR_CART':
-      return initialState;
+      return {
+        items: [],
+        totalItems: 0,
+        totalAmount: 0
+      };
     
     default:
       return state;
   }
 };
 
-interface CartContextType {
-  state: CartState;
-  addItem: (item: MenuItem) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
-  clearCart: () => void;
-  getItemQuantity: (id: number) => number;
-}
+export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [state, dispatch] = useReducer(cartReducer, {
+    items: [],
+    totalItems: 0,
+    totalAmount: 0
+  });
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+  const addItem = (item: MenuItem | CartItem) => {
+    let cartItem: CartItem;
+    
+    if ('uniqueId' in item) {
+      // Already a cart item
+      cartItem = item;
+    } else {
+      // Regular menu item, create cart item
+      cartItem = {
+        ...item,
+        uniqueId: generateUniqueId(item),
+        quantity: 1
+      };
+    }
+    
+    dispatch({ type: 'ADD_ITEM', payload: cartItem });
+  };
+
+  const removeItem = (uniqueId: string) => {
+    dispatch({ type: 'REMOVE_ITEM', payload: uniqueId });
+  };
+
+  const updateQuantity = (uniqueId: string, quantity: number) => {
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { uniqueId, quantity } });
+  };
+
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+  };
+
+  const getItemQuantity = (itemId: number, customization?: Customization): number => {
+    const uniqueId = generateUniqueId({ id: itemId } as MenuItem, customization);
+    const item = state.items.find(item => item.uniqueId === uniqueId);
+    return item ? item.quantity : 0;
+  };
+
+  const getCustomizedItemQuantity = (uniqueId: string): number => {
+    const item = state.items.find(item => item.uniqueId === uniqueId);
+    return item ? item.quantity : 0;
+  };
+
+  return (
+    <CartContext.Provider value={{
+      state,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      getItemQuantity,
+      getCustomizedItemQuantity
+    }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
 
 export const useCart = () => {
   const context = useContext(CartContext);
@@ -108,52 +212,4 @@ export const useCart = () => {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-};
-
-interface CartProviderProps {
-  children: ReactNode;
-}
-
-export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
-
-  const addItem = (item: MenuItem) => {
-    dispatch({ type: 'ADD_ITEM', payload: item });
-  };
-
-  const removeItem = (id: number) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: id });
-  };
-
-  const updateQuantity = (id: number, quantity: number) => {
-    if (quantity <= 0) {
-      removeItem(id);
-    } else {
-      dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
-    }
-  };
-
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' });
-  };
-
-  const getItemQuantity = (id: number): number => {
-    const item = state.items.find(item => item.id === id);
-    return item ? item.quantity : 0;
-  };
-
-  const value: CartContextType = {
-    state,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    getItemQuantity,
-  };
-
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
 };

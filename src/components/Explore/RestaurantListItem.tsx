@@ -109,8 +109,8 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
     >
       {/* Mobile-optimized layout */}
       <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-        {/* Restaurant Image - Larger and more prominent on mobile */}
-        <div className="relative w-full sm:w-28 h-48 sm:h-28 flex-shrink-0 rounded-lg overflow-hidden">
+        {/* Restaurant Image - Larger and more prominent on all screens */}
+        <div className="relative w-full sm:w-40 md:w-48 lg:w-56 h-48 sm:h-32 md:h-36 lg:h-40 flex-shrink-0 rounded-lg overflow-hidden">
           <img 
             src={restaurant.image} 
             alt={restaurant.name}
@@ -124,15 +124,15 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
             </div>
           </div>
 
-          {/* Restaurant Status - Repositioned for mobile */}
-          <div className="absolute bottom-3 right-3 z-10">
-            <RestaurantStatus 
-              status={restaurant.status}
-              subStatus={restaurant.subStatus}
-              statusDetails={restaurant.statusDetails}
-              isHovered={isHovered}
-            />
-          </div>
+                     {/* Restaurant Status - Repositioned for mobile */}
+           <div className="absolute bottom-3 left-2 z-10">
+             <RestaurantStatus 
+               status={restaurant.status}
+               subStatus={restaurant.subStatus}
+               statusDetails={restaurant.statusDetails}
+               isHovered={isHovered}
+             />
+           </div>
 
           {/* Favorite Button - Floating on image for mobile */}
           <button
@@ -152,12 +152,43 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
 
         {/* Restaurant Info - Improved mobile layout */}
         <div className="flex-1 min-w-0 flex flex-col justify-between">
-          {/* Top section: Name, Rating, and Desktop Favorite */}
+          {/* Top section: Name, Rating, Offers, and Desktop Favorite */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0 mr-3">
-              <h3 className="text-white font-bold text-xl sm:text-lg group-hover:text-sera-blue transition-colors mb-1 line-clamp-2">
-                {restaurant.name}
-              </h3>
+              <div className="flex items-start gap-2 mb-1">
+                <h3 className="text-white font-bold text-xl sm:text-lg group-hover:text-sera-blue transition-colors line-clamp-2 flex-1">
+                  {restaurant.name}
+                </h3>
+                {/* Offers - Inline with name */}
+                {restaurant.offers.length > 0 && (
+                  <div className="flex flex-wrap gap-1 flex-shrink-0">
+                    {restaurant.offers.slice(0, 2).map((offer, index) => (
+                      <div key={index} className="bg-gradient-to-r from-sera-orange/20 to-sera-orange/10 text-sera-orange text-xs px-2 py-1 rounded-full font-medium border border-sera-orange/20 whitespace-nowrap">
+                        {offer}
+                      </div>
+                    ))}
+                    {restaurant.offers.length > 2 && (
+                      <div className="bg-gradient-to-r from-sera-orange/20 to-sera-orange/10 text-sera-orange text-xs px-2 py-1 rounded-full font-medium border border-sera-orange/20">
+                        +{restaurant.offers.length - 2}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Desktop Favorite Button - Inline with name and offers */}
+                <button
+                  onClick={handleFavoriteClick}
+                  className="p-1 text-gray-400 hover:text-red-500 transition-colors hidden sm:block flex-shrink-0"
+                >
+                  <svg 
+                    className={`w-5 h-5 ${restaurant.isFavorite ? 'text-red-500 fill-current' : ''}`} 
+                    fill={restaurant.isFavorite ? 'currentColor' : 'none'} 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </button>
+              </div>
               <div className="flex items-center space-x-2 mb-2">
                 <div className="flex items-center space-x-1">
                   {renderStars(restaurant.rating)}
@@ -167,21 +198,6 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
                 <span className="text-gray-400 text-sm">{restaurant.reviewCount.toLocaleString()} reviews</span>
               </div>
             </div>
-            
-            {/* Desktop Favorite Button */}
-            <button
-              onClick={handleFavoriteClick}
-              className="p-2 text-gray-400 hover:text-red-500 transition-colors hidden sm:block"
-            >
-              <svg 
-                className={`w-5 h-5 ${restaurant.isFavorite ? 'text-red-500 fill-current' : ''}`} 
-                fill={restaurant.isFavorite ? 'currentColor' : 'none'} 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </button>
           </div>
 
           {/* Cuisine and Popular Dishes */}
@@ -194,36 +210,35 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
             </p>
           </div>
 
-          {/* Delivery Info - Improved mobile layout */}
-          <div className="grid grid-cols-2 sm:flex sm:items-center sm:space-x-4 text-sm text-gray-400 mb-4">
-            <div className="flex items-center space-x-2 mb-2 sm:mb-0">
-              <svg className="w-4 h-4 text-sera-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12,6 12,12 16,14"></polyline>
-              </svg>
-              <span className="font-medium">{restaurant.deliveryTime}</span>
+          {/* Delivery Info and View Menu Button - Inline layout */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div className="grid grid-cols-2 sm:flex sm:items-center sm:space-x-4 text-sm text-gray-400">
+              <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                <svg className="w-4 h-4 text-sera-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12,6 12,12 16,14"></polyline>
+                </svg>
+                <span className="font-medium">{restaurant.deliveryTime}</span>
+              </div>
+              <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                <svg className="w-4 h-4 text-sera-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span className="font-medium">{restaurant.distance}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-500">Min. {restaurant.minimumOrder}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-500">{restaurant.deliveryFee} delivery</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2 mb-2 sm:mb-0">
-              <svg className="w-4 h-4 text-sera-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <span className="font-medium">{restaurant.distance}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-500">Min. {restaurant.minimumOrder}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-500">{restaurant.deliveryFee} delivery</span>
-            </div>
-          </div>
-
-          {/* Action Buttons - Improved mobile layout */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
-            {/* View Menu Button - Full width on mobile */}
+            
+            {/* View Menu Button - Inline with delivery info */}
             <button
               onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-              className="w-full sm:w-auto bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white py-3 px-6 rounded-xl text-sm font-semibold hover:from-sera-blue/90 hover:to-sera-blue/80 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:from-sera-blue/90 hover:to-sera-blue/80 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
             >
               View Menu
             </button>
@@ -231,18 +246,7 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
         </div>
       </div>
 
-      {/* Offers - Improved mobile layout */}
-      {restaurant.offers.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-dark-700">
-          <div className="flex flex-wrap gap-2">
-            {restaurant.offers.map((offer, index) => (
-              <div key={index} className="bg-gradient-to-r from-sera-orange/20 to-sera-orange/10 text-sera-orange text-xs px-3 py-2 rounded-full font-medium border border-sera-orange/20">
-                {offer}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

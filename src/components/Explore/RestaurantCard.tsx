@@ -148,14 +148,14 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
         </div>
 
         {/* Restaurant Status */}
-        <div className="absolute bottom-3 right-3 z-10">
-          <RestaurantStatus 
-            status={restaurant.status}
-            subStatus={restaurant.subStatus}
-            statusDetails={restaurant.statusDetails}
-            isHovered={isHovered}
-          />
-        </div>
+                  <div className="absolute bottom-3 right-2 z-10">
+            <RestaurantStatus 
+              status={restaurant.status}
+              subStatus={restaurant.subStatus}
+              statusDetails={restaurant.statusDetails}
+              isHovered={isHovered}
+            />
+          </div>
       </div>
 
       {/* Restaurant Info */}

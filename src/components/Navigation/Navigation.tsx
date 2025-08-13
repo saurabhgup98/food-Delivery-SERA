@@ -3,13 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 
 interface NavigationProps {
-  cartItemCount?: number;
   isMobile?: boolean;
   onMobileMenuClose?: () => void;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ 
-  cartItemCount = 0, 
   isMobile = false, 
   onMobileMenuClose 
 }) => {
@@ -85,11 +83,7 @@ const Navigation: React.FC<NavigationProps> = ({
               <ShoppingCart className="w-4 h-4" />
             </div>
             <span className="flex-1">Cart</span>
-            {cartItemCount > 0 && (
-              <div className="w-5 h-5 bg-sera-yellow rounded-full text-xs flex items-center justify-center text-dark-900 font-bold">
-                {cartItemCount}
-              </div>
-            )}
+            {/* Cart count will be handled by CartIcon component */}
           </Link>
           
           <Link 

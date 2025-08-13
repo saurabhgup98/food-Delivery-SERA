@@ -122,13 +122,13 @@ const RestaurantStatus: React.FC<RestaurantStatusProps> = ({
       {/* Additional details - Show above tag with stylish background */}
       {isHovered && (
         <div className="absolute bottom-full right-0 mb-1 z-20">
-          <div className="bg-gradient-to-r from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-lg px-3 py-2 border border-slate-600/30 shadow-xl">
-            <div className="text-xs text-slate-100 font-semibold whitespace-nowrap flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-              {config.details}
+          <div className="bg-gradient-to-r from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-lg px-3 py-2 border border-slate-600/30 shadow-xl max-w-xs" style={{ transform: 'translateX(calc(50% - 1rem))' }}>
+            <div className="text-xs text-slate-100 font-semibold flex items-start gap-1">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse flex-shrink-0 mt-1"></span>
+              <span className="break-words leading-relaxed">{config.details}</span>
             </div>
             {/* Arrow pointing down to tag */}
-            <div className="absolute top-full right-3 w-2 h-2 bg-slate-800/95 transform rotate-45 border-r border-b border-slate-600/30"></div>
+            <div className="absolute top-full right-4 w-2 h-2 bg-slate-800/95 rotate-45 border-r border-b border-slate-600/30"></div>
           </div>
         </div>
       )}

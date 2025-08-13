@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Search,
@@ -17,11 +17,13 @@ import {
 } from '../../data/menuItems';
 import { useCart } from '../../contexts/CartContext';
 import FilterModal, { FilterSelections } from './FilterModal';
+import DishCustomizationModal from './DishCustomizationModal';
+import CartModal from '../Cart/CartModal';
 
 type TabType = 'top-meals' | 'quick-order' | 'chef-specials' | 'trending';
 
 const RestaurantDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+ // const { id: _restaurantId } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('top-meals');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -29,17 +31,21 @@ const RestaurantDetail: React.FC = () => {
   const { state: cartState, addItem, getItemQuantity, updateQuantity } = useCart();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterSelections | null>(null);
+  const [isDishCustomizationOpen, setIsDishCustomizationOpen] = useState(false);
+  const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
+  const [hoveredDishId, setHoveredDishId] = useState<number | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Helper function to get price range from price string
-  const getPriceRange = (price: string) => {
+  const getPriceRange = useCallback((price: string) => {
     const num = parseInt(price.replace('₹', ''));
     if (num < 100) return 'Budget <₹100';
     if (num <= 300) return '₹100-₹300';
     return '>₹300';
-  };
+  }, []);
 
   // Helper function to check if item matches dietary filter
-  const matchesDietary = (item: MenuItem, dietaryFilters: string[]) => {
+  const matchesDietary = useCallback((item: MenuItem, dietaryFilters: string[]) => {
     if (dietaryFilters.length === 0) return true;
     return dietaryFilters.some(filter => {
       if (filter === 'Veg') return item.dietary === 'veg';
@@ -48,17 +54,17 @@ const RestaurantDetail: React.FC = () => {
       if (filter === 'Jain') return item.dietary === 'jain';
       return false;
     });
-  };
+  }, []);
 
   // Helper function to check if item matches price filter
-  const matchesPrice = (item: MenuItem, priceFilters: string[]) => {
+  const matchesPrice = useCallback((item: MenuItem, priceFilters: string[]) => {
     if (priceFilters.length === 0) return true;
     const itemPriceRange = getPriceRange(item.price);
     return priceFilters.includes(itemPriceRange);
-  };
+  }, [getPriceRange]);
 
   // Helper function to sort items
-  const sortItems = (items: MenuItem[], sortBy: string, sortOrder: 'asc' | 'desc') => {
+  const sortItems = useCallback((items: MenuItem[], sortBy: string, sortOrder: 'asc' | 'desc') => {
     return [...items].sort((a, b) => {
       let aValue: any, bValue: any;
       
@@ -89,7 +95,7 @@ const RestaurantDetail: React.FC = () => {
         return aValue < bValue ? 1 : -1;
       }
     });
-  };
+  }, []);
 
   // Mock restaurant data - in real app, fetch by ID
   const restaurant: Restaurant = {
@@ -106,11 +112,11 @@ const RestaurantDetail: React.FC = () => {
     distance: '2.1 km',
     popularDishes: ['Butter Chicken', 'Biryani', 'Naan', 'Tandoori Chicken'],
     offers: ['20% off on orders above ₹500', 'Free delivery'],
-    isOpen: true,
+    isOpen: false, // Changed to false to test closed restaurant behavior
     isFavorite: false,
     priceRange: 'mid-range',
     features: ['Pure veg available', 'Family restaurant', 'Fine dining'],
-    status: 'OPEN',
+    status: 'CLOSED',
     subStatus: 'NORMAL'
   };
 
@@ -168,7 +174,7 @@ const RestaurantDetail: React.FC = () => {
     }
 
     return items;
-  }, [activeTab, searchQuery, selectedCategory, filterValues]);
+  }, [activeTab, searchQuery, selectedCategory, filterValues, matchesDietary, matchesPrice, sortItems]);
 
   const tabs = [
     { id: 'top-meals', label: 'Top Meals', count: getPopularItems().length },
@@ -179,6 +185,18 @@ const RestaurantDetail: React.FC = () => {
 
   const handleAddToCart = (item: MenuItem) => {
     addItem(item);
+  };
+
+  const handleCustomizeDish = (item: MenuItem) => {
+    setSelectedDish(item);
+    setIsDishCustomizationOpen(true);
+  };
+
+
+
+  const handleCloseCustomization = () => {
+    setIsDishCustomizationOpen(false);
+    setSelectedDish(null);
   };
 
      const renderStars = (rating: number) => {
@@ -429,8 +447,15 @@ const RestaurantDetail: React.FC = () => {
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
              {filteredMenuItems.map(item => {
                const quantity = getItemQuantity(item.id);
+               const isHovered = hoveredDishId === item.id;
+               
                return (
-                 <div key={item.id} className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group">
+                 <div 
+                   key={item.id} 
+                   className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group relative"
+                   onMouseEnter={() => setHoveredDishId(item.id)}
+                   onMouseLeave={() => setHoveredDishId(null)}
+                 >
                    {/* Dish Image */}
                    <div className="relative h-48 overflow-hidden">
                      <img 
@@ -439,6 +464,39 @@ const RestaurantDetail: React.FC = () => {
                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                      />
                      
+                     {/* Hover Overlay */}
+                     {isHovered && (
+                       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-20 transition-all duration-300">
+                         <div className="text-center space-y-3">
+                           <h3 className="text-white font-bold text-lg">{item.name}</h3>
+                           <p className="text-white/80 text-sm px-4">{item.description}</p>
+                           <div className="flex space-x-3 justify-center">
+                             {restaurant.status === 'CLOSED' ? (
+                               <div className="text-center">
+                                 <div className="text-red-400 font-semibold mb-2">🚫 Restaurant Closed</div>
+                                 <p className="text-white/70 text-sm">Orders not available at this time</p>
+                               </div>
+                             ) : (
+                               <>
+                                 <button
+                                   onClick={() => handleCustomizeDish(item)}
+                                   className="bg-sera-orange text-white px-4 py-2 rounded-lg font-semibold hover:bg-sera-orange/80 transition-colors"
+                                 >
+                                   Customize
+                                 </button>
+                                 <button
+                                   onClick={() => handleAddToCart(item)}
+                                   className="bg-sera-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-sera-blue/80 transition-colors"
+                                 >
+                                   Quick Add
+                                 </button>
+                               </>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                     )}
+
                      {/* Dietary Badge */}
                      <div className="absolute top-3 left-3">
                        <div className="bg-white/90 text-dark-900 text-xs px-2 py-1 rounded-full font-medium">
@@ -459,16 +517,42 @@ const RestaurantDetail: React.FC = () => {
 
                      {/* Quick Add Button */}
                      {quantity === 0 ? (
-                       <button
-                         onClick={() => handleAddToCart(item)}
-                         className="absolute bottom-3 right-3 bg-sera-blue text-white p-2 rounded-full hover:bg-sera-blue/80 transition-colors shadow-lg"
-                       >
-                         <ShoppingCart className="w-5 h-5" />
-                       </button>
+                       <div className="absolute bottom-3 right-3 flex space-x-2">
+                         {restaurant.status === 'CLOSED' ? (
+                           <div className="bg-red-500/90 text-white px-3 py-2 rounded-full text-xs font-medium shadow-lg">
+                             🚫 Closed
+                           </div>
+                         ) : (
+                           <>
+                             <button
+                               onClick={() => handleCustomizeDish(item)}
+                               className="bg-sera-orange text-white p-2 rounded-full hover:bg-sera-orange/80 transition-colors shadow-lg"
+                               title="Customize"
+                             >
+                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                               </svg>
+                             </button>
+                             <button
+                               onClick={() => handleAddToCart(item)}
+                               className="bg-sera-blue text-white p-2 rounded-full hover:bg-sera-blue/80 transition-colors shadow-lg"
+                               title="Quick Add"
+                             >
+                               <ShoppingCart className="w-5 h-5" />
+                             </button>
+                           </>
+                         )}
+                       </div>
                      ) : (
                        <div className="absolute bottom-3 right-3 bg-sera-blue text-white px-3 py-1 rounded-full flex items-center space-x-2 shadow-lg">
                          <button
-                           onClick={() => handleAddToCart(item)}
+                           onClick={() => {
+                             const cartItem = cartState.items.find(cartItem => cartItem.id === item.id && !cartItem.customization);
+                             if (cartItem) {
+                               updateQuantity(cartItem.uniqueId, quantity - 1);
+                             }
+                           }}
                            className="text-sm font-bold hover:text-sera-orange transition-colors"
                          >
                            +
@@ -543,15 +627,23 @@ const RestaurantDetail: React.FC = () => {
                        <span className="text-sera-orange font-semibold">{item.price}</span>
                      </div>
 
-                     {/* Add to Cart Button - Fixed height */}
-                     <div style={{ height: '40px' }}>
-                       {quantity === 0 ? (
-                         <button
-                           onClick={() => handleAddToCart(item)}
-                           className="w-full bg-gradient-to-r from-sera-blue to-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30"
-                         >
-                           Add to Cart
-                         </button>
+                                           {/* Add to Cart Button - Fixed height */}
+                      <div style={{ height: '40px' }}>
+                        {quantity === 0 ? (
+                          <div className="flex space-x-2 h-full">
+                            {restaurant.status === 'CLOSED' ? (
+                              <div className="flex-1 bg-red-500/90 text-white py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center">
+                                🚫 Restaurant Closed
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleAddToCart(item)}
+                                className="flex-1 bg-gradient-to-r from-sera-blue to-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30 text-sm"
+                              >
+                                Quick Add
+                              </button>
+                            )}
+                          </div>
                        ) : (
                          <div className="flex items-center justify-between h-full bg-gradient-to-r from-sera-orange via-orange-500 to-orange-600 rounded-lg p-2 shadow-xl border border-orange-400/40 relative overflow-hidden">
                            {/* Animated background effect */}
@@ -571,7 +663,12 @@ const RestaurantDetail: React.FC = () => {
                            
                            <div className="flex items-center space-x-2 relative z-10">
                              <button
-                               onClick={() => updateQuantity(item.id, quantity - 1)}
+                               onClick={() => {
+                                 const cartItem = cartState.items.find(cartItem => cartItem.id === item.id && !cartItem.customization);
+                                 if (cartItem) {
+                                   updateQuantity(cartItem.uniqueId, quantity - 1);
+                                 }
+                               }}
                                className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
                              >
                                −
@@ -605,7 +702,10 @@ const RestaurantDetail: React.FC = () => {
              {/* Floating Cart Button */}
        {cartState.totalItems > 0 && (
          <div className="fixed bottom-6 right-6 z-50">
-           <button className="relative w-16 h-16 bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center group border-2 border-white/20">
+           <button 
+             onClick={() => setIsCartOpen(true)}
+             className="relative w-16 h-16 bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center group border-2 border-white/20"
+           >
              <ShoppingCart className="w-7 h-7 group-hover:scale-110 transition-transform duration-200" />
              <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-sera-orange to-orange-500 text-white rounded-full text-sm flex items-center justify-center font-bold shadow-lg border-2 border-white animate-pulse">
                {cartState.totalItems}
@@ -621,6 +721,19 @@ const RestaurantDetail: React.FC = () => {
            </button>
          </div>
        )}
+
+      {/* Dish Customization Modal */}
+      <DishCustomizationModal
+        isOpen={isDishCustomizationOpen}
+        onClose={handleCloseCustomization}
+        dish={selectedDish}
+      />
+
+      {/* Cart Modal */}
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };

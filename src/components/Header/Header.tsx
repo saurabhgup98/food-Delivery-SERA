@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
-  ShoppingCart, 
   User, 
   Menu, 
   X,
@@ -12,14 +11,13 @@ import { User as UserType } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import Navigation from '../Navigation/Navigation';
 import SearchBar from '../SearchBar/SearchBar';
+import { CartIcon } from '../Cart';
 
 interface HeaderProps {
-  cartItemCount?: number;
   onSearch?: (query: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  cartItemCount = 0, 
   onSearch 
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -103,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({
             </Link>
 
             {/* Desktop Navigation */}
-            <Navigation cartItemCount={cartItemCount} />
+            <Navigation />
           </div>
 
           {/* Right Side - Search Bar and Actions */}
@@ -130,17 +128,7 @@ const Header: React.FC<HeaderProps> = ({
               </button>
 
               {/* Cart */}
-              <Link 
-                to="/cart" 
-                className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-sera-yellow rounded-full text-xs flex items-center justify-center text-dark-900 font-bold animate-bounce-gentle">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Link>
+              <CartIcon />
 
               {/* User Menu / Auth Buttons */}
               {user ? (
@@ -302,7 +290,6 @@ const Header: React.FC<HeaderProps> = ({
          {isMobileMenuOpen && (
            <div className="md:hidden pb-4 border-t border-white/20 bg-gradient-to-r from-sera-pink to-sera-orange -mx-4 sm:-mx-2 lg:-mx-14 px-4 sm:px-2 lg:px-14">
              <Navigation 
-               cartItemCount={cartItemCount} 
                isMobile={true} 
                onMobileMenuClose={() => setIsMobileMenuOpen(false)} 
              />
