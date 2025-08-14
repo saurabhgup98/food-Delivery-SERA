@@ -73,9 +73,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('authToken');
+      console.log('Checking auth on page load, token exists:', !!token);
+      
       if (token) {
         try {
+          console.log('Calling /api/auth/me to verify token...');
           const data = await apiCall('/api/auth/me');
+          console.log('Auth check response:', data);
+          
           if (data.success && data.data.user) {
             setUser({
               id: data.data.user._id,
@@ -85,11 +90,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               phone: data.data.user.phone,
               avatar: data.data.user.avatar,
             });
+            console.log('User session restored successfully');
           }
         } catch (error) {
           console.error('Auth check failed:', error);
           localStorage.removeItem('authToken');
+          console.log('Token removed from localStorage due to auth failure');
         }
+      } else {
+        console.log('No token found in localStorage');
       }
       setIsLoading(false);
     };
