@@ -142,14 +142,10 @@ const ExplorePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-sera-blue/20 border-t-sera-blue mx-auto mb-6"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-sera-orange animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-          </div>
-          <h3 className="text-white text-lg font-semibold mb-2">Discovering Amazing Restaurants</h3>
-          <p className="text-gray-400">Loading your culinary journey...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sera-blue mx-auto mb-4"></div>
+          <p className="text-white">Loading restaurants...</p>
         </div>
       </div>
     );
@@ -157,37 +153,27 @@ const ExplorePage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-6">
-          <div className="text-red-400 text-6xl mb-6">🍽️</div>
-          <h2 className="text-white text-2xl font-bold mb-4">Oops! Something went wrong</h2>
-          <p className="text-gray-400 mb-8 leading-relaxed">{error}</p>
-          <div className="space-y-4">
-            <button 
-              onClick={fetchRestaurants}
-              className="w-full bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white px-8 py-3 rounded-xl hover:from-sera-blue/90 hover:to-sera-blue transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Try Again
-            </button>
-            <button 
-              onClick={clearFilters}
-              className="w-full bg-dark-700 text-white px-8 py-3 rounded-xl hover:bg-dark-600 transition-all duration-300 font-semibold border border-dark-600"
-            >
-              Clear Filters
-            </button>
-          </div>
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-4xl mb-4">⚠️</div>
+          <h2 className="text-white text-xl font-semibold mb-2">Error Loading Restaurants</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button 
+            onClick={fetchRestaurants}
+            className="bg-sera-blue text-white px-6 py-2 rounded-lg hover:bg-sera-blue/80 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
-      {/* Hero Section with Search */}
-      <div className="relative bg-gradient-to-r from-sera-pink/20 via-sera-orange/20 to-sera-yellow/20 border-b border-white/10">
-        <div className="absolute inset-0 bg-gradient-to-r from-sera-pink/5 to-sera-orange/5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Page Title */}
+    <div className="min-h-screen bg-dark-900">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-sera-pink/10 via-sera-orange/10 to-sera-yellow/10 border-b border-dark-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               <span className="bg-gradient-to-r from-sera-pink to-sera-orange bg-clip-text text-transparent">
@@ -196,195 +182,180 @@ const ExplorePage: React.FC = () => {
               <span className="text-white"> Restaurants</span>
             </h1>
             <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-              Discover the best restaurants in your area. Order delicious food and get it delivered to your doorstep.
+              Discover amazing food from the best restaurants near you
             </p>
           </div>
+        </div>
+      </div>
 
-          {/* Search and Filter Bar */}
-          <div className="bg-dark-800/80 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl">
-            <div className="flex flex-col lg:flex-row gap-4 items-center">
-              {/* Search Bar */}
-              <div className="flex-1 w-full">
-                <form onSubmit={handleSearch} className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search restaurants, cuisines, or dishes..."
-                    className="w-full px-6 py-4 pl-14 bg-dark-700/50 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent backdrop-blur-sm transition-all duration-300"
-                  />
-                  <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white px-4 py-2 rounded-lg hover:from-sera-blue/90 hover:to-sera-blue transition-all duration-300 text-sm font-semibold"
-                  >
-                    Search
-                  </button>
-                </form>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex flex-wrap gap-3">
-                {/* Location */}
-                <button className="flex items-center space-x-2 bg-dark-700/50 border border-white/10 px-4 py-3 rounded-xl text-white hover:bg-dark-600/50 transition-all duration-300 backdrop-blur-sm">
-                  <MapPin className="w-4 h-4 text-sera-orange" />
-                  <span className="text-sm font-medium">Deliver to</span>
-                </button>
-
-                {/* Filter Toggle */}
-                <button 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center space-x-2 px-4 py-3 rounded-xl text-white transition-all duration-300 backdrop-blur-sm ${
-                    showFilters 
-                      ? 'bg-gradient-to-r from-sera-orange to-sera-orange/90 border border-sera-orange/50' 
-                      : 'bg-dark-700/50 border border-white/10 hover:bg-dark-600/50'
-                  }`}
-                >
-                  <span className="text-sm">⚙️</span>
-                  <span className="text-sm font-medium">Filters</span>
-                </button>
-
-                {/* View Toggle */}
-                <button 
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                  className="flex items-center space-x-2 bg-dark-700/50 border border-white/10 px-4 py-3 rounded-xl text-white hover:bg-dark-600/50 transition-all duration-300 backdrop-blur-sm"
-                >
-                  {viewMode === 'grid' ? (
-                    <span className="text-sm">📋</span>
-                  ) : (
-                    <span className="text-sm">🔲</span>
-                  )}
-                  <span className="text-sm font-medium">{viewMode === 'grid' ? 'List' : 'Grid'}</span>
-                </button>
-
-                {/* Results Count */}
-                <div className="flex items-center space-x-2 bg-gradient-to-r from-sera-blue/20 to-sera-blue/10 border border-sera-blue/20 px-4 py-3 rounded-xl text-white backdrop-blur-sm">
-                  <span className="text-sera-blue text-lg">🍽️</span>
-                  <span className="text-sm font-semibold">{restaurants.length} restaurants</span>
-                </div>
-              </div>
+      {/* Search and Filter Bar */}
+      <div className="bg-dark-800 border-b border-dark-700 sticky top-16 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Search Bar */}
+            <div className="flex-1 w-full">
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search restaurants, cuisines, or dishes..."
+                  className="w-full px-4 py-3 pl-12 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
+                />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </form>
             </div>
 
-            {/* Advanced Filters Panel */}
-            {showFilters && (
-              <div className="mt-6 p-6 bg-dark-700/30 rounded-xl border border-white/10 backdrop-blur-sm">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  {/* Sort By */}
-                  <div>
-                    <label className="block text-white text-sm font-semibold mb-2">Sort By</label>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full bg-dark-600/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue backdrop-blur-sm"
-                    >
-                      {sortOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+            {/* Filter Controls */}
+            <div className="flex flex-wrap gap-3">
+              {/* Location */}
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <MapPin className="w-4 h-4" />
+                <span>Deliver to: Current Location</span>
+              </button>
 
-                  {/* Cuisine Filter */}
-                  <div>
-                    <label className="block text-white text-sm font-semibold mb-2">Cuisine</label>
-                    <select
-                      value={selectedCuisine}
-                      onChange={(e) => setSelectedCuisine(e.target.value)}
-                      className="w-full bg-dark-600/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue backdrop-blur-sm"
-                    >
-                      {cuisineOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm"
+              >
+                {sortOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
 
-                  {/* Status Filter */}
-                  <div>
-                    <label className="block text-white text-sm font-semibold mb-2">Status</label>
-                    <select
-                      value={selectedStatus}
-                      onChange={(e) => setSelectedStatus(e.target.value)}
-                      className="w-full bg-dark-600/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue backdrop-blur-sm"
-                    >
-                      {statusOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/* Filter Toggle */}
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm ${
+                  showFilters 
+                    ? 'bg-sera-orange border border-sera-orange/50' 
+                    : 'bg-dark-700 border border-dark-600 hover:bg-dark-600'
+                }`}
+              >
+                <span className="text-sm">⚙️</span>
+                <span>Filters</span>
+              </button>
 
-                  {/* Dietary Filter */}
-                  <div>
-                    <label className="block text-white text-sm font-semibold mb-2">Dietary</label>
-                    <select
-                      value={selectedDietary}
-                      onChange={(e) => setSelectedDietary(e.target.value)}
-                      className="w-full bg-dark-600/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue backdrop-blur-sm"
-                    >
-                      {dietaryOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Price Range Filter */}
-                  <div>
-                    <label className="block text-white text-sm font-semibold mb-2">Price Range</label>
-                    <select
-                      value={selectedPriceRange}
-                      onChange={(e) => setSelectedPriceRange(e.target.value)}
-                      className="w-full bg-dark-600/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue backdrop-blur-sm"
-                    >
-                      {priceRangeOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Clear Filters Button */}
-                <div className="mt-6 flex justify-end">
-                  <button
-                    onClick={clearFilters}
-                    className="bg-gradient-to-r from-sera-orange to-sera-orange/90 text-white px-6 py-2 rounded-lg hover:from-sera-orange/90 hover:to-sera-orange transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                  >
-                    Clear All Filters
-                  </button>
-                </div>
+              {/* View Toggle */}
+              <div className="flex bg-dark-700 border border-dark-600 rounded-lg overflow-hidden">
+                <button 
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 text-sm transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-sera-blue text-white' 
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  🔲
+                </button>
+                <button 
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-sera-blue text-white' 
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  📋
+                </button>
               </div>
-            )}
+            </div>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="mt-4">
+            <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
+            <div className="flex flex-wrap gap-2">
+              {/* Dietary Filters */}
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🌿</span>
+                <span>Veg Only</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🍗</span>
+                <span>Non-Veg</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🟣</span>
+                <span>Both</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🟣</span>
+                <span>Jain</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🌱</span>
+                <span>Vegan</span>
+              </button>
+
+              {/* Cuisine Filters */}
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🇮🇳</span>
+                <span>Indian</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🇨🇳</span>
+                <span>Chinese</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>🇮🇹</span>
+                <span>Italian</span>
+              </button>
+
+              {/* Rating Filters */}
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>⭐</span>
+                <span>4+ Stars</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>⭐</span>
+                <span>3+ Stars</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>⭐</span>
+                <span>2+ Stars</span>
+              </button>
+              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+                <span>⭐</span>
+                <span>1+ Stars</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Restaurant List */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Results Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-white font-semibold">
+            {restaurants.length} Restaurants Found
+          </div>
+          <div className="text-gray-400 text-sm">
+            Showing {restaurants.length} of {restaurants.length} restaurants
+          </div>
+        </div>
+
         {restaurants.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-gray-400 text-8xl mb-6">🍽️</div>
-            <h2 className="text-white text-3xl font-bold mb-4">No restaurants found</h2>
-            <p className="text-gray-400 mb-8 text-lg max-w-md mx-auto">
-              Try adjusting your search criteria or filters to discover more amazing restaurants
-            </p>
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">🍽️</div>
+            <h2 className="text-white text-2xl font-semibold mb-2">No restaurants found</h2>
+            <p className="text-gray-400 mb-6">Try adjusting your search or filters</p>
             <button
               onClick={clearFilters}
-              className="bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white px-8 py-3 rounded-xl hover:from-sera-blue/90 hover:to-sera-blue transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="bg-sera-blue text-white px-6 py-3 rounded-lg hover:bg-sera-blue/80 transition-colors"
             >
-              Clear All Filters
+              Clear Filters
             </button>
           </div>
         ) : (
           <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'
-            : 'space-y-6'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+            : 'space-y-4'
           }>
             {restaurants.map(restaurant => (
               viewMode === 'grid' ? (
