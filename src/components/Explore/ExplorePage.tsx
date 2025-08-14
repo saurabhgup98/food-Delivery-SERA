@@ -21,6 +21,10 @@ const ExplorePage: React.FC = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('rating');
+  
+  // Quick filter states
+  const [selectedVegFilter, setSelectedVegFilter] = useState(false);
+  const [selectedRatingFilter, setSelectedRatingFilter] = useState('4+');
 
   // Fetch restaurants from backend
   const fetchRestaurants = async () => {
@@ -95,6 +99,8 @@ const ExplorePage: React.FC = () => {
     setSelectedDietary('all');
     setSelectedPriceRange('all');
     setSortBy('rating');
+    setSelectedVegFilter(false);
+    setSelectedRatingFilter('4+');
   };
 
   const cuisineOptions = [
@@ -274,7 +280,14 @@ const ExplorePage: React.FC = () => {
           <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
           <div className="flex flex-wrap gap-2">
             {/* Dietary Filters */}
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button 
+              onClick={() => setSelectedVegFilter(!selectedVegFilter)}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
+                selectedVegFilter 
+                  ? 'bg-green-600 border-green-500' 
+                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+              }`}
+            >
               <span>🌿</span>
               <span>Veg Only</span>
             </button>
@@ -310,25 +323,136 @@ const ExplorePage: React.FC = () => {
             </button>
 
             {/* Rating Filters */}
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button 
+              onClick={() => setSelectedRatingFilter('4+')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
+                selectedRatingFilter === '4+' 
+                  ? 'bg-dark-600 border-dark-500' 
+                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+              }`}
+            >
               <span>⭐</span>
               <span>4+ Stars</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button 
+              onClick={() => setSelectedRatingFilter('3+')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
+                selectedRatingFilter === '3+' 
+                  ? 'bg-dark-600 border-dark-500' 
+                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+              }`}
+            >
               <span>⭐</span>
               <span>3+ Stars</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button 
+              onClick={() => setSelectedRatingFilter('2+')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
+                selectedRatingFilter === '2+' 
+                  ? 'bg-dark-600 border-dark-500' 
+                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+              }`}
+            >
               <span>⭐</span>
               <span>2+ Stars</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button 
+              onClick={() => setSelectedRatingFilter('1+')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
+                selectedRatingFilter === '1+' 
+                  ? 'bg-dark-600 border-dark-500' 
+                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+              }`}
+            >
               <span>⭐</span>
               <span>1+ Stars</span>
             </button>
           </div>
         </div>
       </div>
+
+      {/* Advanced Filters Panel */}
+      {showFilters && (
+        <div className="bg-dark-800 border-b border-dark-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Cuisine Filter */}
+              <div>
+                <label className="block text-white text-sm font-medium mb-2">Cuisine</label>
+                <select
+                  value={selectedCuisine}
+                  onChange={(e) => setSelectedCuisine(e.target.value)}
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {cuisineOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-white text-sm font-medium mb-2">Status</label>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Dietary Filter */}
+              <div>
+                <label className="block text-white text-sm font-medium mb-2">Dietary</label>
+                <select
+                  value={selectedDietary}
+                  onChange={(e) => setSelectedDietary(e.target.value)}
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {dietaryOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price Range Filter */}
+              <div>
+                <label className="block text-white text-sm font-medium mb-2">Price Range</label>
+                <select
+                  value={selectedPriceRange}
+                  onChange={(e) => setSelectedPriceRange(e.target.value)}
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {priceRangeOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={clearFilters}
+                className="bg-sera-orange text-white px-4 py-2 rounded-lg hover:bg-sera-orange/80 transition-colors text-sm"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Restaurant List */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
