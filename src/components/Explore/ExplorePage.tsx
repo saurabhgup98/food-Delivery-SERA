@@ -148,7 +148,7 @@ const ExplorePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sera-blue mx-auto mb-4"></div>
           <p className="text-white">Loading restaurants...</p>
@@ -159,7 +159,7 @@ const ExplorePage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-400 text-4xl mb-4">⚠️</div>
           <h2 className="text-white text-xl font-semibold mb-2">Error Loading Restaurants</h2>
@@ -176,18 +176,15 @@ const ExplorePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-slate-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-sera-pink/10 via-sera-orange/10 to-sera-yellow/10 border-b border-dark-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="bg-slate-900 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              <span className="bg-gradient-to-r from-sera-pink to-sera-orange bg-clip-text text-transparent">
-                Explore
-              </span>
-              <span className="text-white"> Restaurants</span>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+              Explore Restaurants
             </h1>
-            <p className="text-gray-300 text-base max-w-2xl mx-auto">
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
               Discover amazing food from the best restaurants near you
             </p>
           </div>
@@ -195,9 +192,9 @@ const ExplorePage: React.FC = () => {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="bg-dark-800 border-b border-dark-700">
+      <div className="bg-slate-800 border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="flex flex-col lg:flex-row gap-3 items-center">
             {/* Search Bar */}
             <div className="flex-1 w-full">
               <form onSubmit={handleSearch} className="relative">
@@ -206,48 +203,45 @@ const ExplorePage: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search restaurants, cuisines, or dishes..."
-                  className="w-full px-4 py-3 pl-12 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
+                  className="w-full px-4 py-2.5 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
                 />
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               </form>
             </div>
 
             {/* Filter Controls */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {/* Location */}
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
                 <MapPin className="w-4 h-4" />
                 <span>Deliver to: Current Location</span>
               </button>
 
-              {/* Sort Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-blue text-sm"
-              >
-                {sortOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              {/* Rating Dropdown */}
+              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
+                <span className="text-yellow-400">⭐</span>
+                <span>Rating</span>
+                <span className="text-gray-400">▼</span>
+              </button>
 
               {/* Filter Toggle */}
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm ${
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                   showFilters 
-                    ? 'bg-sera-orange border border-sera-orange/50' 
-                    : 'bg-dark-700 border border-dark-600 hover:bg-dark-600'
+                    ? 'bg-sera-orange border-sera-orange/50' 
+                    : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
                 }`}
               >
-                <span className="text-sm">⚙️</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                </svg>
                 <span>Filters</span>
+                <span className="text-gray-400">▼</span>
               </button>
 
               {/* View Toggle */}
-              <div className="flex bg-dark-700 border border-dark-600 rounded-lg overflow-hidden">
+              <div className="flex bg-slate-700 border border-slate-600 rounded-lg overflow-hidden">
                 <button 
                   onClick={() => setViewMode('grid')}
                   className={`px-3 py-2 text-sm transition-colors ${
@@ -256,7 +250,9 @@ const ExplorePage: React.FC = () => {
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  🔲
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
+                  </svg>
                 </button>
                 <button 
                   onClick={() => setViewMode('list')}
@@ -266,16 +262,23 @@ const ExplorePage: React.FC = () => {
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  📋
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                  </svg>
                 </button>
               </div>
+
+              {/* Map View Button */}
+              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
+                <MapPin className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Filters */}
-      <div className="bg-dark-800 border-b border-dark-700">
+      <div className="bg-slate-800 border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
           <div className="flex flex-wrap gap-2">
@@ -285,39 +288,39 @@ const ExplorePage: React.FC = () => {
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedVegFilter 
                   ? 'bg-green-600 border-green-500' 
-                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
               }`}
             >
               <span>🌿</span>
               <span>Veg Only</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🍗</span>
               <span>Non-Veg</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🟣</span>
               <span>Both</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🟣</span>
               <span>Jain</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🌱</span>
               <span>Vegan</span>
             </button>
 
             {/* Cuisine Filters */}
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🇮🇳</span>
               <span>Indian</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🇨🇳</span>
               <span>Chinese</span>
             </button>
-            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
               <span>🇮🇹</span>
               <span>Italian</span>
             </button>
@@ -327,8 +330,8 @@ const ExplorePage: React.FC = () => {
               onClick={() => setSelectedRatingFilter('4+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '4+' 
-                  ? 'bg-dark-600 border-dark-500' 
-                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+                  ? 'bg-slate-600 border-slate-500' 
+                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
               }`}
             >
               <span>⭐</span>
@@ -338,8 +341,8 @@ const ExplorePage: React.FC = () => {
               onClick={() => setSelectedRatingFilter('3+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '3+' 
-                  ? 'bg-dark-600 border-dark-500' 
-                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+                  ? 'bg-slate-600 border-slate-500' 
+                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
               }`}
             >
               <span>⭐</span>
@@ -349,8 +352,8 @@ const ExplorePage: React.FC = () => {
               onClick={() => setSelectedRatingFilter('2+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '2+' 
-                  ? 'bg-dark-600 border-dark-500' 
-                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+                  ? 'bg-slate-600 border-slate-500' 
+                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
               }`}
             >
               <span>⭐</span>
@@ -360,8 +363,8 @@ const ExplorePage: React.FC = () => {
               onClick={() => setSelectedRatingFilter('1+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '1+' 
-                  ? 'bg-dark-600 border-dark-500' 
-                  : 'bg-dark-700 border-dark-600 hover:bg-dark-600'
+                  ? 'bg-slate-600 border-slate-500' 
+                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
               }`}
             >
               <span>⭐</span>
@@ -373,7 +376,7 @@ const ExplorePage: React.FC = () => {
 
       {/* Advanced Filters Panel */}
       {showFilters && (
-        <div className="bg-dark-800 border-b border-dark-700">
+        <div className="bg-slate-800 border-b border-slate-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Cuisine Filter */}
@@ -382,7 +385,7 @@ const ExplorePage: React.FC = () => {
                 <select
                   value={selectedCuisine}
                   onChange={(e) => setSelectedCuisine(e.target.value)}
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
                 >
                   {cuisineOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -398,7 +401,7 @@ const ExplorePage: React.FC = () => {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
                 >
                   {statusOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -414,7 +417,7 @@ const ExplorePage: React.FC = () => {
                 <select
                   value={selectedDietary}
                   onChange={(e) => setSelectedDietary(e.target.value)}
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
                 >
                   {dietaryOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -430,7 +433,7 @@ const ExplorePage: React.FC = () => {
                 <select
                   value={selectedPriceRange}
                   onChange={(e) => setSelectedPriceRange(e.target.value)}
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
                 >
                   {priceRangeOptions.map(option => (
                     <option key={option.value} value={option.value}>
