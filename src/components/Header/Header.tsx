@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const { user, openLoginModal, openSignupModal, logout } = useAuth();
+  const { user, isLoading, openLoginModal, openSignupModal, logout } = useAuth();
   const navigate = useNavigate();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -131,7 +131,13 @@ const Header: React.FC<HeaderProps> = ({
               <CartIcon />
 
               {/* User Menu / Auth Buttons */}
-              {user ? (
+              {isLoading ? (
+                // Show loading skeleton while checking authentication
+                <div className="flex items-center space-x-2 p-2">
+                  <div className="w-8 h-8 bg-white/20 rounded-full animate-pulse"></div>
+                  <div className="hidden sm:block w-16 h-4 bg-white/20 rounded animate-pulse"></div>
+                </div>
+              ) : user ? (
                 <div className="relative group">
                   <button 
                     className="flex items-center space-x-2 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-105"
