@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingCart } from 'lucide-react';
-import { MenuItem } from '../../data/menuItems';
+import { MenuItem } from '../../services/api';
 import { useCart } from '../../contexts/CartContext';
 
 interface DishCustomizationModalProps {
@@ -93,7 +93,7 @@ const DishCustomizationModal: React.FC<DishCustomizationModalProps> = ({
         quantity: customization.quantity,
         totalPrice: customization.totalPrice
       },
-      uniqueId: `item-${dish.id}-${Date.now()}`,
+      uniqueId: `item-${dish._id}-${Date.now()}`,
       quantity: customization.quantity
     };
     

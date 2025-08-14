@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Restaurant } from '../../data/restaurants';
+import { Restaurant } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import RestaurantStatus from './RestaurantStatus';
 
@@ -24,7 +24,7 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
       openLoginModal();
       return;
     }
-    onFavoriteToggle(restaurant.id);
+    onFavoriteToggle(restaurant._id);
   };
 
   const renderStars = (rating: number) => {
@@ -237,7 +237,7 @@ const RestaurantListItem: React.FC<RestaurantListItemProps> = ({
             
             {/* View Menu Button - Inline with delivery info */}
             <button
-              onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+              onClick={() => navigate(`/restaurant/${restaurant._id}`)}
               className="w-full sm:w-auto bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:from-sera-blue/90 hover:to-sera-blue/80 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
             >
               View Menu

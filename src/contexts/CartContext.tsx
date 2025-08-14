@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { MenuItem } from '../data/menuItems';
+import { MenuItem } from '../services/api';
 
 interface Customization {
   size: string;
@@ -13,6 +13,7 @@ interface CartItem extends MenuItem {
   customization?: Customization;
   uniqueId: string;
   quantity: number;
+  id: string; // Add this for compatibility with existing cart logic
 }
 
 interface CartState {
@@ -33,14 +34,14 @@ const CartContext = createContext<{
   removeItem: (uniqueId: string) => void;
   updateQuantity: (uniqueId: string, quantity: number) => void;
   clearCart: () => void;
-  getItemQuantity: (itemId: number, customization?: Customization) => number;
+  getItemQuantity: (itemId: string, customization?: Customization) => number;
   getCustomizedItemQuantity: (uniqueId: string) => number;
 } | undefined>(undefined);
 
 // Generate unique ID for customized items
 const generateUniqueId = (item: MenuItem, customization?: Customization): string => {
   if (!customization) {
-    return `item-${item.id}`;
+    return `item-${item._id}`;
   }
   
   // Create a hash of the customization
@@ -50,7 +51,7 @@ const generateUniqueId = (item: MenuItem, customization?: Customization): string
     specialInstructions: customization.specialInstructions
   });
   
-  return `item-${item.id}-${btoa(customizationHash).slice(0, 8)}`;
+  return `item-${item._id}-${btoa(customizationHash).slice(0, 8)}`;
 };
 
 // Calculate total price for customized item
@@ -160,6 +161,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Regular menu item, create cart item
       cartItem = {
         ...item,
+        id: item._id, // Set id for compatibility
         uniqueId: generateUniqueId(item),
         quantity: 1
       };
@@ -180,8 +182,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'CLEAR_CART' });
   };
 
-  const getItemQuantity = (itemId: number, customization?: Customization): number => {
-    const uniqueId = generateUniqueId({ id: itemId } as MenuItem, customization);
+  const getItemQuantity = (itemId: string, customization?: Customization): number => {
+    const uniqueId = generateUniqueId({ _id: itemId } as MenuItem, customization);
     const item = state.items.find(item => item.uniqueId === uniqueId);
     return item ? item.quantity : 0;
   };

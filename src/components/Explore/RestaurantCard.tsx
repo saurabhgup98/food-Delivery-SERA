@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Restaurant } from '../../data/restaurants';
+import { Restaurant } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import RestaurantStatus from './RestaurantStatus';
 
@@ -24,7 +24,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
       openLoginModal();
       return;
     }
-    onFavoriteToggle(restaurant.id);
+    onFavoriteToggle(restaurant._id);
   };
 
   const renderStars = (rating: number) => {
@@ -261,7 +261,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 
         {/* View Menu Button */}
         <button
-          onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+          onClick={() => navigate(`/restaurant/${restaurant._id}`)}
           className="w-full bg-sera-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-sera-blue/80 transition-colors"
         >
           View Menu

@@ -1,20 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Search,
   Menu,
   ShoppingCart
 } from 'lucide-react';
-import { Restaurant } from '../../data/restaurants';
-import { 
-  menuItems, 
-  getPopularItems, 
-  getChefSpecials, 
-  getQuickOrderItems, 
-  getTrendingItems,
-  searchMenuItems,
-  MenuItem 
-} from '../../data/menuItems';
+import { apiService, Restaurant, MenuItem } from '../../services/api';
 import { useCart } from '../../contexts/CartContext';
 import FilterModal, { FilterSelections } from './FilterModal';
 import DishCustomizationModal from './DishCustomizationModal';
@@ -23,7 +14,7 @@ import CartModal from '../Cart/CartModal';
 type TabType = 'top-meals' | 'quick-order' | 'chef-specials' | 'trending';
 
 const RestaurantDetail: React.FC = () => {
- // const { id: _restaurantId } = useParams<{ id: string }>();
+  const { id: restaurantId } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('top-meals');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -33,8 +24,75 @@ const RestaurantDetail: React.FC = () => {
   const [filterValues, setFilterValues] = useState<FilterSelections | null>(null);
   const [isDishCustomizationOpen, setIsDishCustomizationOpen] = useState(false);
   const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
-  const [hoveredDishId, setHoveredDishId] = useState<number | null>(null);
+  const [hoveredDishId, setHoveredDishId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // State for API data
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch restaurant data
+  const fetchRestaurant = async () => {
+    if (!restaurantId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiService.getRestaurant(restaurantId);
+      
+      if (response.success) {
+        setRestaurant(response.data.restaurant);
+        setIsFavorite(response.data.restaurant.isFavorite);
+      } else {
+        setError('Failed to fetch restaurant');
+      }
+    } catch (err) {
+      console.error('Error fetching restaurant:', err);
+      setError('Failed to load restaurant. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch menu items
+  const fetchMenuItems = async () => {
+    if (!restaurantId) return;
+    
+    try {
+      const typeMap: Record<TabType, 'all' | 'popular' | 'chef-special' | 'quick-order' | 'trending'> = {
+        'top-meals': 'popular',
+        'quick-order': 'quick-order',
+        'chef-specials': 'chef-special',
+        'trending': 'trending'
+      };
+      
+      const response = await apiService.getRestaurantMenu(restaurantId, {
+        type: typeMap[activeTab],
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        search: searchQuery || undefined
+      });
+      
+      if (response.success) {
+        setMenuItems(response.data.menuItems);
+      }
+    } catch (err) {
+      console.error('Error fetching menu items:', err);
+    }
+  };
+
+  // Fetch data on component mount and when dependencies change
+  useEffect(() => {
+    fetchRestaurant();
+  }, [restaurantId]);
+
+  useEffect(() => {
+    if (restaurant) {
+      fetchMenuItems();
+    }
+  }, [restaurantId, activeTab, selectedCategory, searchQuery]);
 
   // Helper function to get price range from price string
   const getPriceRange = useCallback((price: string) => {
@@ -97,69 +155,19 @@ const RestaurantDetail: React.FC = () => {
     });
   }, []);
 
-  // Mock restaurant data - in real app, fetch by ID
-  const restaurant: Restaurant = {
-    id: '1',
-    name: 'Spice Garden',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop',
-    rating: 4.5,
-    reviewCount: 1247,
-    cuisine: ['Indian', 'North Indian', 'Mughlai'],
-    dietary: 'both',
-    deliveryTime: '30-45 min',
-    deliveryFee: '₹30',
-    minimumOrder: '₹200',
-    distance: '2.1 km',
-    popularDishes: ['Butter Chicken', 'Biryani', 'Naan', 'Tandoori Chicken'],
-    offers: ['20% off on orders above ₹500', 'Free delivery'],
-    isOpen: false, // Changed to false to test closed restaurant behavior
-    isFavorite: false,
-    priceRange: 'mid-range',
-    features: ['Pure veg available', 'Family restaurant', 'Fine dining'],
-    status: 'CLOSED',
-    subStatus: 'NORMAL'
-  };
-
   // Menu categories
-  const menuCategories = [
-    { id: 'starters', name: 'Starters', count: menuItems.filter(item => item.category === 'starters').length },
-    { id: 'mains', name: 'Main Course', count: menuItems.filter(item => item.category === 'mains').length },
-    { id: 'breads', name: 'Breads & Rice', count: menuItems.filter(item => item.category === 'breads').length },
-    { id: 'desserts', name: 'Desserts', count: menuItems.filter(item => item.category === 'desserts').length },
-    { id: 'beverages', name: 'Beverages', count: menuItems.filter(item => item.category === 'beverages').length }
-  ];
-
-  // Get menu items based on active tab
-  const getTabData = (tab: TabType): MenuItem[] => {
-    switch (tab) {
-      case 'top-meals':
-        return getPopularItems();
-      case 'quick-order':
-        return getQuickOrderItems();
-      case 'chef-specials':
-        return getChefSpecials();
-      case 'trending':
-        return getTrendingItems();
-      default:
-        return getPopularItems();
-    }
-  };
+  const menuCategories = useMemo(() => {
+    const categories = ['starters', 'mains', 'breads', 'desserts', 'beverages'];
+    return categories.map(category => ({
+      id: category,
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+      count: menuItems.filter(item => item.category === category).length
+    }));
+  }, [menuItems]);
 
   // Filter menu items based on search and category
   const filteredMenuItems = useMemo(() => {
-    let items = getTabData(activeTab);
-
-    // Search filter
-    if (searchQuery) {
-      items = searchMenuItems(searchQuery).filter(item => 
-        getTabData(activeTab).some(tabItem => tabItem.id === item.id)
-      );
-    }
-
-    // Category filter
-    if (selectedCategory !== 'all') {
-      items = items.filter(item => item.category === selectedCategory);
-    }
+    let items = menuItems;
 
     // Apply advanced filters
     if (filterValues) {
@@ -174,63 +182,106 @@ const RestaurantDetail: React.FC = () => {
     }
 
     return items;
-  }, [activeTab, searchQuery, selectedCategory, filterValues, matchesDietary, matchesPrice, sortItems]);
+  }, [menuItems, filterValues, matchesDietary, matchesPrice, sortItems]);
 
   const tabs = [
-    { id: 'top-meals', label: 'Top Meals', count: getPopularItems().length },
-    { id: 'quick-order', label: 'Quick Order', count: getQuickOrderItems().length },
-    { id: 'chef-specials', label: 'Chef\'s Specials', count: getChefSpecials().length },
-    { id: 'trending', label: 'Trending Now', count: getTrendingItems().length }
+    { id: 'top-meals', label: 'Top Meals', count: menuItems.filter(item => item.isPopular).length },
+    { id: 'quick-order', label: 'Quick Order', count: menuItems.filter(item => item.isQuickOrder).length },
+    { id: 'chef-specials', label: 'Chef\'s Specials', count: menuItems.filter(item => item.isChefSpecial).length },
+    { id: 'trending', label: 'Trending Now', count: menuItems.filter(item => item.isTrending).length }
   ];
 
   const handleAddToCart = (item: MenuItem) => {
+    if (!restaurant || restaurant.status !== 'OPEN') {
+      return; // Prevent adding items from closed restaurants
+    }
     addItem(item);
   };
 
   const handleCustomizeDish = (item: MenuItem) => {
+    if (!restaurant || restaurant.status !== 'OPEN') {
+      return; // Prevent customization for closed restaurants
+    }
     setSelectedDish(item);
     setIsDishCustomizationOpen(true);
   };
-
-
 
   const handleCloseCustomization = () => {
     setIsDishCustomizationOpen(false);
     setSelectedDish(null);
   };
 
-     const renderStars = (rating: number) => {
-        const stars: JSX.Element[] = [];
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 !== 0;
+  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
+    if (!restaurant || restaurant.status !== 'OPEN') {
+      return; // Prevent quantity updates for closed restaurants
+    }
+    const cartItem = cartState.items.find(cartItem => cartItem.id === itemId && !cartItem.customization);
+    if (cartItem) {
+      updateQuantity(cartItem.uniqueId, newQuantity);
+    }
+  };
 
-        for (let i = 0; i < fullStars; i++) {
-          stars.push(
-            <span key={i} className="text-yellow-400 text-xs">
-              ⭐
-            </span>
-          );
-        }
+  const renderStars = (rating: number) => {
+    const stars: JSX.Element[] = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
 
-        if (hasHalfStar) {
-          stars.push(
-            <span key="half" className="text-yellow-400 text-xs">
-              ⭐
-            </span>
-          );
-        }
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <span key={i} className="text-yellow-400 text-xs">
+          ⭐
+        </span>
+      );
+    }
 
-        const emptyStars = 5 - Math.ceil(rating);
-        for (let i = 0; i < emptyStars; i++) {
-          stars.push(
-            <span key={`empty-${i}`} className="text-gray-500 text-xs">
-              ☆
-            </span>
-          );
-        }
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="text-yellow-400 text-xs">
+          ⭐
+        </span>
+      );
+    }
 
-        return stars;
-      };
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className="text-gray-500 text-xs">
+          ☆
+        </span>
+      );
+    }
+
+    return stars;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sera-blue mx-auto mb-4"></div>
+          <p className="text-white">Loading restaurant...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !restaurant) {
+    return (
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-4xl mb-4">⚠️</div>
+          <h2 className="text-white text-xl font-semibold mb-2">Error Loading Restaurant</h2>
+          <p className="text-gray-400 mb-4">{error || 'Restaurant not found'}</p>
+          <Link 
+            to="/explore"
+            className="bg-sera-blue text-white px-6 py-2 rounded-lg hover:bg-sera-blue/80 transition-colors"
+          >
+            Back to Restaurants
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-900">
@@ -283,6 +334,47 @@ const RestaurantDetail: React.FC = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                   {restaurant.name}
                 </h1>
+                
+                {/* Restaurant Status Indicator */}
+                <div className="mb-3">
+                  {restaurant.status === 'OPEN' ? (
+                    <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium border border-green-500/30">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      Open Now
+                      {restaurant.subStatus && restaurant.subStatus !== 'NORMAL' && (
+                        <span className="text-yellow-400">
+                          • {restaurant.subStatus === 'BUSY' ? 'Busy' : 'Very Busy'}
+                        </span>
+                      )}
+                    </div>
+                  ) : restaurant.status === 'CLOSED' ? (
+                    <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium border border-red-500/30">
+                      <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                      Closed
+                      {restaurant.statusDetails?.nextOpenTime && (
+                        <span className="text-gray-300">
+                          • Opens {restaurant.statusDetails.nextOpenTime}
+                        </span>
+                      )}
+                    </div>
+                  ) : restaurant.status === 'TEMPORARILY_CLOSED' ? (
+                    <div className="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-sm font-medium border border-orange-500/30">
+                      <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
+                      Temporarily Closed
+                      {restaurant.statusDetails?.tempCloseReason && (
+                        <span className="text-gray-300">
+                          • {restaurant.statusDetails.tempCloseReason}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-sm font-medium border border-gray-500/30">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                      Permanently Closed
+                    </div>
+                  )}
+                </div>
+                
                 <div className="flex items-center space-x-4 text-white/80 mb-3">
                   <div className="flex items-center space-x-1">
                     {renderStars(restaurant.rating)}
@@ -435,9 +527,34 @@ const RestaurantDetail: React.FC = () => {
         </div>
       </div>
 
-             {/* Tab Content */}
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-         {filteredMenuItems.length === 0 ? (
+      {/* Tab Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Restaurant Status Message */}
+        {restaurant.status !== 'OPEN' && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                <span className="text-red-400 text-lg">⚠️</span>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold mb-1">
+                  {restaurant.status === 'CLOSED' ? 'Restaurant is Currently Closed' :
+                   restaurant.status === 'TEMPORARILY_CLOSED' ? 'Restaurant is Temporarily Closed' :
+                   'Restaurant is Permanently Closed'}
+                </h3>
+                <p className="text-gray-300 text-sm">
+                  {restaurant.status === 'CLOSED' && restaurant.statusDetails?.nextOpenTime
+                    ? `You can browse the menu, but ordering is disabled. Restaurant will open ${restaurant.statusDetails.nextOpenTime}.`
+                    : restaurant.status === 'TEMPORARILY_CLOSED' && restaurant.statusDetails?.tempCloseReason
+                    ? `You can browse the menu, but ordering is disabled. ${restaurant.statusDetails.tempCloseReason} (${restaurant.statusDetails.tempCloseDuration || 'temporarily'}).`
+                    : 'You can browse the menu, but ordering is currently disabled.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {filteredMenuItems.length === 0 ? (
            <div className="text-center py-12">
              <div className="text-gray-400 text-lg mb-2">🍽️</div>
              <h3 className="text-white text-xl font-semibold mb-2">No items found</h3>
@@ -446,15 +563,15 @@ const RestaurantDetail: React.FC = () => {
          ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
              {filteredMenuItems.map(item => {
-               const quantity = getItemQuantity(item.id);
-               const isHovered = hoveredDishId === item.id;
+                               const quantity = getItemQuantity(item._id);
+                const isHovered = hoveredDishId === item._id;
                
                return (
-                 <div 
-                   key={item.id} 
-                   className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group relative"
-                   onMouseEnter={() => setHoveredDishId(item.id)}
-                   onMouseLeave={() => setHoveredDishId(null)}
+                                   <div 
+                    key={item._id} 
+                    className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group relative"
+                                                   onMouseEnter={() => setHoveredDishId(item._id)}
+                                onMouseLeave={() => setHoveredDishId(null)}
                  >
                    {/* Dish Image */}
                    <div className="relative h-48 overflow-hidden">
@@ -471,7 +588,7 @@ const RestaurantDetail: React.FC = () => {
                            <h3 className="text-white font-bold text-lg">{item.name}</h3>
                            <p className="text-white/80 text-sm px-4">{item.description}</p>
                            <div className="flex space-x-3 justify-center">
-                             {restaurant.status === 'CLOSED' ? (
+                             {restaurant.status !== 'OPEN' ? (
                                <div className="text-center">
                                  <div className="text-red-400 font-semibold mb-2">🚫 Restaurant Closed</div>
                                  <p className="text-white/70 text-sm">Orders not available at this time</p>
@@ -518,7 +635,7 @@ const RestaurantDetail: React.FC = () => {
                      {/* Quick Add Button */}
                      {quantity === 0 ? (
                        <div className="absolute bottom-3 right-3 flex space-x-2">
-                         {restaurant.status === 'CLOSED' ? (
+                         {restaurant.status !== 'OPEN' ? (
                            <div className="bg-red-500/90 text-white px-3 py-2 rounded-full text-xs font-medium shadow-lg">
                              🚫 Closed
                            </div>
@@ -546,24 +663,27 @@ const RestaurantDetail: React.FC = () => {
                        </div>
                      ) : (
                        <div className="absolute bottom-3 right-3 bg-sera-blue text-white px-3 py-1 rounded-full flex items-center space-x-2 shadow-lg">
-                         <button
-                           onClick={() => {
-                             const cartItem = cartState.items.find(cartItem => cartItem.id === item.id && !cartItem.customization);
-                             if (cartItem) {
-                               updateQuantity(cartItem.uniqueId, quantity - 1);
-                             }
-                           }}
-                           className="text-sm font-bold hover:text-sera-orange transition-colors"
-                         >
-                           +
-                         </button>
-                         <span className="text-sm font-medium">{quantity}</span>
-                         <button
-                           onClick={() => handleAddToCart(item)}
-                           className="text-sm font-bold hover:text-sera-orange transition-colors"
-                         >
-                           +
-                         </button>
+                         {restaurant.status === 'OPEN' ? (
+                           <>
+                             <button
+                               onClick={() => handleUpdateQuantity(item._id, quantity - 1)}
+                               className="text-sm font-bold hover:text-sera-orange transition-colors"
+                             >
+                               +
+                             </button>
+                             <span className="text-sm font-medium">{quantity}</span>
+                             <button
+                               onClick={() => handleAddToCart(item)}
+                               className="text-sm font-bold hover:text-sera-orange transition-colors"
+                             >
+                               +
+                             </button>
+                           </>
+                         ) : (
+                           <div className="bg-red-500/90 text-white px-3 py-1 rounded-full text-xs font-medium">
+                             🚫 Closed
+                           </div>
+                         )}
                        </div>
                      )}
                    </div>
@@ -631,7 +751,7 @@ const RestaurantDetail: React.FC = () => {
                       <div style={{ height: '40px' }}>
                         {quantity === 0 ? (
                           <div className="flex space-x-2 h-full">
-                            {restaurant.status === 'CLOSED' ? (
+                            {restaurant.status !== 'OPEN' ? (
                               <div className="flex-1 bg-red-500/90 text-white py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center">
                                 🚫 Restaurant Closed
                               </div>
@@ -662,21 +782,18 @@ const RestaurantDetail: React.FC = () => {
                            </div>
                            
                            <div className="flex items-center space-x-2 relative z-10">
-                             <button
-                               onClick={() => {
-                                 const cartItem = cartState.items.find(cartItem => cartItem.id === item.id && !cartItem.customization);
-                                 if (cartItem) {
-                                   updateQuantity(cartItem.uniqueId, quantity - 1);
-                                 }
-                               }}
-                               className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
-                             >
-                               −
-                             </button>
+                                                           <button
+                                onClick={() => handleUpdateQuantity(item._id, quantity - 1)}
+                                className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
+                                disabled={restaurant.status !== 'OPEN'}
+                              >
+                                −
+                              </button>
                              <span className="text-white font-bold text-base min-w-[24px] text-center bg-white/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/30">{quantity}</span>
                              <button
                                onClick={() => handleAddToCart(item)}
                                className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
+                               disabled={restaurant.status !== 'OPEN'}
                              >
                                +
                              </button>
