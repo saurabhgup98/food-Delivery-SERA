@@ -28,7 +28,6 @@ const useDebounce = (value: string, delay: number) => {
 const ExplorePage: React.FC = () => {
   const navigate = useNavigate();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [restaurantFoodItems, setRestaurantFoodItems] = useState<Record<string, MenuItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -86,11 +85,6 @@ const ExplorePage: React.FC = () => {
       if (response.success) {
         setRestaurants(response.data.restaurants);
         console.log('Restaurants set successfully:', response.data.restaurants.length);
-        
-        // Fetch food items for each restaurant
-        response.data.restaurants.forEach(restaurant => {
-          fetchRestaurantFoodItems(restaurant._id);
-        });
       } else {
         console.error('API returned success: false');
         setError('Failed to fetch restaurants');
@@ -108,20 +102,7 @@ const ExplorePage: React.FC = () => {
     }
   }, [debouncedSearchQuery, selectedCuisine, selectedStatus, selectedDietary, selectedPriceRange, selectedDistance, sortBy]);
 
-  // Fetch food items for restaurants
-  const fetchRestaurantFoodItems = async (restaurantId: string) => {
-    try {
-      const response = await apiService.getRestaurantFoodItems(restaurantId);
-      if (response.success) {
-        setRestaurantFoodItems(prev => ({
-          ...prev,
-          [restaurantId]: response.data.foodItems
-        }));
-      }
-    } catch (error) {
-      console.error('Error fetching food items for restaurant:', restaurantId, error);
-    }
-  };
+
 
   // Fetch restaurants on component mount and when filters change
   useEffect(() => {
@@ -692,13 +673,12 @@ const ExplorePage: React.FC = () => {
           }>
                          {restaurants.map(restaurant => (
                viewMode === 'grid' ? (
-                 <RestaurantCard
-                   key={restaurant._id}
-                   restaurant={restaurant}
-                   foodItems={restaurantFoodItems[restaurant._id] || []}
-                   onFavoriteToggle={handleFavoriteToggle}
-                   onViewMenu={handleViewMenu}
-                 />
+                                   <RestaurantCard
+                    key={restaurant._id}
+                    restaurant={restaurant}
+                    onFavoriteToggle={handleFavoriteToggle}
+                    onViewMenu={handleViewMenu}
+                  />
                ) : (
                  <RestaurantListItem
                    key={restaurant._id}

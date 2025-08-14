@@ -6,14 +6,12 @@ import RestaurantStatus from './RestaurantStatus';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
-  foodItems?: MenuItem[];
   onFavoriteToggle: (id: string) => void;
   onViewMenu: (restaurant: Restaurant) => void;
 }
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ 
   restaurant, 
-  foodItems = [],
   onFavoriteToggle, 
   onViewMenu 
 }) => {
@@ -237,24 +235,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
           </p>
         </div>
 
-        {/* Food Items Preview */}
-        {foodItems.length > 0 && (
-          <div className="mb-3">
-            <p className="text-gray-400 text-xs mb-2 font-medium">🍽️ Popular Items:</p>
-            <div className="space-y-1">
-              {foodItems.slice(0, 2).map((item) => (
-                <div key={item._id} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-300 truncate">{item.name}</span>
-                    {item.isPopular && <span className="text-yellow-400">⭐</span>}
-                    {item.isChefSpecial && <span className="text-orange-400">👨‍🍳</span>}
-                  </div>
-                  <span className="text-sera-blue font-medium">{item.price}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Delivery Info - Fixed height */}
         <div className="flex items-center justify-between text-sm mb-3" style={{ height: '20px', overflow: 'hidden' }}>

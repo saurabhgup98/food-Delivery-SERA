@@ -106,9 +106,14 @@ const RestaurantDetail: React.FC = () => {
   useEffect(() => {
     if (restaurant) {
       fetchMenuItems();
-      fetchFoodItems();
     }
   }, [restaurantId, activeTab, selectedCategory, searchQuery]);
+
+  useEffect(() => {
+    if (restaurant) {
+      fetchFoodItems();
+    }
+  }, [restaurantId]);
 
   // Helper function to get price range from price string
   const getPriceRange = useCallback((price: string) => {
