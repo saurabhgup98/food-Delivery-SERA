@@ -173,15 +173,15 @@ const ExplorePage: React.FC = () => {
     <div className="min-h-screen bg-dark-900">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-sera-pink/10 via-sera-orange/10 to-sera-yellow/10 border-b border-dark-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
               <span className="bg-gradient-to-r from-sera-pink to-sera-orange bg-clip-text text-transparent">
                 Explore
               </span>
               <span className="text-white"> Restaurants</span>
             </h1>
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-300 text-base max-w-2xl mx-auto">
               Discover amazing food from the best restaurants near you
             </p>
           </div>
@@ -189,7 +189,7 @@ const ExplorePage: React.FC = () => {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="bg-dark-800 border-b border-dark-700 sticky top-16 z-40">
+      <div className="bg-dark-800 border-b border-dark-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* Search Bar */}
@@ -265,73 +265,75 @@ const ExplorePage: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Quick Filters */}
-          <div className="mt-4">
-            <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
-            <div className="flex flex-wrap gap-2">
-              {/* Dietary Filters */}
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🌿</span>
-                <span>Veg Only</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🍗</span>
-                <span>Non-Veg</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🟣</span>
-                <span>Both</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🟣</span>
-                <span>Jain</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🌱</span>
-                <span>Vegan</span>
-              </button>
+      {/* Quick Filters */}
+      <div className="bg-dark-800 border-b border-dark-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
+          <div className="flex flex-wrap gap-2">
+            {/* Dietary Filters */}
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🌿</span>
+              <span>Veg Only</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🍗</span>
+              <span>Non-Veg</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🟣</span>
+              <span>Both</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🟣</span>
+              <span>Jain</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🌱</span>
+              <span>Vegan</span>
+            </button>
 
-              {/* Cuisine Filters */}
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🇮🇳</span>
-                <span>Indian</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🇨🇳</span>
-                <span>Chinese</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>🇮🇹</span>
-                <span>Italian</span>
-              </button>
+            {/* Cuisine Filters */}
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🇮🇳</span>
+              <span>Indian</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🇨🇳</span>
+              <span>Chinese</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>🇮🇹</span>
+              <span>Italian</span>
+            </button>
 
-              {/* Rating Filters */}
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>⭐</span>
-                <span>4+ Stars</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>⭐</span>
-                <span>3+ Stars</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>⭐</span>
-                <span>2+ Stars</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
-                <span>⭐</span>
-                <span>1+ Stars</span>
-              </button>
-            </div>
+            {/* Rating Filters */}
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>⭐</span>
+              <span>4+ Stars</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>⭐</span>
+              <span>3+ Stars</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>⭐</span>
+              <span>2+ Stars</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-3 py-2 rounded-lg text-white hover:bg-dark-600 transition-colors text-sm">
+              <span>⭐</span>
+              <span>1+ Stars</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Restaurant List */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Results Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <div className="text-white font-semibold">
             {restaurants.length} Restaurants Found
           </div>
@@ -354,7 +356,7 @@ const ExplorePage: React.FC = () => {
           </div>
         ) : (
           <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
             : 'space-y-4'
           }>
             {restaurants.map(restaurant => (
