@@ -443,6 +443,38 @@ class ApiService {
   async getOrder(orderId: string): Promise<OrderResponse> {
     return this.makeRequest<OrderResponse>(`/orders/${orderId}`);
   }
+
+  // Complete user profile
+  async completeProfile(profileData: {
+    name: string;
+    phone: string;
+    dateOfBirth?: string;
+    gender?: string;
+    addresses?: Array<{
+      type: string;
+      street: string;
+      city: string;
+      state: string;
+      pincode: string;
+      isDefault?: boolean;
+    }>;
+    preferences?: {
+      dietary?: string;
+      spiceLevel?: string;
+    };
+    settings?: {
+      notifications?: {
+        email?: boolean;
+        push?: boolean;
+        sms?: boolean;
+      };
+    };
+  }): Promise<{ success: boolean; message: string; data: { user: any } }> {
+    return this.makeRequest<{ success: boolean; message: string; data: { user: any } }>('/user?action=complete-profile', {
+      method: 'POST',
+      body: JSON.stringify(profileData)
+    });
+  }
 }
 
 export const apiService = new ApiService();
