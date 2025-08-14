@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search,
@@ -7,6 +7,23 @@ import {
 import RestaurantCard from './RestaurantCard';
 import RestaurantListItem from './RestaurantListItem';
 import { apiService, Restaurant } from '../../services/api';
+
+// Debounce hook for search
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 const ExplorePage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +46,11 @@ const ExplorePage: React.FC = () => {
   const [offersOnly, setOffersOnly] = useState(false);
   const [freeDelivery, setFreeDelivery] = useState(false);
 
+  // Debounced search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
   // Fetch restaurants from backend
-  const fetchRestaurants = async () => {
+  const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -38,7 +58,7 @@ const ExplorePage: React.FC = () => {
       console.log('Starting to fetch restaurants...');
       
       const params: any = {};
-      if (searchQuery) params.search = searchQuery;
+      if (debouncedSearchQuery) params.search = debouncedSearchQuery;
       if (selectedCuisine !== 'all') params.cuisine = selectedCuisine;
       if (selectedStatus !== 'all') params.status = selectedStatus;
       if (selectedDietary !== 'all') params.dietary = selectedDietary;
@@ -70,12 +90,12 @@ const ExplorePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearchQuery, selectedCuisine, selectedStatus, selectedDietary, selectedPriceRange, selectedDistance, sortBy]);
 
   // Fetch restaurants on component mount and when filters change
   useEffect(() => {
     fetchRestaurants();
-  }, [searchQuery, selectedCuisine, selectedStatus, selectedDietary, selectedPriceRange, selectedDistance, sortBy]);
+  }, [fetchRestaurants]);
 
   const handleFavoriteToggle = (id: string) => {
     setRestaurants(prev => 
@@ -93,7 +113,7 @@ const ExplorePage: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchRestaurants();
+    // Search is now debounced, so no need to manually trigger
   };
 
   const clearFilters = () => {
@@ -112,13 +132,12 @@ const ExplorePage: React.FC = () => {
 
   const applyFilters = () => {
     setShowFilterModal(false);
-    fetchRestaurants();
+    // Filters are applied automatically via useEffect
   };
 
   const handleRatingFilter = (rating: string) => {
     setSelectedRatingFilter(rating);
-    // Apply rating filter immediately
-    fetchRestaurants();
+    // Rating filter is applied automatically via useEffect
   };
 
   const cuisineOptions = [
@@ -127,343 +146,316 @@ const ExplorePage: React.FC = () => {
     { value: 'Italian', label: 'Italian' },
     { value: 'Chinese', label: 'Chinese' },
     { value: 'American', label: 'American' },
-    { value: 'Mexican', label: 'Mexican' },
-    { value: 'Thai', label: 'Thai' },
     { value: 'Japanese', label: 'Japanese' },
+    { value: 'Thai', label: 'Thai' },
+    { value: 'Mexican', label: 'Mexican' },
+    { value: 'Mediterranean', label: 'Mediterranean' },
     { value: 'Korean', label: 'Korean' },
-    { value: 'Mediterranean', label: 'Mediterranean' }
+    { value: 'Vietnamese', label: 'Vietnamese' },
+    { value: 'French', label: 'French' }
   ];
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'OPEN', label: 'Open Now' },
-    { value: 'CLOSED', label: 'Closed' },
-    { value: 'TEMPORARILY_CLOSED', label: 'Temporarily Closed' }
+    { value: 'open', label: 'Open Now' },
+    { value: 'closed', label: 'Closed' },
+    { value: 'busy', label: 'Busy' },
+    { value: 'temporarily_closed', label: 'Temporarily Closed' }
   ];
 
   const distanceOptions = [
     { value: 'any', label: 'Any Distance' },
-    { value: '1km', label: 'Within 1km' },
-    { value: '3km', label: 'Within 3km' },
-    { value: '5km', label: 'Within 5km' },
-    { value: '10km', label: 'Within 10km' }
+    { value: '0-1', label: '0-1 km' },
+    { value: '1-3', label: '1-3 km' },
+    { value: '3-5', label: '3-5 km' },
+    { value: '5-10', label: '5-10 km' },
+    { value: '10+', label: '10+ km' }
   ];
 
   const dietaryOptions = [
     { value: 'all', label: 'All Dietary' },
-    { value: 'veg', label: 'Vegetarian' },
-    { value: 'non-veg', label: 'Non-Vegetarian' },
-    { value: 'both', label: 'Both' },
+    { value: 'vegetarian', label: 'Vegetarian' },
+    { value: 'vegan', label: 'Vegan' },
+    { value: 'non-vegetarian', label: 'Non-Vegetarian' },
     { value: 'jain', label: 'Jain' },
-    { value: 'vegan', label: 'Vegan' }
+    { value: 'gluten-free', label: 'Gluten-Free' }
   ];
 
   const priceRangeOptions = [
     { value: 'all', label: 'All Prices' },
-    { value: 'budget', label: 'Budget (₹100-300)' },
-    { value: 'mid-range', label: 'Mid-Range (₹300-600)' },
-    { value: 'premium', label: 'Premium (₹600+)' }
+    { value: 'budget', label: 'Budget ($)' },
+    { value: 'mid-range', label: 'Mid-Range ($$)' },
+    { value: 'premium', label: 'Premium ($$$)' }
   ];
 
   const sortOptions = [
     { value: 'rating', label: 'Rating' },
+    { value: 'name', label: 'Name' },
     { value: 'deliveryTime', label: 'Delivery Time' },
     { value: 'price', label: 'Price' },
     { value: 'distance', label: 'Distance' }
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sera-blue mx-auto mb-4"></div>
-          <p className="text-white">Loading restaurants...</p>
+  return (
+    <div className="min-h-screen bg-slate-900">
+      {/* Header */}
+      <div className="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search restaurants, cuisines, or dishes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
+              />
+            </div>
+          </form>
+
+          {/* Filter Bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowFilterModal(true)}
+                className="flex items-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                                 <span>🔍</span>
+                 <span>Filters</span>
+              </button>
+
+              <div className="flex items-center space-x-2 bg-slate-700 rounded-lg p-1">
+                                 <button
+                   onClick={() => setViewMode('grid')}
+                   className={`p-2 rounded transition-colors ${
+                     viewMode === 'grid' ? 'bg-sera-blue text-white' : 'text-gray-400 hover:text-white'
+                   }`}
+                 >
+                   <span className="text-sm">⊞</span>
+                 </button>
+                 <button
+                   onClick={() => setViewMode('list')}
+                   className={`p-2 rounded transition-colors ${
+                     viewMode === 'list' ? 'bg-sera-blue text-white' : 'text-gray-400 hover:text-white'
+                   }`}
+                 >
+                   <span className="text-sm">☰</span>
+                 </button>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+              >
+                {sortOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-4xl mb-4">⚠️</div>
-          <h2 className="text-white text-xl font-semibold mb-2">Error Loading Restaurants</h2>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <button 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sera-blue"></div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="text-center py-12">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h2 className="text-white text-2xl font-semibold mb-2">Error loading restaurants</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <button
             onClick={fetchRestaurants}
-            className="bg-sera-blue text-white px-6 py-2 rounded-lg hover:bg-sera-blue/80 transition-colors"
+            className="bg-sera-blue text-white px-6 py-3 rounded-lg hover:bg-sera-blue/80 transition-colors"
           >
             Try Again
           </button>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Hero Section */}
-      <div className="bg-slate-900 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-              Explore Restaurants
-            </h1>
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-              Discover amazing food from the best restaurants near you
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filter Bar */}
-      <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row gap-3 items-center">
-            {/* Search Bar */}
-            <div className="flex-1 w-full">
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search restaurants, cuisines, or dishes..."
-                  className="w-full px-4 py-2.5 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </form>
-            </div>
-
-            {/* Filter Controls */}
-            <div className="flex flex-wrap gap-2">
-              {/* Location */}
-              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>Deliver to: Current Location</span>
-              </button>
-
-              {/* Rating Dropdown */}
-              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-                <span className="text-yellow-400">⭐</span>
-                <span>Rating</span>
-                <span className="text-gray-400">▼</span>
-              </button>
-
-              {/* Filter Toggle */}
-              <button 
-                onClick={() => setShowFilterModal(true)}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border bg-slate-700 border-slate-600 hover:bg-slate-600"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-                </svg>
-                <span>Filters</span>
-                <span className="text-gray-400">▼</span>
-              </button>
-
-              {/* View Toggle */}
-              <div className="flex bg-slate-700 border border-slate-600 rounded-lg overflow-hidden">
-                <button 
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 text-sm transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-sera-blue text-white' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
-                  </svg>
-                </button>
-                <button 
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-sera-blue text-white' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Map View Button */}
-              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-                <MapPin className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Filters */}
-      <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
-          <div className="flex flex-wrap gap-2">
-            {/* Dietary Filters */}
-            <button 
-              onClick={() => setSelectedVegFilter(!selectedVegFilter)}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedVegFilter 
-                  ? 'bg-green-600 border-green-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>🌿</span>
-              <span>Veg Only</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🍗</span>
-              <span>Non-Veg</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🟣</span>
-              <span>Both</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🟣</span>
-              <span>Jain</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🌱</span>
-              <span>Vegan</span>
-            </button>
-
-            {/* Cuisine Filters */}
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🇮🇳</span>
-              <span>Indian</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🇨🇳</span>
-              <span>Chinese</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🇮🇹</span>
-              <span>Italian</span>
-            </button>
-
-            {/* Rating Filters */}
-            <button 
-              onClick={() => handleRatingFilter('4+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '4+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>4+ Stars</span>
-            </button>
-            <button 
-              onClick={() => handleRatingFilter('3+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '3+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>3+ Stars</span>
-            </button>
-            <button 
-              onClick={() => handleRatingFilter('2+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '2+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>2+ Stars</span>
-            </button>
-            <button 
-              onClick={() => handleRatingFilter('1+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '1+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>1+ Stars</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Modal Overlay */}
+      {/* Filter Modal */}
       {showFilterModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 rounded-lg shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-700">
-              <h2 className="text-white text-xl font-semibold">Filters</h2>
+            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+              <h2 className="text-white text-xl font-semibold flex items-center gap-2">
+                                 <span>🔍</span>
+                 Advanced Filters
+              </h2>
+              <button
+                onClick={() => setShowFilterModal(false)}
+                className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                ✕
+              </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+              {/* Cuisine Section */}
+              <div>
+                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span>🍽️</span>
+                  Cuisine Type
+                </h3>
+                <select
+                  value={selectedCuisine}
+                  onChange={(e) => setSelectedCuisine(e.target.value)}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {cuisineOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Status Section */}
               <div>
-                <h3 className="text-white font-medium mb-3">Status</h3>
-                <div className="bg-slate-700 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="text-white">All Status</span>
-                    </div>
-                    <span className="text-gray-400">▼</span>
-                  </div>
-                </div>
+                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span>🟢</span>
+                  Restaurant Status
+                </h3>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Distance Section */}
               <div>
-                <h3 className="text-white font-medium mb-3">Distance</h3>
-                <div className="bg-slate-700 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                      </svg>
-                      <span className="text-white">Any Distance</span>
-                    </div>
-                    <span className="text-gray-400">▼</span>
-                  </div>
-                </div>
+                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Distance
+                </h3>
+                <select
+                  value={selectedDistance}
+                  onChange={(e) => setSelectedDistance(e.target.value)}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {distanceOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Dietary Section */}
+              <div>
+                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span>🌿</span>
+                  Dietary Preferences
+                </h3>
+                <select
+                  value={selectedDietary}
+                  onChange={(e) => setSelectedDietary(e.target.value)}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {dietaryOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price Range Section */}
+              <div>
+                                 <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                   <span>💰</span>
+                   Price Range
+                 </h3>
+                <select
+                  value={selectedPriceRange}
+                  onChange={(e) => setSelectedPriceRange(e.target.value)}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                >
+                  {priceRangeOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Quick Filters Section */}
               <div>
-                <h3 className="text-white font-medium mb-3">Quick Filters</h3>
-                <div className="space-y-3">
-                  {/* Offers Only */}
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={offersOnly}
-                      onChange={(e) => setOffersOnly(e.target.checked)}
-                      className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
-                    />
-                    <span className="text-white">Offers Only</span>
-                    <span className="text-gray-400">🎁</span>
-                  </label>
+                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span>⚡</span>
+                  Quick Filters
+                </h3>
+                <div className="space-y-4">
+                  {/* Rating Filter */}
+                  <div>
+                    <label className="text-white text-sm mb-2 block">Minimum Rating</label>
+                    <div className="flex space-x-2">
+                      {['4+', '4.5+', '5'].map((rating) => (
+                        <button
+                          key={rating}
+                          onClick={() => handleRatingFilter(rating)}
+                          className={`px-3 py-2 rounded-lg border transition-colors ${
+                            selectedRatingFilter === rating
+                              ? 'bg-sera-blue/20 border-sera-blue text-sera-blue'
+                              : 'bg-slate-700 text-gray-300 border-slate-600 hover:bg-slate-600'
+                          }`}
+                        >
+                                                     <span className="inline mr-1">⭐</span>
+                           {rating}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                  {/* Free Delivery */}
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={freeDelivery}
-                      onChange={(e) => setFreeDelivery(e.target.checked)}
-                      className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
-                    />
-                    <span className="text-white">Free Delivery</span>
-                    <span className="text-gray-400">🚚</span>
-                  </label>
+                  {/* Checkbox Filters */}
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={offersOnly}
+                        onChange={(e) => setOffersOnly(e.target.checked)}
+                        className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
+                      />
+                                             <span className="text-white flex items-center gap-2">
+                         <span>🎁</span>
+                         Offers Only
+                       </span>
+                    </label>
+
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={freeDelivery}
+                        onChange={(e) => setFreeDelivery(e.target.checked)}
+                        className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
+                      />
+                                             <span className="text-white flex items-center gap-2">
+                         <span>🚚</span>
+                         Free Delivery
+                       </span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -474,16 +466,16 @@ const ExplorePage: React.FC = () => {
               <div className="flex space-x-3">
                 <button
                   onClick={applyFilters}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-sera-blue text-white px-4 py-3 rounded-lg hover:bg-sera-blue/80 transition-colors font-medium"
                 >
-                  <span className="text-green-400">✓</span>
-                  <span>Apply</span>
+                  <span>✓</span>
+                  <span>Apply Filters</span>
                 </button>
                 <button
                   onClick={() => setShowFilterModal(false)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 text-white px-4 py-3 rounded-lg hover:bg-slate-600 transition-colors"
                 >
-                  <span className="text-red-400">✕</span>
+                  <span>✕</span>
                   <span>Cancel</span>
                 </button>
               </div>
@@ -491,9 +483,9 @@ const ExplorePage: React.FC = () => {
               {/* Clear All Filters Button */}
               <button
                 onClick={clearFilters}
-                className="w-full flex items-center justify-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                className="w-full flex items-center justify-center space-x-2 bg-orange-500 text-white px-4 py-3 rounded-lg hover:bg-orange-600 transition-colors"
               >
-                <span className="text-white">🗑️</span>
+                <span>🗑️</span>
                 <span>Clear All Filters</span>
               </button>
             </div>
@@ -504,8 +496,8 @@ const ExplorePage: React.FC = () => {
       {/* Restaurant List */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Results Header */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-white font-semibold">
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-white font-semibold text-lg">
             {restaurants.length} Restaurants Found
           </div>
           <div className="text-gray-400 text-sm">
@@ -527,7 +519,7 @@ const ExplorePage: React.FC = () => {
           </div>
         ) : (
           <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
             : 'space-y-4'
           }>
             {restaurants.map(restaurant => (
