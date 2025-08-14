@@ -30,6 +30,7 @@ const RestaurantDetail: React.FC = () => {
   // State for API data
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,6 +84,20 @@ const RestaurantDetail: React.FC = () => {
     }
   };
 
+  // Fetch food items
+  const fetchFoodItems = async () => {
+    if (!restaurantId) return;
+    
+    try {
+      const response = await apiService.getRestaurantFoodItems(restaurantId);
+      if (response.success) {
+        setFoodItems(response.data.foodItems);
+      }
+    } catch (error) {
+      console.error('Error fetching food items:', error);
+    }
+  };
+
   // Fetch data on component mount and when dependencies change
   useEffect(() => {
     fetchRestaurant();
@@ -91,6 +106,7 @@ const RestaurantDetail: React.FC = () => {
   useEffect(() => {
     if (restaurant) {
       fetchMenuItems();
+      fetchFoodItems();
     }
   }, [restaurantId, activeTab, selectedCategory, searchQuery]);
 
@@ -550,6 +566,263 @@ const RestaurantDetail: React.FC = () => {
                     : 'You can browse the menu, but ordering is currently disabled.'}
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Food Items Preview */}
+        {foodItems.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">🍽️ Popular Items</h2>
+              <span className="text-gray-400 text-sm">{foodItems.length} items</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {foodItems.map(item => {
+                const quantity = getItemQuantity(item._id);
+                const isHovered = hoveredDishId === item._id;
+                
+                return (
+                  <div 
+                    key={item._id} 
+                    className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-sera-blue/50 group relative"
+                    onMouseEnter={() => setHoveredDishId(item._id)}
+                    onMouseLeave={() => setHoveredDishId(null)}
+                  >
+                    {/* Dish Image */}
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      
+                      {/* Hover Overlay */}
+                      {isHovered && (
+                        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-20 transition-all duration-300">
+                          <div className="text-center space-y-3">
+                            <h3 className="text-white font-bold text-lg">{item.name}</h3>
+                            <p className="text-white/80 text-sm px-4">{item.description}</p>
+                            <div className="flex space-x-3 justify-center">
+                              {restaurant.status !== 'OPEN' ? (
+                                <div className="text-center">
+                                  <div className="text-red-400 font-semibold mb-2">🚫 Restaurant Closed</div>
+                                  <p className="text-white/70 text-sm">Orders not available at this time</p>
+                                </div>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => handleCustomizeDish(item)}
+                                    className="bg-sera-orange text-white px-4 py-2 rounded-lg font-semibold hover:bg-sera-orange/80 transition-colors"
+                                  >
+                                    Customize
+                                  </button>
+                                  <button
+                                    onClick={() => handleAddToCart(item)}
+                                    className="bg-sera-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-sera-blue/80 transition-colors"
+                                  >
+                                    Quick Add
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Dietary Badge */}
+                      <div className="absolute top-3 left-3">
+                        <div className="bg-white/90 text-dark-900 text-xs px-2 py-1 rounded-full font-medium">
+                          {item.dietary === 'veg' ? '🌿 Veg' : item.dietary === 'non-veg' ? '🍖 Non-Veg' : item.dietary.toUpperCase()}
+                        </div>
+                      </div>
+
+                      {/* Popular/Chef Special Badge */}
+                      <div className="absolute top-3 right-3">
+                        {item.isPopular && (
+                          <div className="bg-yellow-500/90 text-white text-xs px-2 py-1 rounded-full font-medium">
+                            ⭐ Popular
+                          </div>
+                        )}
+                        {item.isChefSpecial && (
+                          <div className="bg-orange-500/90 text-white text-xs px-2 py-1 rounded-full font-medium">
+                            👨‍🍳 Chef Special
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Quick Add Button */}
+                      {quantity === 0 ? (
+                        <div className="absolute bottom-3 right-3 flex space-x-2">
+                          {restaurant.status !== 'OPEN' ? (
+                            <div className="bg-red-500/90 text-white px-3 py-2 rounded-full text-xs font-medium shadow-lg">
+                              🚫 Closed
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleCustomizeDish(item)}
+                                className="bg-sera-orange text-white p-2 rounded-full hover:bg-sera-orange/80 transition-colors shadow-lg"
+                                title="Customize"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleAddToCart(item)}
+                                className="bg-sera-blue text-white p-2 rounded-full hover:bg-sera-blue/80 transition-colors shadow-lg"
+                                title="Quick Add"
+                              >
+                                <ShoppingCart className="w-5 h-5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="absolute bottom-3 right-3 bg-sera-blue text-white px-3 py-1 rounded-full flex items-center space-x-2 shadow-lg">
+                          {restaurant.status === 'OPEN' ? (
+                            <>
+                              <button
+                                onClick={() => handleUpdateQuantity(item._id, quantity - 1)}
+                                className="text-sm font-bold hover:text-sera-orange transition-colors"
+                              >
+                                −
+                              </button>
+                              <span className="text-sm font-medium">{quantity}</span>
+                              <button
+                                onClick={() => handleAddToCart(item)}
+                                className="text-sm font-bold hover:text-sera-orange transition-colors"
+                              >
+                                +
+                              </button>
+                            </>
+                          ) : (
+                            <div className="bg-red-500/90 text-white px-3 py-1 rounded-full text-xs font-medium">
+                              🚫 Closed
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dish Info */}
+                    <div className="p-4">
+                      {/* Name and Rating */}
+                      <div className="flex items-start justify-between mb-3" style={{ height: '48px', minHeight: '48px' }}>
+                        <h3 
+                          className="text-white font-semibold text-lg group-hover:text-sera-blue transition-all duration-300 leading-tight"
+                          style={{
+                            height: '2.8rem',
+                            minHeight: '2.8rem',
+                            lineHeight: '1.4rem',
+                            overflow: 'hidden',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            margin: 0,
+                            flex: 1,
+                            marginRight: '12px'
+                          }}
+                        >
+                          {item.name}
+                        </h3>
+                        <div className="flex flex-col items-end space-y-1 flex-shrink-0">
+                          <div className="flex items-center space-x-1 bg-dark-700 px-2 py-1 rounded-lg border border-dark-600">
+                            <div className="flex items-center space-x-0">
+                              {renderStars(item.rating)}
+                            </div>
+                            <span className="text-white font-semibold text-xs ml-1">{item.rating}</span>
+                          </div>
+                          <span className="text-gray-400 text-xs">Rating</span>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div style={{ height: '40px', marginBottom: '12px', overflow: 'hidden' }}>
+                        <p 
+                          className="text-gray-400 text-sm"
+                          style={{
+                            margin: 0,
+                            lineHeight: '1.2rem',
+                            maxHeight: '2.4rem',
+                            overflow: 'hidden',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical'
+                          }}
+                        >
+                          {item.description}
+                        </p>
+                      </div>
+
+                      {/* Prep Time and Price */}
+                      <div className="flex items-center justify-between text-sm mb-3" style={{ height: '20px', overflow: 'hidden' }}>
+                        <div className="flex items-center space-x-2 text-gray-400">
+                          <span>⏰ {item.prepTime}</span>
+                          {item.calories && <span>🔥 {item.calories}</span>}
+                        </div>
+                        <span className="text-sera-orange font-semibold">{item.price}</span>
+                      </div>
+
+                      {/* Add to Cart Button */}
+                      <div style={{ height: '40px' }}>
+                        {quantity === 0 ? (
+                          <div className="flex space-x-2 h-full">
+                            {restaurant.status !== 'OPEN' ? (
+                              <div className="flex-1 bg-red-500/90 text-white py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center">
+                                🚫 Restaurant Closed
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleAddToCart(item)}
+                                className="flex-1 bg-gradient-to-r from-sera-blue to-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30 text-sm"
+                              >
+                                Quick Add
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between h-full bg-gradient-to-r from-sera-orange via-orange-500 to-orange-600 rounded-lg p-2 shadow-xl border border-orange-400/40 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-pulse"></div>
+                            
+                            <div className="flex items-center space-x-3 relative z-10">
+                              <div className="w-7 h-7 bg-white/25 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-white font-bold text-sm tracking-wide">IN CART</span>
+                                <span className="text-white/90 text-xs font-medium">{quantity} {quantity === 1 ? 'item' : 'items'}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2 relative z-10">
+                              <button
+                                onClick={() => handleUpdateQuantity(item._id, quantity - 1)}
+                                className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
+                                disabled={restaurant.status !== 'OPEN'}
+                              >
+                                −
+                              </button>
+                              <span className="text-white font-bold text-base min-w-[24px] text-center bg-white/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/30">{quantity}</span>
+                              <button
+                                onClick={() => handleAddToCart(item)}
+                                className="w-7 h-7 bg-white/25 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-all duration-200 text-sm font-bold backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95"
+                                disabled={restaurant.status !== 'OPEN'}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
