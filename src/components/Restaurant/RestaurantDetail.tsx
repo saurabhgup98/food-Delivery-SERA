@@ -31,6 +31,11 @@ const RestaurantDetail: React.FC = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
+  
+  // Debug foodItems state changes
+  useEffect(() => {
+    console.log('FoodItems state updated:', foodItems.length, 'items');
+  }, [foodItems]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,10 +119,12 @@ const RestaurantDetail: React.FC = () => {
   }, [restaurantId, activeTab, selectedCategory, searchQuery]);
 
   useEffect(() => {
-    if (restaurant) {
+    console.log('Restaurant state changed:', restaurant ? 'loaded' : 'null');
+    if (restaurant && restaurant._id) {
+      console.log('Restaurant loaded, fetching food items...');
       fetchFoodItems();
     }
-  }, [restaurantId]);
+  }, [restaurant]);
 
   // Helper function to get price range from price string
   const getPriceRange = useCallback((price: string) => {
