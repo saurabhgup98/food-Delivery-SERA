@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
 
 // Backend API URL - Update this with your Vercel deployment URL
-const API_BASE_URL = (process.env.REACT_APP_API_URL as string) || 'https://food-delivery-backend-sera.vercel.app';
+const API_BASE_URL = (process.env.REACT_APP_API_URL as string) || 'https://food-delivery-backend-sera.vercel.app/api';
 
 interface AuthContextType {
   user: User | null;
