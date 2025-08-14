@@ -27,6 +27,8 @@ const ExplorePage: React.FC = () => {
       setLoading(true);
       setError(null);
       
+      console.log('Starting to fetch restaurants...');
+      
       const params: any = {};
       if (searchQuery) params.search = searchQuery;
       if (selectedCuisine !== 'all') params.cuisine = selectedCuisine;
@@ -34,16 +36,27 @@ const ExplorePage: React.FC = () => {
       if (selectedDietary !== 'all') params.dietary = selectedDietary;
       if (selectedPriceRange !== 'all') params.priceRange = selectedPriceRange;
       
+      console.log('API parameters:', params);
+      
       const response = await apiService.getRestaurants(params);
+      
+      console.log('API response received:', response);
       
       if (response.success) {
         setRestaurants(response.data.restaurants);
+        console.log('Restaurants set successfully:', response.data.restaurants.length);
       } else {
+        console.error('API returned success: false');
         setError('Failed to fetch restaurants');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching restaurants:', err);
-      setError('Failed to load restaurants. Please try again.');
+      console.error('Error details:', {
+        message: err?.message,
+        stack: err?.stack,
+        name: err?.name
+      });
+      setError(`Failed to load restaurants: ${err?.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

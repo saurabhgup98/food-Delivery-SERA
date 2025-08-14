@@ -104,6 +104,7 @@ export interface MenuResponse {
 class ApiService {
   private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
+    console.log('Making API request to:', url);
     
     try {
       const response = await fetch(url, {
@@ -114,11 +115,17 @@ class ApiService {
         ...options,
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error text:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Response data:', data);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
