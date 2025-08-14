@@ -187,6 +187,157 @@ class ApiService {
     const endpoint = `/restaurants/${restaurantId}/menu${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return this.makeRequest<MenuResponse>(endpoint);
   }
+
+  // Get popular food items for a restaurant (mock data for now)
+  async getRestaurantFoodItems(restaurantId: string): Promise<{ success: boolean; data: { foodItems: MenuItem[] } }> {
+    // Mock food data based on restaurant cuisine
+    const mockFoodData: Record<string, MenuItem[]> = {
+      'indian': [
+        {
+          _id: '1',
+          restaurantId,
+          name: 'Butter Chicken',
+          description: 'Creamy tomato-based curry with tender chicken',
+          price: '₹350',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'mains',
+          dietary: 'non-veg',
+          spiceLevel: 'medium',
+          prepTime: '25 min',
+          calories: '450 kcal',
+          rating: 4.5,
+          isPopular: true,
+          isChefSpecial: false,
+          isQuickOrder: true,
+          isTrending: true,
+          isAvailable: true
+        },
+        {
+          _id: '2',
+          restaurantId,
+          name: 'Paneer Tikka',
+          description: 'Grilled cottage cheese with Indian spices',
+          price: '₹280',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'starters',
+          dietary: 'veg',
+          spiceLevel: 'medium',
+          prepTime: '20 min',
+          calories: '320 kcal',
+          rating: 4.3,
+          isPopular: true,
+          isChefSpecial: false,
+          isQuickOrder: true,
+          isTrending: false,
+          isAvailable: true
+        },
+        {
+          _id: '3',
+          restaurantId,
+          name: 'Naan Bread',
+          description: 'Soft leavened flatbread',
+          price: '₹50',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'breads',
+          dietary: 'veg',
+          prepTime: '10 min',
+          calories: '150 kcal',
+          rating: 4.0,
+          isPopular: false,
+          isChefSpecial: false,
+          isQuickOrder: true,
+          isTrending: false,
+          isAvailable: true
+        }
+      ],
+      'chinese': [
+        {
+          _id: '4',
+          restaurantId,
+          name: 'Kung Pao Chicken',
+          description: 'Spicy diced chicken with peanuts and vegetables',
+          price: '₹420',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'mains',
+          dietary: 'non-veg',
+          spiceLevel: 'hot',
+          prepTime: '30 min',
+          calories: '380 kcal',
+          rating: 4.4,
+          isPopular: true,
+          isChefSpecial: true,
+          isQuickOrder: false,
+          isTrending: true,
+          isAvailable: true
+        },
+        {
+          _id: '5',
+          restaurantId,
+          name: 'Vegetable Fried Rice',
+          description: 'Stir-fried rice with mixed vegetables',
+          price: '₹180',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'mains',
+          dietary: 'veg',
+          prepTime: '15 min',
+          calories: '280 kcal',
+          rating: 4.1,
+          isPopular: true,
+          isChefSpecial: false,
+          isQuickOrder: true,
+          isTrending: false,
+          isAvailable: true
+        }
+      ],
+      'italian': [
+        {
+          _id: '6',
+          restaurantId,
+          name: 'Margherita Pizza',
+          description: 'Classic pizza with tomato sauce and mozzarella',
+          price: '₹450',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'mains',
+          dietary: 'veg',
+          prepTime: '20 min',
+          calories: '320 kcal',
+          rating: 4.6,
+          isPopular: true,
+          isChefSpecial: false,
+          isQuickOrder: true,
+          isTrending: true,
+          isAvailable: true
+        },
+        {
+          _id: '7',
+          restaurantId,
+          name: 'Pasta Carbonara',
+          description: 'Creamy pasta with bacon and parmesan',
+          price: '₹380',
+          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
+          category: 'mains',
+          dietary: 'non-veg',
+          prepTime: '25 min',
+          calories: '420 kcal',
+          rating: 4.3,
+          isPopular: true,
+          isChefSpecial: true,
+          isQuickOrder: false,
+          isTrending: false,
+          isAvailable: true
+        }
+      ]
+    };
+
+    // Default to Indian cuisine if not found
+    const cuisine = 'indian';
+    const foodItems = mockFoodData[cuisine] || mockFoodData['indian'];
+
+    return {
+      success: true,
+      data: { foodItems }
+    };
+  }
 }
 
 export const apiService = new ApiService();

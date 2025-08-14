@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import RestaurantCard from './RestaurantCard';
 import RestaurantListItem from './RestaurantListItem';
-import { apiService, Restaurant } from '../../services/api';
+import { apiService, Restaurant, MenuItem } from '../../services/api';
 
 // Debounce hook for search
 const useDebounce = (value: string, delay: number) => {
@@ -28,6 +28,7 @@ const useDebounce = (value: string, delay: number) => {
 const ExplorePage: React.FC = () => {
   const navigate = useNavigate();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurantFoodItems, setRestaurantFoodItems] = useState<Record<string, MenuItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -39,6 +40,16 @@ const ExplorePage: React.FC = () => {
   const [selectedDistance, setSelectedDistance] = useState('any');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortBy, setSortBy] = useState('rating');
+  
+  // Filter states for modal (not applied until user clicks Apply)
+  const [tempCuisine, setTempCuisine] = useState('all');
+  const [tempStatus, setTempStatus] = useState('all');
+  const [tempDietary, setTempDietary] = useState('all');
+  const [tempPriceRange, setTempPriceRange] = useState('all');
+  const [tempDistance, setTempDistance] = useState('any');
+  const [tempRatingFilter, setTempRatingFilter] = useState('4+');
+  const [tempOffersOnly, setTempOffersOnly] = useState(false);
+  const [tempFreeDelivery, setTempFreeDelivery] = useState(false);
   
   // Quick filter states
   const [selectedVegFilter, setSelectedVegFilter] = useState(false);
@@ -75,6 +86,11 @@ const ExplorePage: React.FC = () => {
       if (response.success) {
         setRestaurants(response.data.restaurants);
         console.log('Restaurants set successfully:', response.data.restaurants.length);
+        
+        // Fetch food items for each restaurant
+        response.data.restaurants.forEach(restaurant => {
+          fetchRestaurantFoodItems(restaurant._id);
+        });
       } else {
         console.error('API returned success: false');
         setError('Failed to fetch restaurants');
@@ -91,6 +107,21 @@ const ExplorePage: React.FC = () => {
       setLoading(false);
     }
   }, [debouncedSearchQuery, selectedCuisine, selectedStatus, selectedDietary, selectedPriceRange, selectedDistance, sortBy]);
+
+  // Fetch food items for restaurants
+  const fetchRestaurantFoodItems = async (restaurantId: string) => {
+    try {
+      const response = await apiService.getRestaurantFoodItems(restaurantId);
+      if (response.success) {
+        setRestaurantFoodItems(prev => ({
+          ...prev,
+          [restaurantId]: response.data.foodItems
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching food items for restaurant:', restaurantId, error);
+    }
+  };
 
   // Fetch restaurants on component mount and when filters change
   useEffect(() => {
@@ -128,16 +159,48 @@ const ExplorePage: React.FC = () => {
     setSelectedRatingFilter('4+');
     setOffersOnly(false);
     setFreeDelivery(false);
+    
+    // Clear temp filters
+    setTempCuisine('all');
+    setTempStatus('all');
+    setTempDietary('all');
+    setTempPriceRange('all');
+    setTempDistance('any');
+    setTempRatingFilter('4+');
+    setTempOffersOnly(false);
+    setTempFreeDelivery(false);
   };
 
   const applyFilters = () => {
+    // Apply temp filters to actual filters
+    setSelectedCuisine(tempCuisine);
+    setSelectedStatus(tempStatus);
+    setSelectedDietary(tempDietary);
+    setSelectedPriceRange(tempPriceRange);
+    setSelectedDistance(tempDistance);
+    setSelectedRatingFilter(tempRatingFilter);
+    setOffersOnly(tempOffersOnly);
+    setFreeDelivery(tempFreeDelivery);
+    
     setShowFilterModal(false);
-    // Filters are applied automatically via useEffect
   };
 
   const handleRatingFilter = (rating: string) => {
     setSelectedRatingFilter(rating);
     // Rating filter is applied automatically via useEffect
+  };
+
+  const openFilterModal = () => {
+    // Initialize temp filters with current applied filters
+    setTempCuisine(selectedCuisine);
+    setTempStatus(selectedStatus);
+    setTempDietary(selectedDietary);
+    setTempPriceRange(selectedPriceRange);
+    setTempDistance(selectedDistance);
+    setTempRatingFilter(selectedRatingFilter);
+    setTempOffersOnly(offersOnly);
+    setTempFreeDelivery(freeDelivery);
+    setShowFilterModal(true);
   };
 
   const cuisineOptions = [
@@ -269,11 +332,11 @@ const ExplorePage: React.FC = () => {
                 <span className="text-gray-400">▼</span>
               </button>
 
-              {/* Filter Toggle */}
-              <button 
-                onClick={() => setShowFilterModal(true)}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border bg-slate-700 border-slate-600 hover:bg-slate-600"
-              >
+                             {/* Filter Toggle */}
+               <button 
+                 onClick={openFilterModal}
+                 className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border bg-slate-700 border-slate-600 hover:bg-slate-600"
+               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                 </svg>
@@ -426,141 +489,141 @@ const ExplorePage: React.FC = () => {
 
                          {/* Modal Content */}
              <div className="p-6 space-y-8">
-                             {/* Status Section */}
-               <div>
-                 <h3 className="text-white font-medium mb-3">Status</h3>
-                 <select
-                   value={selectedStatus}
-                   onChange={(e) => setSelectedStatus(e.target.value)}
-                   className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                 >
-                   <option value="all">All Status</option>
-                   <option value="open">Open Now</option>
-                   <option value="closed">Closed</option>
-                   <option value="busy">Busy</option>
-                   <option value="temporarily_closed">Temporarily Closed</option>
-                 </select>
-               </div>
+                                                           {/* Status Section */}
+                <div>
+                  <h3 className="text-white font-medium mb-3">Status</h3>
+                  <select
+                    value={tempStatus}
+                    onChange={(e) => setTempStatus(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="open">Open Now</option>
+                    <option value="closed">Closed</option>
+                    <option value="busy">Busy</option>
+                    <option value="temporarily_closed">Temporarily Closed</option>
+                  </select>
+                </div>
 
-                             {/* Distance Section */}
-               <div>
-                 <h3 className="text-white font-medium mb-3">Distance</h3>
-                 <select
-                   value={selectedDistance}
-                   onChange={(e) => setSelectedDistance(e.target.value)}
-                   className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                 >
-                   <option value="any">Any Distance</option>
-                   <option value="0-1">0-1 km</option>
-                   <option value="1-3">1-3 km</option>
-                   <option value="3-5">3-5 km</option>
-                   <option value="5-10">5-10 km</option>
-                   <option value="10+">10+ km</option>
-                 </select>
-               </div>
+                                                           {/* Distance Section */}
+                <div>
+                  <h3 className="text-white font-medium mb-3">Distance</h3>
+                  <select
+                    value={tempDistance}
+                    onChange={(e) => setTempDistance(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  >
+                    <option value="any">Any Distance</option>
+                    <option value="0-1">0-1 km</option>
+                    <option value="1-3">1-3 km</option>
+                    <option value="3-5">3-5 km</option>
+                    <option value="5-10">5-10 km</option>
+                    <option value="10+">10+ km</option>
+                  </select>
+                </div>
 
-                             {/* Cuisine Section */}
-               <div>
-                 <h3 className="text-white font-medium mb-3">Cuisine Type</h3>
-                 <select
-                   value={selectedCuisine}
-                   onChange={(e) => setSelectedCuisine(e.target.value)}
-                   className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                 >
-                   <option value="all">All Cuisines</option>
-                   <option value="Indian">Indian</option>
-                   <option value="Italian">Italian</option>
-                   <option value="Chinese">Chinese</option>
-                   <option value="Japanese">Japanese</option>
-                   <option value="Thai">Thai</option>
-                   <option value="Mexican">Mexican</option>
-                   <option value="Mediterranean">Mediterranean</option>
-                   <option value="Korean">Korean</option>
-                   <option value="Vietnamese">Vietnamese</option>
-                   <option value="French">French</option>
-                 </select>
-               </div>
+                                                           {/* Cuisine Section */}
+                <div>
+                  <h3 className="text-white font-medium mb-3">Cuisine Type</h3>
+                  <select
+                    value={tempCuisine}
+                    onChange={(e) => setTempCuisine(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  >
+                    <option value="all">All Cuisines</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Thai">Thai</option>
+                    <option value="Mexican">Mexican</option>
+                    <option value="Mediterranean">Mediterranean</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Vietnamese">Vietnamese</option>
+                    <option value="French">French</option>
+                  </select>
+                </div>
 
-               {/* Dietary Section */}
-               <div>
-                 <h3 className="text-white font-medium mb-3">Dietary Preferences</h3>
-                 <select
-                   value={selectedDietary}
-                   onChange={(e) => setSelectedDietary(e.target.value)}
-                   className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                 >
-                   <option value="all">All Dietary</option>
-                   <option value="vegetarian">Vegetarian</option>
-                   <option value="vegan">Vegan</option>
-                   <option value="non-vegetarian">Non-Vegetarian</option>
-                   <option value="jain">Jain</option>
-                   <option value="gluten-free">Gluten-Free</option>
-                 </select>
-               </div>
+                               {/* Dietary Section */}
+                <div>
+                  <h3 className="text-white font-medium mb-3">Dietary Preferences</h3>
+                  <select
+                    value={tempDietary}
+                    onChange={(e) => setTempDietary(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  >
+                    <option value="all">All Dietary</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="non-vegetarian">Non-Vegetarian</option>
+                    <option value="jain">Jain</option>
+                    <option value="gluten-free">Gluten-Free</option>
+                  </select>
+                </div>
 
-               {/* Price Range Section */}
-               <div>
-                 <h3 className="text-white font-medium mb-3">Price Range</h3>
-                 <select
-                   value={selectedPriceRange}
-                   onChange={(e) => setSelectedPriceRange(e.target.value)}
-                   className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                 >
-                   <option value="all">All Prices</option>
-                   <option value="budget">Budget ($)</option>
-                   <option value="mid-range">Mid-Range ($$)</option>
-                   <option value="premium">Premium ($$$)</option>
-                 </select>
-               </div>
+                               {/* Price Range Section */}
+                <div>
+                  <h3 className="text-white font-medium mb-3">Price Range</h3>
+                  <select
+                    value={tempPriceRange}
+                    onChange={(e) => setTempPriceRange(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
+                  >
+                    <option value="all">All Prices</option>
+                    <option value="budget">Budget ($)</option>
+                    <option value="mid-range">Mid-Range ($$)</option>
+                    <option value="premium">Premium ($$$)</option>
+                  </select>
+                </div>
 
                {/* Quick Filters Section */}
                <div>
                  <h3 className="text-white font-medium mb-3">Quick Filters</h3>
                  <div className="space-y-3">
-                   {/* Rating Filter */}
-                   <div>
-                     <label className="text-white text-sm mb-2 block">Minimum Rating</label>
-                     <div className="flex space-x-2">
-                       {['4+', '4.5+', '5'].map((rating) => (
-                         <button
-                           key={rating}
-                           onClick={() => handleRatingFilter(rating)}
-                           className={`px-3 py-2 rounded-lg border transition-colors ${
-                             selectedRatingFilter === rating
-                               ? 'bg-sera-blue/20 border-sera-blue text-sera-blue'
-                               : 'bg-slate-700 text-gray-300 border-slate-600 hover:bg-slate-600'
-                           }`}
-                         >
-                           <span className="inline mr-1">⭐</span>
-                           {rating}
-                         </button>
-                       ))}
-                     </div>
-                   </div>
+                                       {/* Rating Filter */}
+                    <div>
+                      <label className="text-white text-sm mb-2 block">Minimum Rating</label>
+                      <div className="flex space-x-2">
+                        {['4+', '4.5+', '5'].map((rating) => (
+                          <button
+                            key={rating}
+                            onClick={() => setTempRatingFilter(rating)}
+                            className={`px-3 py-2 rounded-lg border transition-colors ${
+                              tempRatingFilter === rating
+                                ? 'bg-sera-blue/20 border-sera-blue text-sera-blue'
+                                : 'bg-slate-700 text-gray-300 border-slate-600 hover:bg-slate-600'
+                            }`}
+                          >
+                            <span className="inline mr-1">⭐</span>
+                            {rating}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                   {/* Offers Only */}
-                   <label className="flex items-center space-x-3 cursor-pointer">
-                     <input
-                       type="checkbox"
-                       checked={offersOnly}
-                       onChange={(e) => setOffersOnly(e.target.checked)}
-                       className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
-                     />
-                     <span className="text-white">Offers Only</span>
-                     <span className="text-gray-400">🎁</span>
-                   </label>
+                                       {/* Offers Only */}
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={tempOffersOnly}
+                        onChange={(e) => setTempOffersOnly(e.target.checked)}
+                        className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
+                      />
+                      <span className="text-white">Offers Only</span>
+                      <span className="text-gray-400">🎁</span>
+                    </label>
 
-                   {/* Free Delivery */}
-                   <label className="flex items-center space-x-3 cursor-pointer">
-                     <input
-                       type="checkbox"
-                       checked={freeDelivery}
-                       onChange={(e) => setFreeDelivery(e.target.checked)}
-                       className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
-                     />
-                     <span className="text-white">Free Delivery</span>
-                     <span className="text-gray-400">🚚</span>
-                   </label>
+                    {/* Free Delivery */}
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={tempFreeDelivery}
+                        onChange={(e) => setTempFreeDelivery(e.target.checked)}
+                        className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
+                      />
+                      <span className="text-white">Free Delivery</span>
+                      <span className="text-gray-400">🚚</span>
+                    </label>
                  </div>
                </div>
             </div>
@@ -627,23 +690,24 @@ const ExplorePage: React.FC = () => {
             ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
             : 'space-y-4'
           }>
-            {restaurants.map(restaurant => (
-              viewMode === 'grid' ? (
-                <RestaurantCard
-                  key={restaurant._id}
-                  restaurant={restaurant}
-                  onFavoriteToggle={handleFavoriteToggle}
-                  onViewMenu={handleViewMenu}
-                />
-              ) : (
-                <RestaurantListItem
-                  key={restaurant._id}
-                  restaurant={restaurant}
-                  onFavoriteToggle={handleFavoriteToggle}
-                  onViewMenu={handleViewMenu}
-                />
-              )
-            ))}
+                         {restaurants.map(restaurant => (
+               viewMode === 'grid' ? (
+                 <RestaurantCard
+                   key={restaurant._id}
+                   restaurant={restaurant}
+                   foodItems={restaurantFoodItems[restaurant._id] || []}
+                   onFavoriteToggle={handleFavoriteToggle}
+                   onViewMenu={handleViewMenu}
+                 />
+               ) : (
+                 <RestaurantListItem
+                   key={restaurant._id}
+                   restaurant={restaurant}
+                   onFavoriteToggle={handleFavoriteToggle}
+                   onViewMenu={handleViewMenu}
+                 />
+               )
+             ))}
           </div>
         )}
       </div>
