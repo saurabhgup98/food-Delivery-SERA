@@ -1,6 +1,9 @@
-import React from 'react';
-import { X, ShoppingCart } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, ShoppingCart, MapPin } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { apiService, CreateOrderRequest, Order } from '../../services/api';
+import OrderSuccessModal from './OrderSuccessModal';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -9,6 +12,12 @@ interface CartModalProps {
 
 const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   const { state, removeItem, updateQuantity, clearCart } = useCart();
+  const { user } = useAuth();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [showOrderSuccess, setShowOrderSuccess] = useState(false);
+  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
+  const [deliveryAddress, setDeliveryAddress] = useState('Current Location');
+  const [deliveryInstructions, setDeliveryInstructions] = useState('');
 
   const handleQuantityChange = (uniqueId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -45,6 +54,70 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     }
     
     return parts.length > 0 ? `(${parts.join(', ')})` : '';
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!user) {
+      alert('Please login to place an order');
+      return;
+    }
+
+    if (state.items.length === 0) {
+      alert('Your cart is empty');
+      return;
+    }
+
+    setIsPlacingOrder(true);
+
+    try {
+      // Get restaurant info from the first item (assuming all items are from same restaurant)
+      const firstItem = state.items[0];
+      const restaurantId = firstItem.restaurantId || 'unknown';
+      const restaurantName = 'Spice Garden'; // This should come from restaurant context
+
+      // Prepare order items
+      const orderItems = state.items.map(item => ({
+        itemId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        customization: item.customization
+      }));
+
+      const orderData: CreateOrderRequest = {
+        restaurantId,
+        restaurantName,
+        items: orderItems,
+        subtotal: calculateSubtotal(),
+        deliveryFee: calculateDeliveryFee(),
+        total: calculateTotal(),
+        deliveryAddress,
+        deliveryInstructions: deliveryInstructions || undefined
+      };
+
+      console.log('Placing order:', orderData);
+
+      const response = await apiService.createOrder(orderData);
+
+      if (response.success) {
+        setPlacedOrder(response.data.order);
+        setShowOrderSuccess(true);
+        clearCart(); // Clear the cart after successful order
+        onClose(); // Close the cart modal
+      } else {
+        alert('Failed to place order: ' + response.message);
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
+  const handleOrderSuccessClose = () => {
+    setShowOrderSuccess(false);
+    setPlacedOrder(null);
   };
 
   if (!isOpen) return null;
@@ -156,8 +229,30 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-                 {state.items.length > 0 && (
+        {state.items.length > 0 && (
           <div className="p-4 sm:p-6 border-t border-dark-700 bg-dark-800 flex-shrink-0">
+            {/* Delivery Address */}
+            <div className="mb-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <MapPin className="w-4 h-4 text-gray-400" />
+                <span className="text-white font-semibold text-sm">Delivery Address</span>
+              </div>
+              <input
+                type="text"
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+                placeholder="Enter delivery address"
+                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent text-sm"
+              />
+              <input
+                type="text"
+                value={deliveryInstructions}
+                onChange={(e) => setDeliveryInstructions(e.target.value)}
+                placeholder="Delivery instructions (optional)"
+                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent text-sm mt-2"
+              />
+            </div>
+
             {/* Price Breakdown */}
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
@@ -192,18 +287,23 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                 Clear Cart
               </button>
               <button
-                onClick={() => {
-                  // TODO: Implement checkout
-                  alert('Checkout functionality coming soon!');
-                }}
-                className="flex-1 bg-gradient-to-r from-sera-blue to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
+                onClick={handlePlaceOrder}
+                disabled={isPlacingOrder}
+                className="flex-1 bg-gradient-to-r from-sera-blue to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Checkout
+                {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
               </button>
             </div>
           </div>
         )}
       </div>
+
+      {/* Order Success Modal */}
+      <OrderSuccessModal
+        isOpen={showOrderSuccess}
+        onClose={handleOrderSuccessClose}
+        order={placedOrder}
+      />
     </div>
   );
 };

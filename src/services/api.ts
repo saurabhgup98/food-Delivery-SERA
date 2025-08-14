@@ -101,15 +101,83 @@ export interface MenuResponse {
   };
 }
 
+export interface OrderItem {
+  itemId: string;
+  name: string;
+  price: string;
+  quantity: number;
+  customization?: {
+    size: string;
+    spiceLevel: string;
+    specialInstructions: string;
+    totalPrice: number;
+  };
+}
+
+export interface Order {
+  _id: string;
+  userId: string;
+  restaurantId: string;
+  restaurantName: string;
+  items: OrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  status: 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  deliveryAddress: string;
+  deliveryInstructions?: string;
+  estimatedDeliveryTime: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOrderRequest {
+  restaurantId: string;
+  restaurantName: string;
+  items: OrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  deliveryAddress: string;
+  deliveryInstructions?: string;
+}
+
+export interface OrderResponse {
+  success: boolean;
+  message: string;
+  data: {
+    order: Order;
+  };
+}
+
+export interface OrdersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    orders: Order[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
+
 class ApiService {
   private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     console.log('Making API request to:', url);
     
+    // Get auth token from localStorage
+    const token = localStorage.getItem('token');
+    
     try {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
           ...options?.headers,
         },
         ...options,
@@ -341,6 +409,39 @@ class ApiService {
       success: true,
       data: { foodItems }
     };
+  }
+
+  // Create a new order
+  async createOrder(orderData: CreateOrderRequest): Promise<OrderResponse> {
+    return this.makeRequest<OrderResponse>('/orders', {
+      method: 'POST',
+      body: JSON.stringify(orderData)
+    });
+  }
+
+  // Get user's orders
+  async getUserOrders(params?: {
+    status?: string;
+    limit?: number;
+    page?: number;
+  }): Promise<OrdersResponse> {
+    const queryParams = new URLSearchParams();
+    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const endpoint = `/orders${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.makeRequest<OrdersResponse>(endpoint);
+  }
+
+  // Get a specific order by ID
+  async getOrder(orderId: string): Promise<OrderResponse> {
+    return this.makeRequest<OrderResponse>(`/orders/${orderId}`);
   }
 }
 
