@@ -19,12 +19,15 @@ const ExplorePage: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDietary, setSelectedDietary] = useState('all');
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDistance, setSelectedDistance] = useState('any');
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortBy, setSortBy] = useState('rating');
   
   // Quick filter states
   const [selectedVegFilter, setSelectedVegFilter] = useState(false);
   const [selectedRatingFilter, setSelectedRatingFilter] = useState('4+');
+  const [offersOnly, setOffersOnly] = useState(false);
+  const [freeDelivery, setFreeDelivery] = useState(false);
 
   // Fetch restaurants from backend
   const fetchRestaurants = async () => {
@@ -40,6 +43,7 @@ const ExplorePage: React.FC = () => {
       if (selectedStatus !== 'all') params.status = selectedStatus;
       if (selectedDietary !== 'all') params.dietary = selectedDietary;
       if (selectedPriceRange !== 'all') params.priceRange = selectedPriceRange;
+      if (selectedDistance !== 'any') params.distance = selectedDistance;
       if (sortBy) params.sortBy = sortBy;
       
       console.log('API parameters:', params);
@@ -71,7 +75,7 @@ const ExplorePage: React.FC = () => {
   // Fetch restaurants on component mount and when filters change
   useEffect(() => {
     fetchRestaurants();
-  }, [searchQuery, selectedCuisine, selectedStatus, selectedDietary, selectedPriceRange, sortBy]);
+  }, [searchQuery, selectedCuisine, selectedStatus, selectedDietary, selectedPriceRange, selectedDistance, sortBy]);
 
   const handleFavoriteToggle = (id: string) => {
     setRestaurants(prev => 
@@ -98,9 +102,23 @@ const ExplorePage: React.FC = () => {
     setSelectedStatus('all');
     setSelectedDietary('all');
     setSelectedPriceRange('all');
+    setSelectedDistance('any');
     setSortBy('rating');
     setSelectedVegFilter(false);
     setSelectedRatingFilter('4+');
+    setOffersOnly(false);
+    setFreeDelivery(false);
+  };
+
+  const applyFilters = () => {
+    setShowFilterModal(false);
+    fetchRestaurants();
+  };
+
+  const handleRatingFilter = (rating: string) => {
+    setSelectedRatingFilter(rating);
+    // Apply rating filter immediately
+    fetchRestaurants();
   };
 
   const cuisineOptions = [
@@ -121,6 +139,14 @@ const ExplorePage: React.FC = () => {
     { value: 'OPEN', label: 'Open Now' },
     { value: 'CLOSED', label: 'Closed' },
     { value: 'TEMPORARILY_CLOSED', label: 'Temporarily Closed' }
+  ];
+
+  const distanceOptions = [
+    { value: 'any', label: 'Any Distance' },
+    { value: '1km', label: 'Within 1km' },
+    { value: '3km', label: 'Within 3km' },
+    { value: '5km', label: 'Within 5km' },
+    { value: '10km', label: 'Within 10km' }
   ];
 
   const dietaryOptions = [
@@ -226,12 +252,8 @@ const ExplorePage: React.FC = () => {
 
               {/* Filter Toggle */}
               <button 
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                  showFilters 
-                    ? 'bg-sera-orange border-sera-orange/50' 
-                    : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-                }`}
+                onClick={() => setShowFilterModal(true)}
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border bg-slate-700 border-slate-600 hover:bg-slate-600"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
@@ -327,7 +349,7 @@ const ExplorePage: React.FC = () => {
 
             {/* Rating Filters */}
             <button 
-              onClick={() => setSelectedRatingFilter('4+')}
+              onClick={() => handleRatingFilter('4+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '4+' 
                   ? 'bg-slate-600 border-slate-500' 
@@ -338,7 +360,7 @@ const ExplorePage: React.FC = () => {
               <span>4+ Stars</span>
             </button>
             <button 
-              onClick={() => setSelectedRatingFilter('3+')}
+              onClick={() => handleRatingFilter('3+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '3+' 
                   ? 'bg-slate-600 border-slate-500' 
@@ -349,7 +371,7 @@ const ExplorePage: React.FC = () => {
               <span>3+ Stars</span>
             </button>
             <button 
-              onClick={() => setSelectedRatingFilter('2+')}
+              onClick={() => handleRatingFilter('2+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '2+' 
                   ? 'bg-slate-600 border-slate-500' 
@@ -360,7 +382,7 @@ const ExplorePage: React.FC = () => {
               <span>2+ Stars</span>
             </button>
             <button 
-              onClick={() => setSelectedRatingFilter('1+')}
+              onClick={() => handleRatingFilter('1+')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
                 selectedRatingFilter === '1+' 
                   ? 'bg-slate-600 border-slate-500' 
@@ -374,83 +396,105 @@ const ExplorePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Advanced Filters Panel */}
-      {showFilters && (
-        <div className="bg-slate-800 border-b border-slate-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Cuisine Filter */}
+      {/* Filter Modal Overlay */}
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-800 rounded-lg shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-700">
+              <h2 className="text-white text-xl font-semibold">Filters</h2>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Status Section */}
               <div>
-                <label className="block text-white text-sm font-medium mb-2">Cuisine</label>
-                <select
-                  value={selectedCuisine}
-                  onChange={(e) => setSelectedCuisine(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                >
-                  {cuisineOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <h3 className="text-white font-medium mb-3">Status</h3>
+                <div className="bg-slate-700 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-white">All Status</span>
+                    </div>
+                    <span className="text-gray-400">▼</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Status Filter */}
+              {/* Distance Section */}
               <div>
-                <label className="block text-white text-sm font-medium mb-2">Status</label>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                >
-                  {statusOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <h3 className="text-white font-medium mb-3">Distance</h3>
+                <div className="bg-slate-700 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                      <span className="text-white">Any Distance</span>
+                    </div>
+                    <span className="text-gray-400">▼</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Dietary Filter */}
+              {/* Quick Filters Section */}
               <div>
-                <label className="block text-white text-sm font-medium mb-2">Dietary</label>
-                <select
-                  value={selectedDietary}
-                  onChange={(e) => setSelectedDietary(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                >
-                  {dietaryOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <h3 className="text-white font-medium mb-3">Quick Filters</h3>
+                <div className="space-y-3">
+                  {/* Offers Only */}
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={offersOnly}
+                      onChange={(e) => setOffersOnly(e.target.checked)}
+                      className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
+                    />
+                    <span className="text-white">Offers Only</span>
+                    <span className="text-gray-400">🎁</span>
+                  </label>
 
-              {/* Price Range Filter */}
-              <div>
-                <label className="block text-white text-sm font-medium mb-2">Price Range</label>
-                <select
-                  value={selectedPriceRange}
-                  onChange={(e) => setSelectedPriceRange(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                >
-                  {priceRangeOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  {/* Free Delivery */}
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={freeDelivery}
+                      onChange={(e) => setFreeDelivery(e.target.checked)}
+                      className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
+                    />
+                    <span className="text-white">Free Delivery</span>
+                    <span className="text-gray-400">🚚</span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            {/* Clear Filters Button */}
-            <div className="mt-4 flex justify-end">
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-slate-700 space-y-3">
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={applyFilters}
+                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <span className="text-green-400">✓</span>
+                  <span>Apply</span>
+                </button>
+                <button
+                  onClick={() => setShowFilterModal(false)}
+                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors"
+                >
+                  <span className="text-red-400">✕</span>
+                  <span>Cancel</span>
+                </button>
+              </div>
+
+              {/* Clear All Filters Button */}
               <button
                 onClick={clearFilters}
-                className="bg-sera-orange text-white px-4 py-2 rounded-lg hover:bg-sera-orange/80 transition-colors text-sm"
+                className="w-full flex items-center justify-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
               >
-                Clear All Filters
+                <span className="text-white">🗑️</span>
+                <span>Clear All Filters</span>
               </button>
             </div>
           </div>
