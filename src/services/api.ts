@@ -171,7 +171,7 @@ class ApiService {
     console.log('Making API request to:', url);
     
     // Get auth token from localStorage
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     
     try {
       const response = await fetch(url, {
