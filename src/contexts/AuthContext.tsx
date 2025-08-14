@@ -77,8 +77,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (token) {
         try {
-          console.log('Calling /auth/me to verify token...');
-          const data = await apiCall('/auth/me');
+          console.log('Calling /auth?action=me to verify token...');
+          const data = await apiCall('/auth?action=me');
           console.log('Auth check response:', data);
           
           if (data.success && data.data.user) {
@@ -136,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const data = await apiCall('/auth/login', {
+      const data = await apiCall('/auth?action=login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
@@ -174,7 +174,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const data = await apiCall('/auth/register', {
+      const data = await apiCall('/auth?action=register', {
         method: 'POST',
         body: JSON.stringify({ name, email, password }),
       });
