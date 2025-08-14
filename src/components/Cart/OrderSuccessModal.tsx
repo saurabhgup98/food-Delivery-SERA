@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Clock, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Order } from '../../services/api';
 
 interface OrderSuccessModalProps {
@@ -72,7 +72,7 @@ const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({ isOpen, onClose, 
         <div className="p-6 text-center border-b border-dark-700">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+              <span className="text-green-400 text-3xl">✓</span>
             </div>
           </div>
           <h2 className="text-white text-2xl font-bold mb-2">Order Placed Successfully!</h2>
@@ -107,7 +107,7 @@ const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({ isOpen, onClose, 
           {/* Status */}
           <div className="bg-dark-700 rounded-lg p-4">
             <div className="flex items-center space-x-3">
-              <Clock className={`w-5 h-5 ${getStatusColor(order.status)}`} />
+              <span className={`text-lg ${getStatusColor(order.status)}`}>⏰</span>
               <div className="flex-1">
                 <p className={`font-semibold ${getStatusColor(order.status)}`}>
                   {getStatusText(order.status)}
