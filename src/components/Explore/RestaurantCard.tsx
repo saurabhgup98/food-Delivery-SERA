@@ -116,7 +116,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
         />
         
         {/* Overlay with offers */}
-        {restaurant.offers.length > 0 && (
+        {restaurant.offers && restaurant.offers.length > 0 && (
           <div className="absolute top-3 left-3">
             <div className="bg-sera-orange text-white text-xs px-2 py-1 rounded-full font-medium">
               {restaurant.offers[0]}
@@ -141,8 +141,8 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 
         {/* Dietary Badge */}
         <div className="absolute bottom-3 left-3 z-10">
-          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 border backdrop-blur-sm shadow-sm bg-white/95 text-dark-900">
-            {getDietaryIcon(restaurant.dietary)}
+          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 border backdrop-blur-sm shadow-sm bg-purple-600/90 text-white border-purple-500/50">
+            <span className="text-xs">🟣</span>
             <span className="font-bold">{restaurant.dietary === 'both' ? 'Veg & Non-Veg' : restaurant.dietary.toUpperCase()}</span>
           </div>
         </div>
