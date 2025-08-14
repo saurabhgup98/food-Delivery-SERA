@@ -16,7 +16,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [showOrderSuccess, setShowOrderSuccess] = useState(false);
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
-  const [deliveryAddress, setDeliveryAddress] = useState('Current Location');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
 
   const handleQuantityChange = (uniqueId: string, newQuantity: number) => {
@@ -64,6 +64,11 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
 
     if (state.items.length === 0) {
       alert('Your cart is empty');
+      return;
+    }
+
+    if (!deliveryAddress || deliveryAddress.trim() === '' || deliveryAddress === 'Current Location') {
+      alert('Please enter a valid delivery address');
       return;
     }
 
@@ -241,8 +246,9 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                 type="text"
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
-                placeholder="Enter delivery address"
+                placeholder="Enter your complete delivery address (required)"
                 className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent text-sm"
+                required
               />
               <input
                 type="text"
