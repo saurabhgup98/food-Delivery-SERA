@@ -88,10 +88,14 @@ const RestaurantDetail: React.FC = () => {
   const fetchFoodItems = async () => {
     if (!restaurantId) return;
     
+    console.log('Fetching food items for restaurant:', restaurantId);
+    
     try {
       const response = await apiService.getRestaurantFoodItems(restaurantId);
+      console.log('Food items response:', response);
       if (response.success) {
         setFoodItems(response.data.foodItems);
+        console.log('Food items set:', response.data.foodItems.length, 'items');
       }
     } catch (error) {
       console.error('Error fetching food items:', error);
@@ -575,13 +579,15 @@ const RestaurantDetail: React.FC = () => {
           </div>
         )}
         
-        {foodItems.length === 0 ? (
-           <div className="text-center py-12">
-             <div className="text-gray-400 text-lg mb-2">🍽️</div>
-             <h3 className="text-white text-xl font-semibold mb-2">No food items found</h3>
-             <p className="text-gray-400">No food items available for this restaurant</p>
-           </div>
-         ) : (
+        {(() => {
+          console.log('Current foodItems state:', foodItems);
+          return foodItems.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-lg mb-2">🍽️</div>
+              <h3 className="text-white text-xl font-semibold mb-2">No food items found</h3>
+              <p className="text-gray-400">No food items available for this restaurant</p>
+            </div>
+          ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
              {foodItems.map(item => {
                                const quantity = getItemQuantity(item._id);

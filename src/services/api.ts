@@ -190,6 +190,8 @@ class ApiService {
 
   // Get popular food items for a restaurant (mock data for now)
   async getRestaurantFoodItems(restaurantId: string): Promise<{ success: boolean; data: { foodItems: MenuItem[] } }> {
+    console.log('Fetching food items for restaurant:', restaurantId);
+    
     // Mock food data based on restaurant cuisine
     const mockFoodData: Record<string, MenuItem[]> = {
       'indian': [
@@ -332,6 +334,8 @@ class ApiService {
     // Default to Indian cuisine if not found
     const cuisine = 'indian';
     const foodItems = mockFoodData[cuisine] || mockFoodData['indian'];
+    
+    console.log('Returning food items:', foodItems.length, 'items for cuisine:', cuisine);
 
     return {
       success: true,
