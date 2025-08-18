@@ -222,11 +222,21 @@ const RestaurantDetail: React.FC = () => {
     }));
   }, [filteredMenuItems]);
 
+  // Calculate tab counts based on ALL menu items (not filtered ones)
+  const tabCounts = useMemo(() => {
+    return {
+      'top-meals': menuItems.filter(item => item.isPopular).length,
+      'quick-order': menuItems.filter(item => item.isQuickOrder).length,
+      'chef-specials': menuItems.filter(item => item.isChefSpecial).length,
+      'trending': menuItems.filter(item => item.isTrending).length
+    };
+  }, [menuItems]);
+
   const tabs = [
-    { id: 'top-meals', label: 'Top Meals', count: menuItems.filter(item => item.isPopular).length },
-    { id: 'quick-order', label: 'Quick Order', count: menuItems.filter(item => item.isQuickOrder).length },
-    { id: 'chef-specials', label: 'Chef\'s Specials', count: menuItems.filter(item => item.isChefSpecial).length },
-    { id: 'trending', label: 'Trending Now', count: menuItems.filter(item => item.isTrending).length }
+    { id: 'top-meals', label: 'Top Meals', count: tabCounts['top-meals'] },
+    { id: 'quick-order', label: 'Quick Order', count: tabCounts['quick-order'] },
+    { id: 'chef-specials', label: 'Chef\'s Specials', count: tabCounts['chef-specials'] },
+    { id: 'trending', label: 'Trending Now', count: tabCounts['trending'] }
   ];
 
   const handleAddToCart = (item: MenuItem) => {

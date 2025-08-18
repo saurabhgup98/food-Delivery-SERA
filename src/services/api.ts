@@ -85,6 +85,38 @@ export interface RestaurantResponse {
   };
 }
 
+export interface Address {
+  _id: string;
+  userId: string;
+  label: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+  instructions?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddressesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    addresses: Address[];
+  };
+}
+
+export interface AddressResponse {
+  success: boolean;
+  message: string;
+  data: {
+    address: Address;
+  };
+}
+
 export interface MenuResponse {
   success: boolean;
   message: string;
@@ -473,6 +505,51 @@ class ApiService {
     return this.makeRequest<{ success: boolean; message: string; data: { user: any } }>('/user?action=complete-profile', {
       method: 'POST',
       body: JSON.stringify(profileData)
+    });
+  }
+
+  // Address management methods
+  async getAddresses(): Promise<AddressesResponse> {
+    return this.makeRequest<AddressesResponse>('/addresses');
+  }
+
+  async createAddress(addressData: {
+    label: string;
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+    isDefault?: boolean;
+    instructions?: string;
+  }): Promise<AddressResponse> {
+    return this.makeRequest<AddressResponse>('/addresses', {
+      method: 'POST',
+      body: JSON.stringify(addressData)
+    });
+  }
+
+  async updateAddress(addressId: string, addressData: {
+    label?: string;
+    fullName?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    isDefault?: boolean;
+    instructions?: string;
+  }): Promise<AddressResponse> {
+    return this.makeRequest<AddressResponse>('/addresses', {
+      method: 'PUT',
+      body: JSON.stringify({ id: addressId, ...addressData })
+    });
+  }
+
+  async deleteAddress(addressId: string): Promise<{ success: boolean; message: string }> {
+    return this.makeRequest<{ success: boolean; message: string }>(`/addresses?addressId=${addressId}`, {
+      method: 'DELETE'
     });
   }
 }

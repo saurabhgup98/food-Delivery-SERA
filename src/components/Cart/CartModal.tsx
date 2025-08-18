@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { X, ShoppingCart, MapPin } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { apiService, CreateOrderRequest, Order } from '../../services/api';
+import { apiService, CreateOrderRequest, Order, Address } from '../../services/api';
 import OrderSuccessModal from './OrderSuccessModal';
+import AddressSelectionModal from './AddressSelectionModal';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -16,8 +17,9 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [showOrderSuccess, setShowOrderSuccess] = useState(false);
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   const handleQuantityChange = (uniqueId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -67,8 +69,8 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    if (!deliveryAddress || deliveryAddress.trim() === '' || deliveryAddress === 'Current Location') {
-      alert('Please enter a valid delivery address');
+    if (!selectedAddress) {
+      setShowAddressModal(true);
       return;
     }
 
@@ -96,8 +98,8 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
         subtotal: calculateSubtotal(),
         deliveryFee: calculateDeliveryFee(),
         total: calculateTotal(),
-        deliveryAddress,
-        deliveryInstructions: deliveryInstructions || undefined
+        deliveryAddress: `${selectedAddress.address}, ${selectedAddress.city}, ${selectedAddress.state} - ${selectedAddress.pincode}`,
+        deliveryInstructions: deliveryInstructions || selectedAddress.instructions || undefined
       };
 
       console.log('Placing order:', orderData);
@@ -238,23 +240,61 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
           <div className="p-4 sm:p-6 border-t border-dark-700 bg-dark-800 flex-shrink-0">
             {/* Delivery Address */}
             <div className="mb-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-white font-semibold text-sm">Delivery Address</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  <span className="text-white font-semibold text-sm">Delivery Address</span>
+                </div>
+                <button
+                  onClick={() => setShowAddressModal(true)}
+                  className="text-sera-orange text-sm hover:text-orange-400 transition-colors"
+                >
+                  {selectedAddress ? 'Change' : 'Select'}
+                </button>
               </div>
-              <input
-                type="text"
-                value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
-                placeholder="Enter your complete delivery address (required)"
-                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent text-sm"
-                required
-              />
+              {selectedAddress ? (
+                <div className="p-3 bg-dark-700 border border-dark-600 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {selectedAddress.label}
+                        </span>
+                        {selectedAddress.isDefault && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-white font-medium text-sm">{selectedAddress.fullName}</p>
+                      <p className="text-gray-400 text-sm">{selectedAddress.phone}</p>
+                      <p className="text-gray-300 text-sm">
+                        {selectedAddress.address}, {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}
+                      </p>
+                      {selectedAddress.instructions && (
+                        <p className="text-gray-400 text-sm mt-1">
+                          <span className="font-medium">Instructions:</span> {selectedAddress.instructions}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAddressModal(true)}
+                  className="w-full p-3 border-2 border-dashed border-dark-600 rounded-lg text-gray-400 hover:text-white hover:border-dark-500 transition-colors text-left"
+                >
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>Select delivery address</span>
+                  </div>
+                </button>
+              )}
               <input
                 type="text"
                 value={deliveryInstructions}
                 onChange={(e) => setDeliveryInstructions(e.target.value)}
-                placeholder="Delivery instructions (optional)"
+                placeholder="Additional delivery instructions (optional)"
                 className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent text-sm mt-2"
               />
             </div>
@@ -309,6 +349,14 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
         isOpen={showOrderSuccess}
         onClose={handleOrderSuccessClose}
         order={placedOrder}
+      />
+
+      {/* Address Selection Modal */}
+      <AddressSelectionModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        onAddressSelect={setSelectedAddress}
+        selectedAddress={selectedAddress}
       />
     </div>
   );

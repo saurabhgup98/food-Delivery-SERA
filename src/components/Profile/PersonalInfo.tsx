@@ -7,9 +7,9 @@ const PersonalInfo: React.FC = () => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '+91 98765 43210',
-    dateOfBirth: '1990-01-01',
-    gender: 'prefer-not-to-say',
+    phone: '',
+    dateOfBirth: '',
+    gender: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -30,9 +30,9 @@ const PersonalInfo: React.FC = () => {
     setFormData({
       name: user?.name || '',
       email: user?.email || '',
-      phone: '+91 98765 43210',
-      dateOfBirth: '1990-01-01',
-      gender: 'prefer-not-to-say',
+      phone: '',
+      dateOfBirth: '',
+      gender: '',
     });
     setIsEditing(false);
   };
@@ -135,6 +135,7 @@ const PersonalInfo: React.FC = () => {
             onChange={handleInputChange}
             disabled={!isEditing}
             className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
+            placeholder="Select your date of birth"
           />
         </div>
 
@@ -150,6 +151,7 @@ const PersonalInfo: React.FC = () => {
             disabled={!isEditing}
             className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
           >
+            <option value="">Select gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>

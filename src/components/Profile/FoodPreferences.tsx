@@ -33,14 +33,14 @@ const FoodPreferences: React.FC = () => {
   });
 
   const [cuisinePreferences, setCuisinePreferences] = useState<CuisinePreferences>({
-    indian: true,
-    chinese: true,
-    italian: true,
+    indian: false,
+    chinese: false,
+    italian: false,
     mexican: false,
-    thai: true,
+    thai: false,
     japanese: false,
     mediterranean: false,
-    american: true,
+    american: false,
   });
 
   const [spiceLevel, setSpiceLevel] = useState('medium');

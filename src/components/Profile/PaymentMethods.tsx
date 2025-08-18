@@ -11,35 +11,7 @@ interface PaymentMethod {
 }
 
 const PaymentMethods: React.FC = () => {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    {
-      id: '1',
-      type: 'card',
-      name: 'HDFC Credit Card',
-      details: '**** **** **** 1234',
-      isDefault: true,
-      isVerified: true,
-      lastUsed: '2024-01-15'
-    },
-    {
-      id: '2',
-      type: 'upi',
-      name: 'UPI ID',
-      details: 'john.doe@okicici',
-      isDefault: false,
-      isVerified: true,
-      lastUsed: '2024-01-14'
-    },
-    {
-      id: '3',
-      type: 'wallet',
-      name: 'Paytm Wallet',
-      details: '₹1,250 available',
-      isDefault: false,
-      isVerified: true,
-      lastUsed: '2024-01-13'
-    }
-  ]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
@@ -189,65 +161,79 @@ const PaymentMethods: React.FC = () => {
 
       {/* Payment Methods List */}
       <div className="space-y-4">
-        {paymentMethods.map((method) => (
-          <div key={method.id} className="bg-dark-700 rounded-lg p-6 border border-dark-600">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="text-2xl">{getPaymentIcon(method.type)}</div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="text-white font-medium">{method.name}</h4>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentTypeColor(method.type)}`}>
-                      {method.type.toUpperCase()}
-                    </span>
-                    {method.isDefault && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Default
+        {paymentMethods.length === 0 ? (
+          <div className="bg-dark-700 rounded-lg p-8 border border-dark-600 text-center">
+            <div className="text-gray-400 text-4xl mb-4">💳</div>
+            <h4 className="text-white font-medium mb-2">No payment methods</h4>
+            <p className="text-gray-400 text-sm mb-4">Add your first payment method for quick and secure checkout</p>
+            <button
+              onClick={() => setIsAddingNew(true)}
+              className="px-4 py-2 bg-sera-orange text-white rounded-lg hover:bg-orange-600 transition-colors duration-200"
+            >
+              + Add Your First Payment Method
+            </button>
+          </div>
+        ) : (
+          paymentMethods.map((method) => (
+            <div key={method.id} className="bg-dark-700 rounded-lg p-6 border border-dark-600">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="text-2xl">{getPaymentIcon(method.type)}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h4 className="text-white font-medium">{method.name}</h4>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentTypeColor(method.type)}`}>
+                        {method.type.toUpperCase()}
                       </span>
-                    )}
-                    {method.isVerified && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        ✓ Verified
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <p className="text-gray-300">{method.details}</p>
-                    {method.lastUsed && (
-                      <p className="text-gray-400 text-sm">
-                        Last used: {new Date(method.lastUsed).toLocaleDateString()}
-                      </p>
-                    )}
+                      {method.isDefault && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Default
+                        </span>
+                      )}
+                      {method.isVerified && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          ✓ Verified
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-gray-300">{method.details}</p>
+                      {method.lastUsed && (
+                        <p className="text-gray-400 text-sm">
+                          Last used: {new Date(method.lastUsed).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center space-x-2 ml-4">
-                {!method.isDefault && (
+                
+                <div className="flex items-center space-x-2 ml-4">
+                  {!method.isDefault && (
+                    <button
+                      onClick={() => handleSetDefault(method.id)}
+                      className="px-3 py-1 bg-dark-600 text-white text-sm rounded hover:bg-dark-500 transition-colors duration-200"
+                    >
+                      Set Default
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleSetDefault(method.id)}
+                    onClick={() => handleEdit(method)}
                     className="px-3 py-1 bg-dark-600 text-white text-sm rounded hover:bg-dark-500 transition-colors duration-200"
                   >
-                    Set Default
+                    Edit
                   </button>
-                )}
-                <button
-                  onClick={() => handleEdit(method)}
-                  className="px-3 py-1 bg-dark-600 text-white text-sm rounded hover:bg-dark-500 transition-colors duration-200"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(method.id)}
-                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors duration-200"
-                >
-                  Delete
-                </button>
+                  <button
+                    onClick={() => handleDelete(method.id)}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors duration-200"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Add/Edit Form */}
