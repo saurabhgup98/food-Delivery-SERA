@@ -51,12 +51,6 @@ const RestaurantDetail: React.FC = () => {
   // State for API data
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
-  
-  // Debug foodItems state changes
-  useEffect(() => {
-    console.log('FoodItems state updated:', foodItems.length, 'items');
-  }, [foodItems]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,23 +107,7 @@ const RestaurantDetail: React.FC = () => {
     }
   };
 
-  // Fetch food items
-  const fetchFoodItems = async () => {
-    if (!restaurantId) return;
-    
-    console.log('Fetching food items for restaurant:', restaurantId);
-    
-    try {
-      const response = await apiService.getRestaurantFoodItems(restaurantId);
-      console.log('Food items response:', response);
-      if (response.success) {
-        setFoodItems(response.data.foodItems);
-        console.log('Food items set:', response.data.foodItems.length, 'items');
-      }
-    } catch (error) {
-      console.error('Error fetching food items:', error);
-    }
-  };
+
 
   // Fetch data on component mount and when dependencies change
   useEffect(() => {
@@ -152,13 +130,7 @@ const RestaurantDetail: React.FC = () => {
     }
   }, [debouncedSearchQuery, menuItems.length]);
 
-  useEffect(() => {
-    console.log('Restaurant state changed:', restaurant ? 'loaded' : 'null');
-    if (restaurant && restaurant._id) {
-      console.log('Restaurant loaded, fetching food items...');
-      fetchFoodItems();
-    }
-  }, [restaurant]);
+
 
   // Helper function to get price range from price string
   const getPriceRange = useCallback((price: string) => {
@@ -622,16 +594,16 @@ const RestaurantDetail: React.FC = () => {
         )}
         
         {(() => {
-          console.log('Current foodItems state:', foodItems);
-          return foodItems.length === 0 ? (
+          console.log('Current menuItems state:', menuItems);
+          return menuItems.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-lg mb-2">🍽️</div>
-              <h3 className="text-white text-xl font-semibold mb-2">No food items found</h3>
-              <p className="text-gray-400">No food items available for this restaurant</p>
+              <h3 className="text-white text-xl font-semibold mb-2">No menu items found</h3>
+              <p className="text-gray-400">No menu items available for this restaurant</p>
             </div>
           ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-             {foodItems.map(item => {
+             {menuItems.map(item => {
                                const quantity = getItemQuantity(item._id);
                 const isHovered = hoveredDishId === item._id;
                
