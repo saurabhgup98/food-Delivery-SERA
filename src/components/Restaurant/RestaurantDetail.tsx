@@ -32,11 +32,11 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
-type TabType = 'top-meals' | 'quick-order' | 'chef-specials' | 'trending';
+type TabType = 'all-meals' | 'top-meals' | 'quick-order' | 'chef-specials' | 'trending';
 
 const RestaurantDetail: React.FC = () => {
   const { id: restaurantId } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<TabType>('top-meals');
+  const [activeTab, setActiveTab] = useState<TabType>('all-meals');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isFavorite, setIsFavorite] = useState(false);
@@ -52,6 +52,7 @@ const RestaurantDetail: React.FC = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [menuLoading, setMenuLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Debounced search query
@@ -81,20 +82,15 @@ const RestaurantDetail: React.FC = () => {
     }
   };
 
-  // Fetch menu items
+  // Fetch menu items - always fetch all items
   const fetchMenuItems = async () => {
     if (!restaurantId) return;
     
     try {
-      const typeMap: Record<TabType, 'all' | 'popular' | 'chef-special' | 'quick-order' | 'trending'> = {
-        'top-meals': 'all',
-        'quick-order': 'quick-order',
-        'chef-specials': 'chef-special',
-        'trending': 'trending'
-      };
+      setMenuLoading(true);
       
       const response = await apiService.getRestaurantMenu(restaurantId, {
-        type: typeMap[activeTab],
+        type: 'all', // Always fetch all items
         category: selectedCategory !== 'all' ? selectedCategory : undefined,
         search: debouncedSearchQuery || undefined
       });
@@ -104,6 +100,8 @@ const RestaurantDetail: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching menu items:', err);
+    } finally {
+      setMenuLoading(false);
     }
   };
 
@@ -118,7 +116,7 @@ const RestaurantDetail: React.FC = () => {
     if (restaurant) {
       fetchMenuItems();
     }
-  }, [restaurantId, activeTab, selectedCategory, debouncedSearchQuery]);
+  }, [restaurantId, selectedCategory, debouncedSearchQuery]);
 
   // Scroll to top when search query changes
   useEffect(() => {
@@ -225,6 +223,7 @@ const RestaurantDetail: React.FC = () => {
   // Calculate tab counts based on ALL menu items (not filtered ones)
   const tabCounts = useMemo(() => {
     return {
+      'all-meals': menuItems.length,
       'top-meals': menuItems.filter(item => item.isPopular).length,
       'quick-order': menuItems.filter(item => item.isQuickOrder).length,
       'chef-specials': menuItems.filter(item => item.isChefSpecial).length,
@@ -233,6 +232,7 @@ const RestaurantDetail: React.FC = () => {
   }, [menuItems]);
 
   const tabs = [
+    { id: 'all-meals', label: 'All Meals', count: tabCounts['all-meals'] },
     { id: 'top-meals', label: 'Top Meals', count: tabCounts['top-meals'] },
     { id: 'quick-order', label: 'Quick Order', count: tabCounts['quick-order'] },
     { id: 'chef-specials', label: 'Chef\'s Specials', count: tabCounts['chef-specials'] },
@@ -479,18 +479,25 @@ const RestaurantDetail: React.FC = () => {
             </div>
 
             {/* Category Filter */}
-            <select 
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-            >
-              <option value="all">All Categories</option>
-              {menuCategories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name} ({category.count})
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select 
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue appearance-none cursor-pointer transition-all duration-200 hover:border-dark-500 pr-10"
+              >
+                <option value="all">All Categories</option>
+                {menuCategories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name} ({category.count})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
 
             {/* Filter Button */}
             <button
@@ -604,16 +611,76 @@ const RestaurantDetail: React.FC = () => {
         )}
         
         {(() => {
-          console.log('Current menuItems state:', menuItems);
-          return menuItems.length === 0 ? (
+          // Show loader while fetching menu items
+          if (menuLoading) {
+            return (
+              <div className="text-center py-12">
+                <AnimatedLoader type="restaurant" size="large" className="mx-auto mb-6" />
+                <p className="text-white text-lg font-medium">Loading menu items...</p>
+                <p className="text-gray-400 text-sm mt-2">Fetching delicious dishes for you</p>
+              </div>
+            );
+          }
+
+          // Filter items based on active tab (client-side filtering)
+          let displayItems = menuItems;
+          if (activeTab !== 'all-meals') {
+            switch (activeTab) {
+              case 'top-meals':
+                displayItems = menuItems.filter(item => item.isPopular);
+                break;
+              case 'quick-order':
+                displayItems = menuItems.filter(item => item.isQuickOrder);
+                break;
+              case 'chef-specials':
+                displayItems = menuItems.filter(item => item.isChefSpecial);
+                break;
+              case 'trending':
+                displayItems = menuItems.filter(item => item.isTrending);
+                break;
+              default:
+                displayItems = menuItems;
+            }
+          }
+
+          // Apply additional filters (search, category, etc.)
+          if (filterValues) {
+            displayItems = displayItems.filter(item => {
+              // Dietary filter
+              if (filterValues.dietary.length > 0) {
+                const matchesDietary = filterValues.dietary.some(filter => {
+                  if (filter === 'Veg') return item.dietary === 'veg';
+                  if (filter === 'Non-Veg') return item.dietary === 'non-veg';
+                  if (filter === 'Vegan') return item.dietary === 'vegan';
+                  if (filter === 'Jain') return item.dietary === 'jain';
+                  return false;
+                });
+                if (!matchesDietary) return false;
+              }
+
+              // Price filter
+              if (filterValues.priceRange.length > 0) {
+                const itemPriceRange = getPriceRange(item.price);
+                if (!filterValues.priceRange.includes(itemPriceRange)) return false;
+              }
+
+              return true;
+            });
+
+            // Sort items
+            displayItems = sortItems(displayItems, filterValues.sortBy, filterValues.sortOrder);
+          }
+
+          console.log('Current displayItems state:', displayItems);
+          return displayItems.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-lg mb-2">🍽️</div>
               <h3 className="text-white text-xl font-semibold mb-2">No menu items found</h3>
-              <p className="text-gray-400">No menu items available for this restaurant</p>
+              <p className="text-gray-400">No menu items available for the selected filters</p>
             </div>
           ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-             {menuItems.map(item => {
+             {displayItems.map(item => {
                                const quantity = getItemQuantity(item._id);
                 const isHovered = hoveredDishId === item._id;
                

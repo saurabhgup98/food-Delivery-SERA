@@ -249,16 +249,23 @@ const PaymentMethods: React.FC = () => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Payment Type
               </label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-              >
-                <option value="card">Credit/Debit Card</option>
-                <option value="upi">UPI</option>
-                <option value="wallet">Digital Wallet</option>
-              </select>
+              <div className="relative">
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent appearance-none cursor-pointer transition-all duration-200 hover:border-dark-400"
+                >
+                  <option value="card">Credit/Debit Card</option>
+                  <option value="upi">UPI</option>
+                  <option value="wallet">Digital Wallet</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Name */}
@@ -347,17 +354,24 @@ const PaymentMethods: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Wallet Type
                 </label>
-                <select
-                  name="walletType"
-                  value={formData.walletType}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                >
-                  <option value="paytm">Paytm</option>
-                  <option value="phonepe">PhonePe</option>
-                  <option value="amazonpay">Amazon Pay</option>
-                  <option value="googlepay">Google Pay</option>
-                </select>
+                <div className="relative">
+                  <select
+                    name="walletType"
+                    value={formData.walletType}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent appearance-none cursor-pointer transition-all duration-200 hover:border-dark-400"
+                  >
+                    <option value="paytm">Paytm</option>
+                    <option value="phonepe">PhonePe</option>
+                    <option value="amazonpay">Amazon Pay</option>
+                    <option value="googlepay">Google Pay</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             )}
           </div>

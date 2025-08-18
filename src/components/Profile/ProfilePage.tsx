@@ -91,7 +91,7 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="text-center sm:text-right w-full sm:w-auto">
               <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sera-orange to-orange-500 bg-clip-text text-transparent">
-                ₹2,450
+                ₹0
               </div>
               <div className="text-gray-400 text-sm">Total Spent</div>
             </div>
