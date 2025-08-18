@@ -87,7 +87,7 @@ const RestaurantDetail: React.FC = () => {
     
     try {
       const typeMap: Record<TabType, 'all' | 'popular' | 'chef-special' | 'quick-order' | 'trending'> = {
-        'top-meals': 'popular',
+        'top-meals': 'all',
         'quick-order': 'quick-order',
         'chef-specials': 'chef-special',
         'trending': 'trending'
@@ -223,10 +223,10 @@ const RestaurantDetail: React.FC = () => {
   }, [filteredMenuItems]);
 
   const tabs = [
-    { id: 'top-meals', label: 'Top Meals', count: filteredMenuItems.filter(item => item.isPopular).length },
-    { id: 'quick-order', label: 'Quick Order', count: filteredMenuItems.filter(item => item.isQuickOrder).length },
-    { id: 'chef-specials', label: 'Chef\'s Specials', count: filteredMenuItems.filter(item => item.isChefSpecial).length },
-    { id: 'trending', label: 'Trending Now', count: filteredMenuItems.filter(item => item.isTrending).length }
+    { id: 'top-meals', label: 'Top Meals', count: menuItems.filter(item => item.isPopular).length },
+    { id: 'quick-order', label: 'Quick Order', count: menuItems.filter(item => item.isQuickOrder).length },
+    { id: 'chef-specials', label: 'Chef\'s Specials', count: menuItems.filter(item => item.isChefSpecial).length },
+    { id: 'trending', label: 'Trending Now', count: menuItems.filter(item => item.isTrending).length }
   ];
 
   const handleAddToCart = (item: MenuItem) => {
