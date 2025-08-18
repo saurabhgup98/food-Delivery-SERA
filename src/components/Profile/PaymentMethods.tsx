@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import PrimaryDropdown from '../Common/PrimaryDropdown';
+import { paymentTypeOptions, walletTypeOptions } from '../../data/dropdownOptions';
 
 interface PaymentMethod {
   id: string;
@@ -249,25 +251,12 @@ const PaymentMethods: React.FC = () => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Payment Type
               </label>
-              <div className="relative group">
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent appearance-none cursor-pointer transition-all duration-300 hover:border-dark-400 group-hover:border-dark-300"
-                >
-                  <option value="card">Credit/Debit Card</option>
-                  <option value="upi">UPI</option>
-                  <option value="wallet">Digital Wallet</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                {/* Dropdown overlay for visual integration */}
-                <div className="absolute inset-0 border border-transparent rounded-lg pointer-events-none transition-all duration-300 group-hover:border-dark-300 group-focus-within:border-sera-orange"></div>
-              </div>
+              <PrimaryDropdown
+                value={formData.type}
+                onChange={(value) => setFormData(prev => ({ ...prev, type: value as 'card' | 'upi' | 'wallet' }))}
+                options={paymentTypeOptions}
+                placeholder="Select payment type"
+              />
             </div>
 
             {/* Name */}
@@ -356,26 +345,12 @@ const PaymentMethods: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Wallet Type
                 </label>
-                <div className="relative group">
-                  <select
-                    name="walletType"
-                    value={formData.walletType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent appearance-none cursor-pointer transition-all duration-300 hover:border-dark-400 group-hover:border-dark-300"
-                  >
-                    <option value="paytm">Paytm</option>
-                    <option value="phonepe">PhonePe</option>
-                    <option value="amazonpay">Amazon Pay</option>
-                    <option value="googlepay">Google Pay</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                  {/* Dropdown overlay for visual integration */}
-                  <div className="absolute inset-0 border border-transparent rounded-lg pointer-events-none transition-all duration-300 group-hover:border-dark-300 group-focus-within:border-sera-orange"></div>
-                </div>
+                <PrimaryDropdown
+                  value={formData.walletType}
+                  onChange={(value) => setFormData(prev => ({ ...prev, walletType: value }))}
+                  options={walletTypeOptions}
+                  placeholder="Select wallet type"
+                />
               </div>
             )}
           </div>

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService, Address } from '../../services/api';
+import PrimaryDropdown from '../Common/PrimaryDropdown';
+import { addressLabelOptions } from '../../data/dropdownOptions';
 
 const DeliveryAddresses: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -257,26 +259,12 @@ const DeliveryAddresses: React.FC = () => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Address Label
               </label>
-              <div className="relative group">
-                <select
-                  name="label"
-                  value={formData.label}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent appearance-none cursor-pointer transition-all duration-300 hover:border-dark-400 group-hover:border-dark-300"
-                >
-                  <option value="">Select a label</option>
-                  <option value="Home">Home</option>
-                  <option value="Office">Office</option>
-                  <option value="Other">Other</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                {/* Dropdown overlay for visual integration */}
-                <div className="absolute inset-0 border border-transparent rounded-lg pointer-events-none transition-all duration-300 group-hover:border-dark-300 group-focus-within:border-sera-orange"></div>
-              </div>
+              <PrimaryDropdown
+                value={formData.label}
+                onChange={(value) => setFormData(prev => ({ ...prev, label: value }))}
+                options={addressLabelOptions}
+                placeholder="Select a label"
+              />
             </div>
 
             {/* Full Name */}
