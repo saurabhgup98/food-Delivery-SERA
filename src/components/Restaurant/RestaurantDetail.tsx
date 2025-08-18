@@ -113,7 +113,7 @@ const RestaurantDetail: React.FC = () => {
   }, [restaurantId]);
 
   useEffect(() => {
-    if (restaurant) {
+    if (restaurantId) {
       fetchMenuItems();
     }
   }, [restaurantId, selectedCategory, debouncedSearchQuery]);
