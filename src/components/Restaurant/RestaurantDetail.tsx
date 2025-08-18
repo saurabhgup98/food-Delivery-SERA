@@ -17,13 +17,16 @@ const useDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+    // Only debounce if the value has at least 3 characters or is empty
+    if (value.length >= 3 || value.length === 0) {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
 
-    return () => {
-      clearTimeout(handler);
-    };
+      return () => {
+        clearTimeout(handler);
+      };
+    }
   }, [value, delay]);
 
   return debouncedValue;
@@ -141,8 +144,11 @@ const RestaurantDetail: React.FC = () => {
 
   // Scroll to top when search query changes
   useEffect(() => {
-    if (searchQuery && menuItems.length > 0) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (debouncedSearchQuery && menuItems.length > 0) {
+      // Only scroll if we're not already at the top
+      if (window.scrollY > 100) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }, [debouncedSearchQuery, menuItems.length]);
 
