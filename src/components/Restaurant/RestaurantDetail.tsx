@@ -10,6 +10,24 @@ import { useCart } from '../../contexts/CartContext';
 import FilterModal, { FilterSelections } from './FilterModal';
 import DishCustomizationModal from './DishCustomizationModal';
 import CartModal from '../Cart/CartModal';
+import { AnimatedLoader } from '../Loader';
+
+// Debounce hook for search
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 type TabType = 'top-meals' | 'quick-order' | 'chef-specials' | 'trending';
 
@@ -38,6 +56,9 @@ const RestaurantDetail: React.FC = () => {
   }, [foodItems]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Debounced search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Fetch restaurant data
   const fetchRestaurant = async () => {
@@ -78,7 +99,7 @@ const RestaurantDetail: React.FC = () => {
       const response = await apiService.getRestaurantMenu(restaurantId, {
         type: typeMap[activeTab],
         category: selectedCategory !== 'all' ? selectedCategory : undefined,
-        search: searchQuery || undefined
+        search: debouncedSearchQuery || undefined
       });
       
       if (response.success) {
@@ -116,7 +137,14 @@ const RestaurantDetail: React.FC = () => {
     if (restaurant) {
       fetchMenuItems();
     }
-  }, [restaurantId, activeTab, selectedCategory, searchQuery]);
+  }, [restaurantId, activeTab, selectedCategory, debouncedSearchQuery]);
+
+  // Scroll to top when search query changes
+  useEffect(() => {
+    if (searchQuery && menuItems.length > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [debouncedSearchQuery, menuItems.length]);
 
   useEffect(() => {
     console.log('Restaurant state changed:', restaurant ? 'loaded' : 'null');
@@ -187,16 +215,6 @@ const RestaurantDetail: React.FC = () => {
     });
   }, []);
 
-  // Menu categories
-  const menuCategories = useMemo(() => {
-    const categories = ['starters', 'mains', 'breads', 'desserts', 'beverages'];
-    return categories.map(category => ({
-      id: category,
-      name: category.charAt(0).toUpperCase() + category.slice(1),
-      count: menuItems.filter(item => item.category === category).length
-    }));
-  }, [menuItems]);
-
   // Filter menu items based on search and category
   const filteredMenuItems = useMemo(() => {
     let items = menuItems;
@@ -216,11 +234,21 @@ const RestaurantDetail: React.FC = () => {
     return items;
   }, [menuItems, filterValues, matchesDietary, matchesPrice, sortItems]);
 
+  // Menu categories
+  const menuCategories = useMemo(() => {
+    const categories = ['starters', 'mains', 'breads', 'desserts', 'beverages'];
+    return categories.map(category => ({
+      id: category,
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+      count: filteredMenuItems.filter(item => item.category === category).length
+    }));
+  }, [filteredMenuItems]);
+
   const tabs = [
-    { id: 'top-meals', label: 'Top Meals', count: menuItems.filter(item => item.isPopular).length },
-    { id: 'quick-order', label: 'Quick Order', count: menuItems.filter(item => item.isQuickOrder).length },
-    { id: 'chef-specials', label: 'Chef\'s Specials', count: menuItems.filter(item => item.isChefSpecial).length },
-    { id: 'trending', label: 'Trending Now', count: menuItems.filter(item => item.isTrending).length }
+    { id: 'top-meals', label: 'Top Meals', count: filteredMenuItems.filter(item => item.isPopular).length },
+    { id: 'quick-order', label: 'Quick Order', count: filteredMenuItems.filter(item => item.isQuickOrder).length },
+    { id: 'chef-specials', label: 'Chef\'s Specials', count: filteredMenuItems.filter(item => item.isChefSpecial).length },
+    { id: 'trending', label: 'Trending Now', count: filteredMenuItems.filter(item => item.isTrending).length }
   ];
 
   const handleAddToCart = (item: MenuItem) => {
@@ -290,8 +318,9 @@ const RestaurantDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-dark-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sera-blue mx-auto mb-4"></div>
-          <p className="text-white">Loading restaurant...</p>
+          <AnimatedLoader type="restaurant" size="large" className="mx-auto mb-6" />
+          <p className="text-white text-lg font-medium">Loading restaurant...</p>
+          <p className="text-gray-400 text-sm mt-2">Preparing the menu for you</p>
         </div>
       </div>
     );

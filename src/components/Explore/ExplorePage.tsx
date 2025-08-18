@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Search,
   MapPin
@@ -7,6 +7,7 @@ import {
 import RestaurantCard from './RestaurantCard';
 import RestaurantListItem from './RestaurantListItem';
 import { apiService, Restaurant, MenuItem } from '../../services/api';
+import { AnimatedLoader } from '../Loader';
 
 // Debounce hook for search
 const useDebounce = (value: string, delay: number) => {
@@ -27,6 +28,7 @@ const useDebounce = (value: string, delay: number) => {
 
 const ExplorePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,10 +106,26 @@ const ExplorePage: React.FC = () => {
 
 
 
+  // Handle URL search parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get('search');
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [location.search]);
+
   // Fetch restaurants on component mount and when filters change
   useEffect(() => {
     fetchRestaurants();
   }, [fetchRestaurants]);
+
+  // Scroll to top when search query changes and results update
+  useEffect(() => {
+    if (debouncedSearchQuery && restaurants.length > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [debouncedSearchQuery, restaurants.length]);
 
   const handleFavoriteToggle = (id: string) => {
     setRestaurants(prev => 
@@ -239,8 +257,9 @@ const ExplorePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sera-blue mx-auto mb-4"></div>
-          <p className="text-white">Loading restaurants...</p>
+          <AnimatedLoader type="restaurant" size="large" className="mx-auto mb-6" />
+          <p className="text-white text-lg font-medium">Loading restaurants...</p>
+          <p className="text-gray-400 text-sm mt-2">Discovering amazing food near you</p>
         </div>
       </div>
     );

@@ -44,6 +44,10 @@ const Header: React.FC<HeaderProps> = ({
   }, [isProfileDropdownOpen]);
 
   const handleSearch = (query: string) => {
+    if (query.trim()) {
+      // Navigate to explore page with search query
+      navigate(`/explore?search=${encodeURIComponent(query.trim())}`);
+    }
     onSearch?.(query);
   };
 

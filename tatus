@@ -1,0 +1,5 @@
+[33m5c34a20[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Update auth endpoints to use consolidated API
+[33m69ceb1a[m Add address validation to prevent order placement without address
+[33m3a05e06[m Fix Orders page: update field names and status values to match API
+[33m88cdbdc[m Fix token key mismatch - API service now uses 'authToken' to match AuthContext
+[33mb7d9628[m resollved icon for error
