@@ -144,13 +144,13 @@ const PersonalInfo: React.FC = () => {
           <label className="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">
             Gender
           </label>
-          <div className="relative">
+          <div className="relative group">
             <select
               name="gender"
               value={formData.gender}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base appearance-none cursor-pointer transition-all duration-200 hover:border-dark-500"
+              className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base appearance-none cursor-pointer transition-all duration-300 hover:border-dark-500 group-hover:border-dark-400"
             >
               <option value="">Select gender</option>
               <option value="male">Male</option>
@@ -159,10 +159,12 @@ const PersonalInfo: React.FC = () => {
               <option value="prefer-not-to-say">Prefer not to say</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
+            {/* Dropdown overlay for visual integration */}
+            <div className="absolute inset-0 border border-transparent rounded-lg pointer-events-none transition-all duration-300 group-hover:border-dark-400 group-focus-within:border-sera-orange"></div>
           </div>
         </div>
       </div>

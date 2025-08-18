@@ -479,11 +479,11 @@ const RestaurantDetail: React.FC = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="relative">
+            <div className="relative group">
               <select 
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue appearance-none cursor-pointer transition-all duration-200 hover:border-dark-500 pr-10"
+                className="bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue appearance-none cursor-pointer transition-all duration-300 hover:border-dark-500 group-hover:border-dark-400 pr-10"
               >
                 <option value="all">All Categories</option>
                 {menuCategories.map(category => (
@@ -493,10 +493,12 @@ const RestaurantDetail: React.FC = () => {
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
+              {/* Dropdown overlay for visual integration */}
+              <div className="absolute inset-0 border border-transparent rounded-lg pointer-events-none transition-all duration-300 group-hover:border-dark-400 group-focus-within:border-sera-blue"></div>
             </div>
 
             {/* Filter Button */}
