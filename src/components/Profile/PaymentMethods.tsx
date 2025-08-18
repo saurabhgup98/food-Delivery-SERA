@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
+import PrimaryInput from '../Common/PrimaryInput';
 import { paymentTypeOptions, walletTypeOptions } from '../../data/dropdownOptions';
 
 interface PaymentMethod {
@@ -27,13 +28,7 @@ const PaymentMethods: React.FC = () => {
     walletType: 'paytm'
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+
 
   const handleSubmit = () => {
     let newMethod: PaymentMethod;
@@ -260,83 +255,53 @@ const PaymentMethods: React.FC = () => {
             </div>
 
             {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                {formData.type === 'card' ? 'Card Name' : formData.type === 'upi' ? 'UPI Name' : 'Wallet Name'}
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder={formData.type === 'card' ? 'Enter card name' : formData.type === 'upi' ? 'Enter UPI name' : 'Enter wallet name'}
-              />
-            </div>
+            <PrimaryInput
+              type="text"
+              value={formData.name}
+              onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
+              placeholder={formData.type === 'card' ? 'Enter card name' : formData.type === 'upi' ? 'Enter UPI name' : 'Enter wallet name'}
+              label={formData.type === 'card' ? 'Card Name' : formData.type === 'upi' ? 'UPI Name' : 'Wallet Name'}
+            />
 
             {/* Card Details */}
             {formData.type === 'card' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Card Number
-                  </label>
-                  <input
-                    type="text"
-                    name="cardNumber"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                    placeholder="1234 5678 9012 3456"
-                    maxLength={19}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    name="expiryDate"
-                    value={formData.expiryDate}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                    placeholder="MM/YY"
-                    maxLength={5}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    CVV
-                  </label>
-                  <input
-                    type="text"
-                    name="cvv"
-                    value={formData.cvv}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                    placeholder="123"
-                    maxLength={4}
-                  />
-                </div>
+                <PrimaryInput
+                  type="text"
+                  value={formData.cardNumber}
+                  onChange={(value) => setFormData(prev => ({ ...prev, cardNumber: value }))}
+                  placeholder="1234 5678 9012 3456"
+                  label="Card Number"
+                  maxLength={19}
+                />
+                <PrimaryInput
+                  type="text"
+                  value={formData.expiryDate}
+                  onChange={(value) => setFormData(prev => ({ ...prev, expiryDate: value }))}
+                  placeholder="MM/YY"
+                  label="Expiry Date"
+                  maxLength={5}
+                />
+                <PrimaryInput
+                  type="text"
+                  value={formData.cvv}
+                  onChange={(value) => setFormData(prev => ({ ...prev, cvv: value }))}
+                  placeholder="123"
+                  label="CVV"
+                  maxLength={4}
+                />
               </div>
             )}
 
             {/* UPI Details */}
             {formData.type === 'upi' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  UPI ID
-                </label>
-                <input
-                  type="text"
-                  name="upiId"
-                  value={formData.upiId}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                  placeholder="username@upi"
-                />
-              </div>
+              <PrimaryInput
+                type="text"
+                value={formData.upiId}
+                onChange={(value) => setFormData(prev => ({ ...prev, upiId: value }))}
+                placeholder="username@upi"
+                label="UPI ID"
+              />
             )}
 
             {/* Wallet Details */}

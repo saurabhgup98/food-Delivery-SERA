@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
+import PrimaryInput from '../Common/PrimaryInput';
+import DatePrimary from '../Common/DatePrimary';
 import { genderOptions } from '../../data/dropdownOptions';
 
 
@@ -17,13 +19,7 @@ const PersonalInfo: React.FC = () => {
     gender: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+
 
   const handleSave = () => {
     // TODO: Implement save functionality
@@ -81,68 +77,43 @@ const PersonalInfo: React.FC = () => {
       {/* Form Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
         {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">
-            Full Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
-            placeholder="Enter your full name"
-          />
-        </div>
+        <PrimaryInput
+          type="text"
+          value={formData.name}
+          onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
+          placeholder="Enter your full name"
+          label="Full Name"
+          disabled={!isEditing}
+        />
 
         {/* Email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">
-            Email Address
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
-            placeholder="Enter your email"
-          />
-        </div>
+        <PrimaryInput
+          type="email"
+          value={formData.email}
+          onChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
+          placeholder="Enter your email"
+          label="Email Address"
+          disabled={!isEditing}
+        />
 
         {/* Phone */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
-            placeholder="Enter your phone number"
-          />
-        </div>
+        <PrimaryInput
+          type="tel"
+          value={formData.phone}
+          onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+          placeholder="Enter your phone number"
+          label="Phone Number"
+          disabled={!isEditing}
+        />
 
         {/* Date of Birth */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">
-            Date of Birth
-          </label>
-          <input
-            type="date"
-            name="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
-            placeholder="Select your date of birth"
-          />
-        </div>
+        <DatePrimary
+          value={formData.dateOfBirth}
+          onChange={(value) => setFormData(prev => ({ ...prev, dateOfBirth: value }))}
+          placeholder="Select your date of birth"
+          label="Date of Birth"
+          disabled={!isEditing}
+        />
 
         {/* Gender */}
         <div>

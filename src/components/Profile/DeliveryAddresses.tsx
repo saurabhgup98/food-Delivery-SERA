@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService, Address } from '../../services/api';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
+import PrimaryInput from '../Common/PrimaryInput';
 import { addressLabelOptions } from '../../data/dropdownOptions';
 
 const DeliveryAddresses: React.FC = () => {
@@ -43,13 +44,7 @@ const DeliveryAddresses: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
+
 
   const handleSubmit = async () => {
     try {
@@ -174,9 +169,28 @@ const DeliveryAddresses: React.FC = () => {
         </button>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="text-red-400 text-lg">⚠️</div>
+            <div>
+              <h4 className="text-red-400 font-medium mb-1">Error</h4>
+              <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Address List */}
       <div className="space-y-4">
-        {addresses.length === 0 ? (
+        {loading ? (
+          <div className="bg-dark-700 rounded-lg p-8 border border-dark-600 text-center">
+            <div className="text-gray-400 text-4xl mb-4">⏳</div>
+            <h4 className="text-white font-medium mb-2">Loading addresses...</h4>
+            <p className="text-gray-400 text-sm">Please wait while we fetch your delivery addresses</p>
+          </div>
+        ) : addresses.length === 0 ? (
           <div className="bg-dark-700 rounded-lg p-8 border border-dark-600 text-center">
             <div className="text-gray-400 text-4xl mb-4">📍</div>
             <h4 className="text-white font-medium mb-2">No delivery addresses</h4>
@@ -268,94 +282,60 @@ const DeliveryAddresses: React.FC = () => {
             </div>
 
             {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder="Enter full name"
-              />
-            </div>
+            <PrimaryInput
+              type="text"
+              value={formData.fullName}
+              onChange={(value) => setFormData(prev => ({ ...prev, fullName: value }))}
+              placeholder="Enter full name"
+              label="Full Name"
+            />
 
             {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder="Enter phone number"
-              />
-            </div>
+            <PrimaryInput
+              type="tel"
+              value={formData.phone}
+              onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+              placeholder="Enter phone number"
+              label="Phone Number"
+            />
 
             {/* Address */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Address
-              </label>
-              <input
+              <PrimaryInput
                 type="text"
-                name="address"
                 value={formData.address}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
+                onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
                 placeholder="Enter street address"
+                label="Address"
               />
             </div>
 
             {/* City */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                City
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder="Enter city"
-              />
-            </div>
+            <PrimaryInput
+              type="text"
+              value={formData.city}
+              onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+              placeholder="Enter city"
+              label="City"
+            />
 
             {/* State */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                State
-              </label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder="Enter state"
-              />
-            </div>
+            <PrimaryInput
+              type="text"
+              value={formData.state}
+              onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
+              placeholder="Enter state"
+              label="State"
+            />
 
             {/* Pincode */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Pincode
-              </label>
-              <input
-                type="text"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder="Enter pincode"
-              />
-            </div>
+            <PrimaryInput
+              type="text"
+              value={formData.pincode}
+              onChange={(value) => setFormData(prev => ({ ...prev, pincode: value }))}
+              placeholder="Enter pincode"
+              label="Pincode"
+            />
 
             {/* Default Address */}
             <div className="flex items-center">
@@ -363,7 +343,7 @@ const DeliveryAddresses: React.FC = () => {
                 type="checkbox"
                 name="isDefault"
                 checked={formData.isDefault}
-                onChange={handleInputChange}
+                onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
                 className="w-4 h-4 text-sera-orange bg-dark-600 border-dark-500 rounded focus:ring-sera-orange focus:ring-2"
               />
               <label className="ml-2 text-sm text-gray-300">
@@ -379,7 +359,7 @@ const DeliveryAddresses: React.FC = () => {
               <textarea
                 name="instructions"
                 value={formData.instructions}
-                onChange={handleInputChange}
+                onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
                 rows={3}
                 className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
                 placeholder="Any special instructions for delivery"
@@ -397,9 +377,14 @@ const DeliveryAddresses: React.FC = () => {
             </button>
             <button
               onClick={handleSubmit}
-              className="px-6 py-2 bg-sera-orange text-white rounded-lg hover:bg-orange-600 transition-colors duration-200"
+              disabled={loading}
+              className={`px-6 py-2 rounded-lg transition-colors duration-200 ${
+                loading 
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
+                  : 'bg-sera-orange text-white hover:bg-orange-600'
+              }`}
             >
-              {editingAddress ? 'Update Address' : 'Add Address'}
+              {loading ? 'Saving...' : (editingAddress ? 'Update Address' : 'Add Address')}
             </button>
           </div>
         </div>

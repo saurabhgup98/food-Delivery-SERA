@@ -7,6 +7,57 @@ import FoodPreferences from './FoodPreferences';
 import PaymentMethods from './PaymentMethods';
 import NotificationSettings from './NotificationSettings';
 
+// Mock orders data (in real app, this would come from API)
+const mockOrders = [
+  {
+    id: 'ORD001',
+    restaurantName: 'Spice Garden',
+    items: [
+      { name: 'Butter Chicken', quantity: 1, price: 350 },
+      { name: 'Naan', quantity: 2, price: 30 },
+      { name: 'Dal Makhani', quantity: 1, price: 180 }
+    ],
+    totalAmount: 590,
+    orderDate: '2024-01-15T18:30:00',
+    deliveryDate: '2024-01-15T19:45:00',
+    status: 'delivered',
+    rating: 4,
+    review: 'Great food and fast delivery!'
+  },
+  {
+    id: 'ORD002',
+    restaurantName: 'Pizza Palace',
+    items: [
+      { name: 'Margherita Pizza', quantity: 1, price: 450 },
+      { name: 'Garlic Bread', quantity: 1, price: 120 }
+    ],
+    totalAmount: 570,
+    orderDate: '2024-01-14T20:00:00',
+    deliveryDate: '2024-01-14T21:15:00',
+    status: 'delivered',
+    rating: 3
+  },
+  {
+    id: 'ORD003',
+    restaurantName: 'Chinese Wok',
+    items: [
+      { name: 'Chicken Fried Rice', quantity: 1, price: 280 },
+      { name: 'Spring Rolls', quantity: 1, price: 150 }
+    ],
+    totalAmount: 430,
+    orderDate: '2024-01-13T19:00:00',
+    deliveryDate: '2024-01-13T20:30:00',
+    status: 'delivered',
+    rating: 5,
+    review: 'Amazing taste and generous portions!'
+  }
+];
+
+// Calculate total spent from delivered orders
+const totalSpent = mockOrders
+  .filter(order => order.status === 'delivered')
+  .reduce((total, order) => total + order.totalAmount, 0);
+
 type TabType = 'personal' | 'addresses' | 'preferences' | 'payment' | 'notifications';
 
 const ProfilePage: React.FC = () => {
@@ -91,7 +142,7 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="text-center sm:text-right w-full sm:w-auto">
               <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sera-orange to-orange-500 bg-clip-text text-transparent">
-                ₹0
+                ₹{totalSpent.toLocaleString()}
               </div>
               <div className="text-gray-400 text-sm">Total Spent</div>
             </div>
