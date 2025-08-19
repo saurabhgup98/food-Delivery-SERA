@@ -25,6 +25,7 @@ const DeliveryAddresses: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Fetch addresses on component mount
   useEffect(() => {
@@ -52,21 +53,38 @@ const DeliveryAddresses: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setSuccessMessage(null);
 
       if (editingAddress) {
         // Update existing address
         const response = await apiService.updateAddress(editingAddress._id, formData);
-        if (response.success) {
+        console.log('Update address response:', response); // Debug log
+        
+        if (response.success && response.data && response.data.address) {
+          // Update the addresses list with the new data
           setAddresses(prev => prev.map(addr => 
             addr._id === editingAddress._id ? response.data.address : addr
           ));
           setEditingAddress(null);
+          // Show success message briefly
+          setSuccessMessage('Address updated successfully!');
+          setTimeout(() => setSuccessMessage(null), 3000);
+        } else {
+          throw new Error(response.message || 'Failed to update address');
         }
       } else {
         // Add new address
         const response = await apiService.createAddress(formData);
-        if (response.success) {
+        console.log('Create address response:', response); // Debug log
+        
+        if (response.success && response.data && response.data.address) {
           setAddresses(prev => [...prev, response.data.address]);
+          setIsAddingNew(false);
+          // Show success message briefly
+          setSuccessMessage('Address added successfully!');
+          setTimeout(() => setSuccessMessage(null), 3000);
+        } else {
+          throw new Error(response.message || 'Failed to create address');
         }
       }
       
@@ -83,10 +101,9 @@ const DeliveryAddresses: React.FC = () => {
         isDefault: false,
         instructions: ''
       });
-      setIsAddingNew(false);
-    } catch (err) {
-      setError('Failed to save address');
+    } catch (err: any) {
       console.error('Error saving address:', err);
+      setError(err.message || 'Failed to save address');
     } finally {
       setLoading(false);
     }
@@ -182,6 +199,19 @@ const DeliveryAddresses: React.FC = () => {
             <div>
               <h4 className="text-red-400 font-medium mb-1">Error</h4>
               <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="bg-green-900/20 border border-green-800 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="text-green-400 text-lg">✅</div>
+            <div>
+              <h4 className="text-green-400 font-medium mb-1">Success</h4>
+              <p className="text-green-300 text-sm">{successMessage}</p>
             </div>
           </div>
         </div>

@@ -20,16 +20,42 @@ const PaymentMethods: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Create new payment method
-      const newMethod: PaymentMethod = {
-        id: Date.now().toString(),
-        type: 'card',
-        name: paymentData.cardholderName,
-        details: `**** **** **** ${paymentData.cardNumber.slice(-4)}`,
-        isDefault: paymentData.isDefault,
-        isVerified: true,
-        lastUsed: new Date().toISOString()
-      };
+      // Create new payment method based on type
+      let newMethod: PaymentMethod;
+      
+      if (paymentData.type === 'card') {
+        newMethod = {
+          id: Date.now().toString(),
+          type: 'card',
+          name: paymentData.cardholderName,
+          details: `**** **** **** ${paymentData.cardNumber.slice(-4)}`,
+          isDefault: paymentData.isDefault,
+          isVerified: true,
+          lastUsed: new Date().toISOString()
+        };
+      } else if (paymentData.type === 'upi') {
+        newMethod = {
+          id: Date.now().toString(),
+          type: 'upi',
+          name: 'UPI Payment',
+          details: paymentData.upiId,
+          isDefault: paymentData.isDefault,
+          isVerified: true,
+          lastUsed: new Date().toISOString()
+        };
+      } else if (paymentData.type === 'wallet') {
+        newMethod = {
+          id: Date.now().toString(),
+          type: 'wallet',
+          name: `${paymentData.walletType} Wallet`,
+          details: `****${paymentData.walletNumber.slice(-4)}`,
+          isDefault: paymentData.isDefault,
+          isVerified: true,
+          lastUsed: new Date().toISOString()
+        };
+      } else {
+        throw new Error('Invalid payment type');
+      }
       
       // If setting as default, unset other defaults
       if (paymentData.isDefault) {

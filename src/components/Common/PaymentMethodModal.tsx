@@ -10,6 +10,7 @@ interface PaymentMethodModalProps {
 }
 
 const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose, onSave }) => {
+  const [paymentType, setPaymentType] = useState<'card' | 'upi' | 'wallet'>('card');
   const [formData, setFormData] = useState({
     cardType: '',
     cardNumber: '',
@@ -17,6 +18,9 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
     expiryMonth: '',
     expiryYear: '',
     cvv: '',
+    upiId: '',
+    walletType: '',
+    walletNumber: '',
     isDefault: false
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +33,24 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
     { value: 'mastercard', label: 'Mastercard' },
     { value: 'amex', label: 'American Express' },
     { value: 'rupay', label: 'RuPay' }
+  ];
+
+  const upiOptions = [
+    { value: 'gpay', label: 'Google Pay' },
+    { value: 'phonepe', label: 'PhonePe' },
+    { value: 'paytm', label: 'Paytm' },
+    { value: 'amazonpay', label: 'Amazon Pay' },
+    { value: 'bhim', label: 'BHIM UPI' },
+    { value: 'other', label: 'Other UPI' }
+  ];
+
+  const walletOptions = [
+    { value: 'paytm', label: 'Paytm Wallet' },
+    { value: 'phonepe', label: 'PhonePe Wallet' },
+    { value: 'amazonpay', label: 'Amazon Pay Wallet' },
+    { value: 'mobikwik', label: 'MobiKwik' },
+    { value: 'freecharge', label: 'FreeCharge' },
+    { value: 'other', label: 'Other Wallet' }
   ];
 
   const monthOptions = Array.from({ length: 12 }, (_, i) => ({
@@ -47,14 +69,22 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
       setIsLoading(true);
       setError('');
 
-      // Validate required fields
+      // Validate required fields based on payment type
       const requiredFields: string[] = [];
-      if (!formData.cardType) requiredFields.push('Card Type');
-      if (!formData.cardNumber) requiredFields.push('Card Number');
-      if (!formData.cardholderName) requiredFields.push('Cardholder Name');
-      if (!formData.expiryMonth) requiredFields.push('Expiry Month');
-      if (!formData.expiryYear) requiredFields.push('Expiry Year');
-      if (!formData.cvv) requiredFields.push('CVV');
+      
+      if (paymentType === 'card') {
+        if (!formData.cardType) requiredFields.push('Card Type');
+        if (!formData.cardNumber) requiredFields.push('Card Number');
+        if (!formData.cardholderName) requiredFields.push('Cardholder Name');
+        if (!formData.expiryMonth) requiredFields.push('Expiry Month');
+        if (!formData.expiryYear) requiredFields.push('Expiry Year');
+        if (!formData.cvv) requiredFields.push('CVV');
+      } else if (paymentType === 'upi') {
+        if (!formData.upiId) requiredFields.push('UPI ID');
+      } else if (paymentType === 'wallet') {
+        if (!formData.walletType) requiredFields.push('Wallet Type');
+        if (!formData.walletNumber) requiredFields.push('Wallet Number');
+      }
 
       if (requiredFields.length > 0) {
         setMissingFields(requiredFields);
@@ -62,31 +92,36 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
         return;
       }
 
-      // Validate card number (basic validation)
-      if (formData.cardNumber.replace(/\s/g, '').length < 13) {
-        setError('Please enter a valid card number');
-        return;
+      // Validate based on payment type
+      if (paymentType === 'card') {
+        if (formData.cardNumber.replace(/\s/g, '').length < 13) {
+          setError('Please enter a valid card number');
+          return;
+        }
+        if (formData.cvv.length < 3 || formData.cvv.length > 4) {
+          setError('Please enter a valid CVV');
+          return;
+        }
+      } else if (paymentType === 'upi') {
+        if (!formData.upiId.includes('@')) {
+          setError('Please enter a valid UPI ID (e.g., username@bank)');
+          return;
+        }
+      } else if (paymentType === 'wallet') {
+        if (formData.walletNumber.length < 10) {
+          setError('Please enter a valid wallet number');
+          return;
+        }
       }
 
-      // Validate CVV
-      if (formData.cvv.length < 3 || formData.cvv.length > 4) {
-        setError('Please enter a valid CVV');
-        return;
-      }
-
-      // Call parent save function
-      await onSave(formData);
+      // Call parent save function with payment type
+      await onSave({
+        ...formData,
+        type: paymentType
+      });
       
       // Reset form and close modal
-      setFormData({
-        cardType: '',
-        cardNumber: '',
-        cardholderName: '',
-        expiryMonth: '',
-        expiryYear: '',
-        cvv: '',
-        isDefault: false
-      });
+      resetForm();
       onClose();
     } catch (error) {
       console.error('Error saving payment method:', error);
@@ -97,6 +132,12 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
   };
 
   const handleCancel = () => {
+    resetForm();
+    onClose();
+  };
+
+  const resetForm = () => {
+    setPaymentType('card');
     setFormData({
       cardType: '',
       cardNumber: '',
@@ -104,10 +145,12 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
       expiryMonth: '',
       expiryYear: '',
       cvv: '',
+      upiId: '',
+      walletType: '',
+      walletNumber: '',
       isDefault: false
     });
     setError('');
-    onClose();
   };
 
   const formatCardNumber = (value: string) => {
@@ -137,7 +180,7 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
         />
         
         {/* Modal */}
-        <div className="relative bg-dark-800 rounded-2xl shadow-2xl border border-dark-700 max-w-md w-full mx-4 animate-fade-in">
+        <div className="relative bg-dark-800 rounded-2xl shadow-2xl border border-dark-700 max-w-md w-full mx-4 max-h-[90vh] overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="p-6 border-b border-dark-600">
             <div className="flex items-center space-x-3">
@@ -148,86 +191,154 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({ isOpen, onClose
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">Add Payment Method</h3>
-                <p className="text-sm text-gray-400">Add a new card for quick checkout</p>
+                <p className="text-sm text-gray-400">Add a new payment method for quick checkout</p>
               </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-4">
+          {/* Content - Scrollable */}
+          <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
             {error && (
               <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
-            {/* Card Type */}
+            {/* Payment Type Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Card Type
+                Payment Type
               </label>
-              <PrimaryDropdown
-                value={formData.cardType}
-                onChange={(value) => setFormData(prev => ({ ...prev, cardType: value }))}
-                options={cardTypeOptions}
-                placeholder="Select card type"
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'card', label: 'Card', icon: '💳' },
+                  { value: 'upi', label: 'UPI', icon: '📱' },
+                  { value: 'wallet', label: 'Wallet', icon: '👛' }
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setPaymentType(type.value as any)}
+                    className={`p-3 rounded-lg border transition-all duration-200 ${
+                      paymentType === type.value
+                        ? 'border-sera-orange bg-sera-orange/10 text-sera-orange'
+                        : 'border-dark-600 bg-dark-700 text-gray-300 hover:border-dark-500'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">{type.icon}</div>
+                    <div className="text-xs font-medium">{type.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Card Payment Form */}
+            {paymentType === 'card' && (
+              <>
+                {/* Card Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Card Type
+                  </label>
+                  <PrimaryDropdown
+                    value={formData.cardType}
+                    onChange={(value) => setFormData(prev => ({ ...prev, cardType: value }))}
+                    options={cardTypeOptions}
+                    placeholder="Select card type"
+                  />
+                </div>
+
+                {/* Card Number */}
+                <PrimaryInput
+                  type="text"
+                  value={formData.cardNumber}
+                  onChange={(value) => setFormData(prev => ({ ...prev, cardNumber: formatCardNumber(value) }))}
+                  placeholder="1234 5678 9012 3456"
+                  label="Card Number"
+                  maxLength={19}
+                />
+
+                {/* Cardholder Name */}
+                <PrimaryInput
+                  type="text"
+                  value={formData.cardholderName}
+                  onChange={(value) => setFormData(prev => ({ ...prev, cardholderName: value }))}
+                  placeholder="John Doe"
+                  label="Cardholder Name"
+                />
+
+                {/* Expiry Date and CVV */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Expiry Month
+                    </label>
+                    <PrimaryDropdown
+                      value={formData.expiryMonth}
+                      onChange={(value) => setFormData(prev => ({ ...prev, expiryMonth: value }))}
+                      options={monthOptions}
+                      placeholder="MM"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Expiry Year
+                    </label>
+                    <PrimaryDropdown
+                      value={formData.expiryYear}
+                      onChange={(value) => setFormData(prev => ({ ...prev, expiryYear: value }))}
+                      options={yearOptions}
+                      placeholder="YYYY"
+                    />
+                  </div>
+                </div>
+
+                {/* CVV */}
+                <PrimaryInput
+                  type="password"
+                  value={formData.cvv}
+                  onChange={(value) => setFormData(prev => ({ ...prev, cvv: value.replace(/\D/g, '') }))}
+                  placeholder="123"
+                  label="CVV"
+                  maxLength={4}
+                />
+              </>
+            )}
+
+            {/* UPI Payment Form */}
+            {paymentType === 'upi' && (
+              <PrimaryInput
+                type="text"
+                value={formData.upiId}
+                onChange={(value) => setFormData(prev => ({ ...prev, upiId: value }))}
+                placeholder="username@bank"
+                label="UPI ID"
               />
-            </div>
+            )}
 
-            {/* Card Number */}
-            <PrimaryInput
-              type="text"
-              value={formData.cardNumber}
-              onChange={(value) => setFormData(prev => ({ ...prev, cardNumber: formatCardNumber(value) }))}
-              placeholder="1234 5678 9012 3456"
-              label="Card Number"
-              maxLength={19}
-            />
+            {/* Wallet Payment Form */}
+            {paymentType === 'wallet' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Wallet Type
+                  </label>
+                  <PrimaryDropdown
+                    value={formData.walletType}
+                    onChange={(value) => setFormData(prev => ({ ...prev, walletType: value }))}
+                    options={walletOptions}
+                    placeholder="Select wallet type"
+                  />
+                </div>
 
-            {/* Cardholder Name */}
-            <PrimaryInput
-              type="text"
-              value={formData.cardholderName}
-              onChange={(value) => setFormData(prev => ({ ...prev, cardholderName: value }))}
-              placeholder="John Doe"
-              label="Cardholder Name"
-            />
-
-            {/* Expiry Date and CVV */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Expiry Month
-                </label>
-                <PrimaryDropdown
-                  value={formData.expiryMonth}
-                  onChange={(value) => setFormData(prev => ({ ...prev, expiryMonth: value }))}
-                  options={monthOptions}
-                  placeholder="MM"
+                <PrimaryInput
+                  type="text"
+                  value={formData.walletNumber}
+                  onChange={(value) => setFormData(prev => ({ ...prev, walletNumber: value }))}
+                  placeholder="Enter wallet number"
+                  label="Wallet Number"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Expiry Year
-                </label>
-                <PrimaryDropdown
-                  value={formData.expiryYear}
-                  onChange={(value) => setFormData(prev => ({ ...prev, expiryYear: value }))}
-                  options={yearOptions}
-                  placeholder="YYYY"
-                />
-              </div>
-            </div>
-
-            {/* CVV */}
-            <PrimaryInput
-              type="password"
-              value={formData.cvv}
-              onChange={(value) => setFormData(prev => ({ ...prev, cvv: value.replace(/\D/g, '') }))}
-              placeholder="123"
-              label="CVV"
-              maxLength={4}
-            />
+              </>
+            )}
 
             {/* Set as Default */}
             <div className="flex items-center space-x-3">
