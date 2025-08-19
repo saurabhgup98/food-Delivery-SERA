@@ -112,14 +112,14 @@ const FoodPreferences: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Validate required fields
-      const requiredFields = [];
-      if (Object.values(dietaryPreferences).every(v => !v)) {
-        requiredFields.push('At least one dietary preference');
-      }
-      if (Object.values(cuisinePreferences).every(v => !v)) {
-        requiredFields.push('At least one cuisine preference');
-      }
+             // Validate required fields
+       const requiredFields: string[] = [];
+       if (Object.values(dietaryPreferences).every(v => !v)) {
+         requiredFields.push('At least one dietary preference');
+       }
+       if (Object.values(cuisinePreferences).every(v => !v)) {
+         requiredFields.push('At least one cuisine preference');
+       }
       
       if (requiredFields.length > 0) {
         setMissingFields(requiredFields);
