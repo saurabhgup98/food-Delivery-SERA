@@ -116,6 +116,12 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({
     setSelectedOption(option);
     onChange(option.code);
     setIsOpen(false);
+    
+    // Clear dependent fields when country changes
+    if (type === 'country') {
+      // This will trigger parent component to clear state and city
+      onChange(option.code);
+    }
   };
 
   const getDisplayText = () => {

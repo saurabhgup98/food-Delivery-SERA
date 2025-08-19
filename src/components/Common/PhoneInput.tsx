@@ -122,16 +122,17 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         </label>
       )}
       
-      <div className="relative flex">
-        {/* Country Code Selector */}
-        <div className="relative">
-                     <button
+             <div className="relative flex flex-col sm:flex-row">
+         {/* Country Code Selector */}
+         <div className="relative mb-2 sm:mb-0">
+           <button
              type="button"
              onClick={() => !disabled && setIsOpen(!isOpen)}
              disabled={disabled}
              className={`
-               flex items-center space-x-2 px-3 py-3 bg-dark-700 border border-dark-600 rounded-l-xl
-               transition-all duration-300 ease-out min-w-[120px] group
+               flex items-center justify-center space-x-2 px-3 py-3 bg-dark-700 border border-dark-600 
+               rounded-xl sm:rounded-l-xl sm:rounded-r-none transition-all duration-300 ease-out 
+               min-w-[140px] sm:min-w-[120px] group relative overflow-hidden
                ${disabled 
                  ? 'opacity-50 cursor-not-allowed' 
                  : 'cursor-pointer hover:border-sera-orange hover:bg-dark-650 focus:border-sera-orange focus:bg-dark-650 hover:shadow-lg hover:shadow-sera-orange/20'
@@ -142,20 +143,23 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
                }
              `}
            >
-            {loading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-sera-orange border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm text-gray-400">Loading...</span>
-              </div>
-            ) : selectedCountry ? (
-              <>
-                <img 
-                  src={selectedCountry.flag} 
-                  alt={selectedCountry.name}
-                  className="w-4 h-4 rounded-sm"
-                />
-                <span className="text-sm text-white font-medium">+{selectedCountry.phoneCode}</span>
-                                 <svg 
+             {/* Hover effect background */}
+             <div className="absolute inset-0 bg-gradient-to-r from-sera-orange/10 to-sera-pink/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+             
+             {loading ? (
+               <div className="flex items-center space-x-2 relative z-10">
+                 <div className="w-4 h-4 border-2 border-sera-orange border-t-transparent rounded-full animate-spin"></div>
+                 <span className="text-sm text-gray-400">Loading...</span>
+               </div>
+             ) : selectedCountry ? (
+               <div className="flex items-center space-x-2 relative z-10">
+                 <img 
+                   src={selectedCountry.flag} 
+                   alt={selectedCountry.name}
+                   className="w-4 h-4 rounded-sm shadow-sm ring-1 ring-white/20"
+                 />
+                 <span className="text-sm text-white font-medium">+{selectedCountry.phoneCode}</span>
+                 <svg 
                    className={`w-3 h-3 text-gray-400 transition-all duration-300 ease-out group-hover:text-sera-orange ${
                      isOpen ? 'rotate-180 text-sera-orange' : ''
                    }`}
@@ -165,15 +169,15 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
                  >
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                  </svg>
-              </>
-            ) : (
-              <span className="text-sm text-gray-400">Select</span>
-            )}
-          </button>
+               </div>
+             ) : (
+               <span className="text-sm text-gray-400 relative z-10">Select</span>
+             )}
+           </button>
 
                      {/* Country Dropdown */}
            {isOpen && (
-             <div className="absolute top-full left-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl z-[9999] max-h-60 overflow-y-auto min-w-[200px]">
+             <div className="absolute top-full left-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl z-[9999] max-h-60 overflow-y-auto w-[280px] sm:w-[320px]">
                {countries.map((country) => (
                  <button
                    key={country.code}
@@ -210,17 +214,17 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
            )}
         </div>
 
-        {/* Phone Number Input */}
-        <input
-          type="tel"
-          name={name}
-          value={value}
-          onChange={handlePhoneChange}
-          placeholder={placeholder}
-          disabled={disabled}
-          required={required}
-          className="flex-1 px-4 py-3 bg-dark-700 border border-dark-600 border-l-0 rounded-r-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm transition-all duration-300 hover:border-dark-500"
-        />
+                 {/* Phone Number Input */}
+         <input
+           type="tel"
+           name={name}
+           value={value}
+           onChange={handlePhoneChange}
+           placeholder={placeholder}
+           disabled={disabled}
+           required={required}
+           className="flex-1 px-4 py-3 bg-dark-700 border border-dark-600 sm:border-l-0 rounded-xl sm:rounded-l-none sm:rounded-r-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent disabled:opacity-50 text-sm transition-all duration-300 hover:border-dark-500"
+         />
       </div>
 
       {/* Backdrop for mobile */}
