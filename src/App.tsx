@@ -7,6 +7,7 @@ import HeroSection from './components/HeroSection/HeroSection';
 import AuthModals from './components/Auth/AuthModals';
 import ContactForm from './components/Contact/ContactForm';
 import ExplorePage from './components/Explore/ExplorePage';
+import FavoritesPage from './components/Favorites/FavoritesPage';
 import RestaurantDetail from './components/Restaurant/RestaurantDetail';
 import CartModal from './components/Cart/CartModal';
 import ProfilePage from './components/Profile/ProfilePage';
@@ -41,7 +42,7 @@ const AppContent: React.FC = () => {
           <Route path="/cart" element={<div className="p-8 text-center text-white">Cart Page - Coming Soon</div>} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/orders" element={<OrderHistoryPage />} />
-          <Route path="/favorites" element={<div className="p-8 text-center text-white">Favorites Page - Coming Soon</div>} />
+          <Route path="/favorites" element={<FavoritesPage />} />
         </Routes>
 
         {/* Global Floating Cart Button */}

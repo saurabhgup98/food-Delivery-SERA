@@ -293,6 +293,7 @@ class ApiService {
     dietary?: string;
     priceRange?: string;
     search?: string;
+    favorites?: boolean;
     limit?: number;
     page?: number;
   }): Promise<RestaurantsResponse> {
