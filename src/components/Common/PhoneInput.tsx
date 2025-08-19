@@ -72,11 +72,14 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [countryCode, onCountryCodeChange]);
+  }, []); // Remove dependencies to prevent re-fetching
 
   useEffect(() => {
-    fetchCountryCodes();
-  }, [fetchCountryCodes]);
+    // Only fetch once when component mounts
+    if (countries.length === 0) {
+      fetchCountryCodes();
+    }
+  }, []); // Empty dependency array
 
   const handleCountrySelect = (country: CountryCode) => {
     setSelectedCountry(country);
@@ -122,23 +125,23 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       <div className="relative flex">
         {/* Country Code Selector */}
         <div className="relative">
-          <button
-            type="button"
-            onClick={() => !disabled && setIsOpen(!isOpen)}
-            disabled={disabled}
-            className={`
-              flex items-center space-x-2 px-3 py-3 bg-dark-700 border border-dark-600 rounded-l-xl
-              transition-all duration-300 ease-out min-w-[120px]
-              ${disabled 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'cursor-pointer hover:border-dark-500 hover:bg-dark-650 focus:border-sera-orange focus:bg-dark-650'
-              }
-              ${isOpen 
-                ? 'border-sera-orange bg-dark-650 shadow-lg shadow-sera-orange/20' 
-                : ''
-              }
-            `}
-          >
+                     <button
+             type="button"
+             onClick={() => !disabled && setIsOpen(!isOpen)}
+             disabled={disabled}
+             className={`
+               flex items-center space-x-2 px-3 py-3 bg-dark-700 border border-dark-600 rounded-l-xl
+               transition-all duration-300 ease-out min-w-[120px] group
+               ${disabled 
+                 ? 'opacity-50 cursor-not-allowed' 
+                 : 'cursor-pointer hover:border-sera-orange hover:bg-dark-650 focus:border-sera-orange focus:bg-dark-650 hover:shadow-lg hover:shadow-sera-orange/20'
+               }
+               ${isOpen 
+                 ? 'border-sera-orange bg-dark-650 shadow-lg shadow-sera-orange/20' 
+                 : ''
+               }
+             `}
+           >
             {loading ? (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 border-2 border-sera-orange border-t-transparent rounded-full animate-spin"></div>
@@ -152,49 +155,59 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
                   className="w-4 h-4 rounded-sm"
                 />
                 <span className="text-sm text-white font-medium">+{selectedCountry.phoneCode}</span>
-                <svg 
-                  className={`w-3 h-3 text-gray-400 transition-transform duration-300 ease-out ${
-                    isOpen ? 'rotate-180 text-sera-orange' : ''
-                  }`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                                 <svg 
+                   className={`w-3 h-3 text-gray-400 transition-all duration-300 ease-out group-hover:text-sera-orange ${
+                     isOpen ? 'rotate-180 text-sera-orange' : ''
+                   }`}
+                   fill="none" 
+                   stroke="currentColor" 
+                   viewBox="0 0 24 24"
+                 >
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                 </svg>
               </>
             ) : (
               <span className="text-sm text-gray-400">Select</span>
             )}
           </button>
 
-          {/* Country Dropdown */}
-          {isOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl z-[9999] max-h-60 overflow-y-auto min-w-[200px]">
-              {countries.map((country) => (
-                <button
-                  key={country.code}
-                  onClick={() => handleCountrySelect(country)}
-                  className="w-full flex items-center space-x-3 px-4 py-2.5 text-left hover:bg-dark-600 transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl"
-                >
-                  <img 
-                    src={country.flag} 
-                    alt={country.name}
-                    className="w-4 h-4 rounded-sm flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-white font-medium truncate">{country.name}</div>
-                    <div className="text-xs text-gray-400">+{country.phoneCode}</div>
-                  </div>
-                  {selectedCountry?.code === country.code && (
-                    <svg className="w-4 h-4 text-sera-orange flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+                     {/* Country Dropdown */}
+           {isOpen && (
+             <div className="absolute top-full left-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl z-[9999] max-h-60 overflow-y-auto min-w-[200px]">
+               {countries.map((country) => (
+                 <button
+                   key={country.code}
+                   onClick={() => handleCountrySelect(country)}
+                   className={`
+                     w-full flex items-center space-x-3 px-3 py-2 text-left 
+                     transition-all duration-200 ease-out
+                     hover:bg-dark-600 hover:scale-[1.02] hover:shadow-md
+                     ${selectedCountry?.code === country.code 
+                       ? 'bg-dark-600 text-white shadow-inner' 
+                       : 'text-gray-300 hover:text-white'
+                     }
+                     ${country.code === 'IN' ? 'border-b border-dark-500' : ''}
+                     first:rounded-t-xl last:rounded-b-xl
+                   `}
+                 >
+                   <img 
+                     src={country.flag} 
+                     alt={country.name}
+                     className="w-4 h-4 rounded-sm flex-shrink-0 shadow-sm"
+                   />
+                   <div className="flex-1 min-w-0">
+                     <div className="text-sm font-medium truncate">{country.name}</div>
+                     <div className="text-xs text-gray-400">+{country.phoneCode}</div>
+                   </div>
+                   {selectedCountry?.code === country.code && (
+                     <svg className="w-4 h-4 text-sera-orange flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                     </svg>
+                   )}
+                 </button>
+               ))}
+             </div>
+           )}
         </div>
 
         {/* Phone Number Input */}
