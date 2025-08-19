@@ -594,6 +594,7 @@ class ApiService {
     isDefault?: boolean;
     instructions?: string;
   }): Promise<AddressResponse> {
+    console.log('API updateAddress called with:', { addressId, addressData }); // Debug log
     return this.makeRequest<AddressResponse>('/user?action=update-address', {
       method: 'PUT',
       body: JSON.stringify({ id: addressId, ...addressData })

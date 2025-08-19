@@ -57,6 +57,9 @@ const DeliveryAddresses: React.FC = () => {
 
       if (editingAddress) {
         // Update existing address
+        console.log('Editing address ID:', editingAddress._id); // Debug log
+        console.log('Form data being sent:', formData); // Debug log
+        
         const response = await apiService.updateAddress(editingAddress._id, formData);
         console.log('Update address response:', response); // Debug log
         
