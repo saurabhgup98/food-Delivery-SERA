@@ -734,6 +734,31 @@ class ApiService {
     return this.makeRequest(`/locations?type=cities&countryCode=${countryCode}&stateCode=${stateCode}`);
   }
 
+  // Chat methods
+  async sendChatMessage(message: string, userContext: any): Promise<{
+    success: boolean;
+    response: string;
+    timestamp: string;
+  }> {
+    return this.makeRequest('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, userContext })
+    });
+  }
+
+  // Change password
+  async changePassword(passwordData: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.makeRequest('/user?action=change-password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
+    });
+  }
 
 }
 

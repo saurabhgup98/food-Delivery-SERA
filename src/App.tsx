@@ -11,6 +11,7 @@ import RestaurantDetail from './components/Restaurant/RestaurantDetail';
 import CartModal from './components/Cart/CartModal';
 import ProfilePage from './components/Profile/ProfilePage';
 import OrderHistoryPage from './components/Orders/OrderHistoryPage';
+import ChatWidget from './components/Chat/ChatWidget';
 import { useCart } from './contexts/CartContext';
 import './index.css';
 
@@ -76,6 +77,9 @@ const AppContent: React.FC = () => {
 
         {/* Auth Modals */}
         <AuthModals />
+        
+        {/* Chat Widget */}
+        <ChatWidget />
       </div>
     </Router>
   );

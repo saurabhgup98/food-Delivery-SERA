@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PrimaryInput from './PrimaryInput';
 import ValidationModal from './ValidationModal';
+import { apiService } from '../../services/api';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -47,15 +48,19 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
         return;
       }
 
-      // TODO: Implement API call to change password
-      console.log('Changing password:', formData);
+      // Call API to change password
+      const response = await apiService.changePassword({
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword
+      });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Password changed successfully!');
-      onClose();
-      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      if (response.success) {
+        alert('Password changed successfully!');
+        onClose();
+        setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        setError(response.message || 'Failed to change password');
+      }
     } catch (error) {
       console.error('Error changing password:', error);
       setError('Failed to change password. Please try again.');

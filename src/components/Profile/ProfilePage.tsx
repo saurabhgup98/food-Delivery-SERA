@@ -112,8 +112,8 @@ const ProfilePage: React.FC = () => {
 
         {/* Profile Overview Card */}
         <div className="bg-gradient-to-br from-dark-800 to-dark-700 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-dark-600 shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <div className="relative self-center sm:self-auto">
+          <div className="flex flex-col items-center sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="relative">
               <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-sera-blue to-blue-500 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg border-4 border-sera-blue/30">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
