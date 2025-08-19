@@ -187,6 +187,170 @@ const DeliveryAddresses: React.FC = () => {
         </div>
       )}
 
+      {/* Add/Edit Form - Show first when adding/editing */}
+      {(isAddingNew || editingAddress) && (
+        <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-white font-medium">
+              {editingAddress ? 'Edit Address' : 'Add New Address'}
+            </h4>
+            <button
+              onClick={handleCancel}
+              className="text-gray-400 hover:text-white transition-colors duration-200"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Address Label */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Address Label
+              </label>
+              <PrimaryDropdown
+                value={formData.label}
+                onChange={(value) => setFormData(prev => ({ ...prev, label: value }))}
+                options={addressLabelOptions}
+                placeholder="Select label"
+              />
+            </div>
+
+            {/* Full Name */}
+            <PrimaryInput
+              type="text"
+              value={formData.fullName}
+              onChange={(value) => setFormData(prev => ({ ...prev, fullName: value }))}
+              placeholder="Enter full name"
+              label="Full Name"
+            />
+
+            {/* Phone */}
+            <PrimaryInput
+              type="tel"
+              value={formData.phone}
+              onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+              placeholder="Enter phone number"
+              label="Phone Number"
+            />
+
+            {/* Address */}
+            <PrimaryInput
+              type="text"
+              value={formData.address}
+              onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+              placeholder="Enter street address"
+              label="Street Address"
+            />
+
+            {/* Country */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Country
+              </label>
+              <LocationDropdown
+                type="country"
+                value={formData.country}
+                onChange={(value) => setFormData(prev => ({ ...prev, country: value, state: '', city: '' }))}
+                placeholder="Select country"
+              />
+            </div>
+
+            {/* State */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                State
+              </label>
+              <LocationDropdown
+                type="state"
+                value={formData.state}
+                onChange={(value) => setFormData(prev => ({ ...prev, state: value, city: '' }))}
+                placeholder="Select state"
+                countryCode={formData.country}
+              />
+            </div>
+
+            {/* City */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                City
+              </label>
+              <LocationDropdown
+                type="city"
+                value={formData.city}
+                onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+                placeholder="Select city"
+                countryCode={formData.country}
+                stateCode={formData.state}
+              />
+            </div>
+
+            {/* Pincode */}
+            <PrimaryInput
+              type="text"
+              value={formData.pincode}
+              onChange={(value) => setFormData(prev => ({ ...prev, pincode: value }))}
+              placeholder="Enter pincode"
+              label="Pincode"
+            />
+
+            {/* Instructions */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Delivery Instructions (Optional)
+              </label>
+              <textarea
+                value={formData.instructions}
+                onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
+                placeholder="Any special instructions for delivery..."
+                rows={3}
+                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent resize-none"
+              />
+            </div>
+
+            {/* Set as Default */}
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="isDefault"
+                  checked={formData.isDefault}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
+                  className="w-4 h-4 text-sera-orange bg-dark-600 border-dark-500 rounded focus:ring-sera-orange focus:ring-2"
+                />
+                <label htmlFor="isDefault" className="text-sm text-gray-300">
+                  Set as default delivery address
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end space-x-4 mt-6 pt-6 border-t border-dark-600">
+            <button
+              onClick={handleCancel}
+              className="px-6 py-2 bg-dark-600 text-white rounded-lg hover:bg-dark-500 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="px-6 py-2 bg-sera-orange text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50 flex items-center space-x-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <span>{editingAddress ? 'Update Address' : 'Add Address'}</span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Address List */}
       <div className="space-y-4">
         {loading ? (
@@ -265,147 +429,7 @@ const DeliveryAddresses: React.FC = () => {
         )}
       </div>
 
-      {/* Add/Edit Form */}
-      {(isAddingNew || editingAddress) && (
-        <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
-          <h4 className="text-white font-medium mb-4">
-            {editingAddress ? 'Edit Address' : 'Add New Address'}
-          </h4>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Address Label */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Address Label
-              </label>
-              <PrimaryDropdown
-                value={formData.label}
-                onChange={(value) => setFormData(prev => ({ ...prev, label: value }))}
-                options={addressLabelOptions}
-                placeholder="Select a label"
-              />
-            </div>
 
-            {/* Full Name */}
-            <PrimaryInput
-              type="text"
-              value={formData.fullName}
-              onChange={(value) => setFormData(prev => ({ ...prev, fullName: value }))}
-              placeholder="Enter full name"
-              label="Full Name"
-            />
-
-            {/* Phone */}
-            <PrimaryInput
-              type="tel"
-              value={formData.phone}
-              onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
-              placeholder="Enter phone number"
-              label="Phone Number"
-            />
-
-            {/* Address */}
-            <div className="md:col-span-2">
-              <PrimaryInput
-                type="text"
-                value={formData.address}
-                onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                placeholder="Enter street address"
-                label="Address"
-              />
-            </div>
-
-                         {/* Country */}
-             <LocationDropdown
-               type="country"
-               value={formData.country}
-               onChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
-               placeholder="Select country"
-               label="Country"
-             />
-
-             {/* State */}
-             <LocationDropdown
-               type="state"
-               value={formData.state}
-               onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
-               countryCode={formData.country}
-               placeholder="Select state"
-               label="State"
-             />
-
-             {/* City */}
-             <LocationDropdown
-               type="city"
-               value={formData.city}
-               onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-               countryCode={formData.country}
-               stateCode={formData.state}
-               placeholder="Select city"
-               label="City"
-             />
-
-            {/* Pincode */}
-            <PrimaryInput
-              type="text"
-              value={formData.pincode}
-              onChange={(value) => setFormData(prev => ({ ...prev, pincode: value }))}
-              placeholder="Enter pincode"
-              label="Pincode"
-            />
-
-            {/* Default Address */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isDefault"
-                checked={formData.isDefault}
-                onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
-                className="w-4 h-4 text-sera-orange bg-dark-600 border-dark-500 rounded focus:ring-sera-orange focus:ring-2"
-              />
-              <label className="ml-2 text-sm text-gray-300">
-                Set as default address
-              </label>
-            </div>
-
-            {/* Delivery Instructions */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Delivery Instructions (Optional)
-              </label>
-              <textarea
-                name="instructions"
-                value={formData.instructions}
-                onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
-                rows={3}
-                className="w-full px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent"
-                placeholder="Any special instructions for delivery"
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end space-x-4 mt-6 pt-6 border-t border-dark-600">
-            <button
-              onClick={handleCancel}
-              className="px-6 py-2 bg-dark-600 text-white rounded-lg hover:bg-dark-500 transition-colors duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className={`px-6 py-2 rounded-lg transition-colors duration-200 ${
-                loading 
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-                  : 'bg-sera-orange text-white hover:bg-orange-600'
-              }`}
-            >
-              {loading ? 'Saving...' : (editingAddress ? 'Update Address' : 'Add Address')}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
