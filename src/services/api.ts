@@ -510,7 +510,7 @@ class ApiService {
 
   // Address management methods
   async getAddresses(): Promise<AddressesResponse> {
-    return this.makeRequest<AddressesResponse>('/addresses');
+    return this.makeRequest<AddressesResponse>('/user?action=addresses');
   }
 
   async createAddress(addressData: {
@@ -524,7 +524,7 @@ class ApiService {
     isDefault?: boolean;
     instructions?: string;
   }): Promise<AddressResponse> {
-    return this.makeRequest<AddressResponse>('/addresses', {
+    return this.makeRequest<AddressResponse>('/user?action=add-address', {
       method: 'POST',
       body: JSON.stringify(addressData)
     });
@@ -541,14 +541,14 @@ class ApiService {
     isDefault?: boolean;
     instructions?: string;
   }): Promise<AddressResponse> {
-    return this.makeRequest<AddressResponse>('/addresses', {
+    return this.makeRequest<AddressResponse>('/user?action=update-address', {
       method: 'PUT',
       body: JSON.stringify({ id: addressId, ...addressData })
     });
   }
 
   async deleteAddress(addressId: string): Promise<{ success: boolean; message: string }> {
-    return this.makeRequest<{ success: boolean; message: string }>(`/addresses?addressId=${addressId}`, {
+    return this.makeRequest<{ success: boolean; message: string }>(`/user?action=delete-address&addressId=${addressId}`, {
       method: 'DELETE'
     });
   }
@@ -567,7 +567,7 @@ class ApiService {
     message: string;
     attachments?: File[];
   }): Promise<{ success: boolean; message: string; data: { ticketNumber: string; submissionId: string } }> {
-    return this.makeRequest<{ success: boolean; message: string; data: { ticketNumber: string; submissionId: string } }>('/contact', {
+    return this.makeRequest<{ success: boolean; message: string; data: { ticketNumber: string; submissionId: string } }>('/utilities?type=contact', {
       method: 'POST',
       body: JSON.stringify(contactData)
     });
@@ -599,6 +599,7 @@ class ApiService {
     };
   }> {
     const queryParams = new URLSearchParams();
+    queryParams.append('type', 'contact');
     
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -608,7 +609,7 @@ class ApiService {
       });
     }
 
-    const endpoint = `/contact${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const endpoint = `/utilities?${queryParams.toString()}`;
     return this.makeRequest(endpoint);
   }
 
@@ -626,7 +627,7 @@ class ApiService {
       total: number;
     };
   }> {
-    return this.makeRequest('/country-codes');
+    return this.makeRequest('/utilities?type=country-codes');
   }
 
   async getCountries(): Promise<{
@@ -642,7 +643,7 @@ class ApiService {
       total: number;
     };
   }> {
-    return this.makeRequest('/locations/countries');
+    return this.makeRequest('/locations?type=countries');
   }
 
   async getStates(countryCode: string): Promise<{
@@ -658,7 +659,7 @@ class ApiService {
       countryCode: string;
     };
   }> {
-    return this.makeRequest(`/locations/states?countryCode=${countryCode}`);
+    return this.makeRequest(`/locations?type=states&countryCode=${countryCode}`);
   }
 
   async getCities(countryCode: string, stateCode: string): Promise<{
@@ -677,7 +678,7 @@ class ApiService {
       countryCode: string;
     };
   }> {
-    return this.makeRequest(`/locations/cities?countryCode=${countryCode}&stateCode=${stateCode}`);
+    return this.makeRequest(`/locations?type=cities&countryCode=${countryCode}&stateCode=${stateCode}`);
   }
 }
 

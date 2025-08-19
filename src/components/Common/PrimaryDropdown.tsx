@@ -84,7 +84,7 @@ const PrimaryDropdown: React.FC<PrimaryDropdownProps> = ({
       {/* Dropdown Menu */}
       <div className={`
         absolute top-full left-0 right-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl
-        transition-all duration-300 ease-out z-50
+        transition-all duration-300 ease-out z-[9999]
         ${isOpen 
           ? 'opacity-100 scale-100 translate-y-0' 
           : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -127,7 +127,7 @@ const PrimaryDropdown: React.FC<PrimaryDropdownProps> = ({
       {/* Backdrop for mobile */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[9998]"
           onClick={() => setIsOpen(false)}
         />
       )}

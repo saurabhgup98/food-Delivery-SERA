@@ -167,7 +167,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
 
           {/* Country Dropdown */}
           {isOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto min-w-[200px]">
+            <div className="absolute top-full left-0 mt-1 bg-dark-700 border border-dark-600 rounded-xl shadow-2xl z-[9999] max-h-60 overflow-y-auto min-w-[200px]">
               {countries.map((country) => (
                 <button
                   key={country.code}
@@ -210,7 +210,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       {/* Backdrop for mobile */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[9998]"
           onClick={() => setIsOpen(false)}
         />
       )}

@@ -154,7 +154,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
   return (
     <div className="min-h-screen bg-dark-900 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-dark-800 rounded-2xl shadow-2xl border border-dark-700 overflow-hidden">
+        <div className="bg-dark-800 rounded-2xl shadow-2xl border border-dark-700">
           {/* Header */}
           <div className="relative p-4 md:p-6 bg-gradient-to-r from-sera-blue to-sera-darkBlue">
             <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
