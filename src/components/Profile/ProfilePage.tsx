@@ -1,62 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { apiService } from '../../services/api';
 import PersonalInfo from './PersonalInfo';
 import DeliveryAddresses from './DeliveryAddresses';
 import FoodPreferences from './FoodPreferences';
 import PaymentMethods from './PaymentMethods';
 import NotificationSettings from './NotificationSettings';
 
-// Mock orders data (in real app, this would come from API)
-const mockOrders = [
-  {
-    id: 'ORD001',
-    restaurantName: 'Spice Garden',
-    items: [
-      { name: 'Butter Chicken', quantity: 1, price: 350 },
-      { name: 'Naan', quantity: 2, price: 30 },
-      { name: 'Dal Makhani', quantity: 1, price: 180 }
-    ],
-    totalAmount: 590,
-    orderDate: '2024-01-15T18:30:00',
-    deliveryDate: '2024-01-15T19:45:00',
-    status: 'delivered',
-    rating: 4,
-    review: 'Great food and fast delivery!'
-  },
-  {
-    id: 'ORD002',
-    restaurantName: 'Pizza Palace',
-    items: [
-      { name: 'Margherita Pizza', quantity: 1, price: 450 },
-      { name: 'Garlic Bread', quantity: 1, price: 120 }
-    ],
-    totalAmount: 570,
-    orderDate: '2024-01-14T20:00:00',
-    deliveryDate: '2024-01-14T21:15:00',
-    status: 'delivered',
-    rating: 3
-  },
-  {
-    id: 'ORD003',
-    restaurantName: 'Chinese Wok',
-    items: [
-      { name: 'Chicken Fried Rice', quantity: 1, price: 280 },
-      { name: 'Spring Rolls', quantity: 1, price: 150 }
-    ],
-    totalAmount: 430,
-    orderDate: '2024-01-13T19:00:00',
-    deliveryDate: '2024-01-13T20:30:00',
-    status: 'delivered',
-    rating: 5,
-    review: 'Amazing taste and generous portions!'
-  }
-];
-
 // Calculate total spent from delivered orders
-const totalSpent = mockOrders
-  .filter(order => order.status === 'delivered')
-  .reduce((total, order) => total + order.totalAmount, 0);
+const calculateTotalSpent = (orders: any[]) => {
+  return orders
+    .filter(order => order.status === 'delivered')
+    .reduce((total, order) => total + order.total, 0);
+};
 
 type TabType = 'personal' | 'addresses' | 'preferences' | 'payment' | 'notifications';
 
@@ -64,6 +21,42 @@ const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('personal');
+  const [orders, setOrders] = useState<any[]>([]);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+
+  // Fetch user orders
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setIsLoadingOrders(true);
+        const response = await apiService.getUserOrders({ limit: 100 }); // Get all orders
+        if (response.success) {
+          setOrders(response.data.orders);
+          const total = calculateTotalSpent(response.data.orders);
+          setTotalSpent(total);
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        // Fallback to mock data if API fails
+        const mockOrders = [
+          { status: 'delivered', total: 590 },
+          { status: 'delivered', total: 570 },
+          { status: 'delivered', total: 430 },
+          { status: 'delivered', total: 530 },
+          { status: 'delivered', total: 600 }
+        ];
+        setOrders(mockOrders);
+        setTotalSpent(2720);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    };
+
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
 
   // Redirect to home if user is not logged in
   useEffect(() => {

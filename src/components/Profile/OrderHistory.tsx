@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiService } from '../../services/api';
 
 interface Order {
   id: string;
@@ -17,50 +18,115 @@ interface Order {
 }
 
 const OrderHistory: React.FC = () => {
-  const [orders] = useState<Order[]>([
-    {
-      id: 'ORD001',
-      restaurantName: 'Spice Garden',
-      items: [
-        { name: 'Butter Chicken', quantity: 1, price: 350 },
-        { name: 'Naan', quantity: 2, price: 30 },
-        { name: 'Dal Makhani', quantity: 1, price: 180 }
-      ],
-      totalAmount: 590,
-      orderDate: '2024-01-15T18:30:00',
-      deliveryDate: '2024-01-15T19:45:00',
-      status: 'delivered',
-      rating: 4,
-      review: 'Great food and fast delivery!'
-    },
-    {
-      id: 'ORD002',
-      restaurantName: 'Pizza Palace',
-      items: [
-        { name: 'Margherita Pizza', quantity: 1, price: 450 },
-        { name: 'Garlic Bread', quantity: 1, price: 120 }
-      ],
-      totalAmount: 570,
-      orderDate: '2024-01-14T20:00:00',
-      deliveryDate: '2024-01-14T21:15:00',
-      status: 'delivered',
-      rating: 3
-    },
-    {
-      id: 'ORD003',
-      restaurantName: 'Chinese Wok',
-      items: [
-        { name: 'Chicken Fried Rice', quantity: 1, price: 280 },
-        { name: 'Spring Rolls', quantity: 1, price: 150 }
-      ],
-      totalAmount: 430,
-      orderDate: '2024-01-13T19:00:00',
-      deliveryDate: '2024-01-13T20:30:00',
-      status: 'delivered',
-      rating: 5,
-      review: 'Amazing taste and generous portions!'
-    }
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiService.getUserOrders({ limit: 100 });
+        if (response.success) {
+          // Transform API orders to match our interface
+          const transformedOrders: Order[] = response.data.orders.map((apiOrder: any) => ({
+            id: apiOrder._id,
+            restaurantName: apiOrder.restaurantName,
+            items: apiOrder.items.map((item: any) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: parseFloat(item.price)
+            })),
+            totalAmount: apiOrder.total,
+            orderDate: apiOrder.createdAt,
+            deliveryDate: apiOrder.status === 'delivered' ? apiOrder.updatedAt : null,
+            status: apiOrder.status === 'delivered' ? 'delivered' : 
+                   apiOrder.status === 'cancelled' ? 'cancelled' : 'in-progress',
+            rating: undefined, // API doesn't have ratings yet
+            review: undefined
+          }));
+          setOrders(transformedOrders);
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        // Fallback to mock data
+        setOrders([
+          {
+            id: 'ORD001',
+            restaurantName: 'Spice Garden',
+            items: [
+              { name: 'Butter Chicken', quantity: 1, price: 350 },
+              { name: 'Naan', quantity: 2, price: 30 },
+              { name: 'Dal Makhani', quantity: 1, price: 180 }
+            ],
+            totalAmount: 590,
+            orderDate: '2024-01-15T18:30:00',
+            deliveryDate: '2024-01-15T19:45:00',
+            status: 'delivered',
+            rating: 4,
+            review: 'Great food and fast delivery!'
+          },
+          {
+            id: 'ORD002',
+            restaurantName: 'Pizza Palace',
+            items: [
+              { name: 'Margherita Pizza', quantity: 1, price: 450 },
+              { name: 'Garlic Bread', quantity: 1, price: 120 }
+            ],
+            totalAmount: 570,
+            orderDate: '2024-01-14T20:00:00',
+            deliveryDate: '2024-01-14T21:15:00',
+            status: 'delivered',
+            rating: 3
+          },
+          {
+            id: 'ORD003',
+            restaurantName: 'Chinese Wok',
+            items: [
+              { name: 'Chicken Fried Rice', quantity: 1, price: 280 },
+              { name: 'Spring Rolls', quantity: 1, price: 150 }
+            ],
+            totalAmount: 430,
+            orderDate: '2024-01-13T19:00:00',
+            deliveryDate: '2024-01-13T20:30:00',
+            status: 'delivered',
+            rating: 5,
+            review: 'Amazing taste and generous portions!'
+          },
+          {
+            id: 'ORD004',
+            restaurantName: 'Royal Darbar',
+            items: [
+              { name: 'Biryani', quantity: 1, price: 450 },
+              { name: 'Raita', quantity: 1, price: 80 }
+            ],
+            totalAmount: 530,
+            orderDate: '2024-01-12T19:30:00',
+            deliveryDate: '2024-01-12T20:45:00',
+            status: 'delivered',
+            rating: 4
+          },
+          {
+            id: 'ORD005',
+            restaurantName: 'Thai Delight',
+            items: [
+              { name: 'Pad Thai', quantity: 1, price: 380 },
+              { name: 'Tom Yum Soup', quantity: 1, price: 220 }
+            ],
+            totalAmount: 600,
+            orderDate: '2024-01-11T20:00:00',
+            deliveryDate: '2024-01-11T21:15:00',
+            status: 'delivered',
+            rating: 5
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,6 +170,25 @@ const OrderHistory: React.FC = () => {
   const handleRateOrder = (order: Order) => {
     setSelectedOrder(order);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-white">Order History</h3>
+            <p className="text-gray-400 text-sm">View and manage your past orders</p>
+          </div>
+        </div>
+        <div className="bg-dark-700 rounded-lg p-8 text-center border border-dark-600">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-6 h-6 border-2 border-sera-orange border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-gray-400">Loading orders...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

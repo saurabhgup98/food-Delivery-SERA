@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
 import PrimaryInput from '../Common/PrimaryInput';
 import DatePrimary from '../Common/DatePrimary';
 import PhoneInput from '../Common/PhoneInput';
+import ChangePasswordModal from '../Common/ChangePasswordModal';
 import { genderOptions } from '../../data/dropdownOptions';
 
 
@@ -12,6 +13,7 @@ import { genderOptions } from '../../data/dropdownOptions';
 const PersonalInfo: React.FC = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -21,10 +23,29 @@ const PersonalInfo: React.FC = () => {
     gender: '',
   });
 
+  // Load saved data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('personalInfo');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setFormData(prev => ({
+          ...prev,
+          ...parsed,
+          name: parsed.name || user?.name || '',
+          email: parsed.email || user?.email || '',
+        }));
+      } catch (error) {
+        console.error('Error loading personal info:', error);
+      }
+    }
+  }, [user]);
+
 
 
   const handleSave = () => {
-    // TODO: Implement save functionality
+    // Save to localStorage for now (can be replaced with API call later)
+    localStorage.setItem('personalInfo', JSON.stringify(formData));
     console.log('Saving personal info:', formData);
     setIsEditing(false);
   };
@@ -59,20 +80,20 @@ const PersonalInfo: React.FC = () => {
 
       {/* Profile Picture Section */}
       <div className="bg-dark-700 rounded-lg p-3 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-          <div className="relative self-center sm:self-auto">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-r from-sera-blue to-blue-600 rounded-full flex items-center justify-center text-white text-xl sm:text-3xl font-bold">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-sera-blue to-blue-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg border-4 border-sera-blue/30">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             {isEditing && (
-              <button className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-sera-orange text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors duration-200 text-xs sm:text-sm">
+              <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-sera-orange text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors duration-200 text-sm shadow-lg">
                 📷
               </button>
             )}
           </div>
-          <div className="text-center sm:text-left">
-            <h4 className="text-white font-medium text-sm sm:text-base">Profile Picture</h4>
-            <p className="text-gray-400 text-xs sm:text-sm">Upload a new profile picture</p>
+          <div className="text-center">
+            <h4 className="text-white font-medium text-base">Profile Picture</h4>
+            <p className="text-gray-400 text-sm">Upload a new profile picture</p>
           </div>
         </div>
       </div>
@@ -143,7 +164,10 @@ const PersonalInfo: React.FC = () => {
               <p className="text-white text-sm sm:text-base">Password</p>
               <p className="text-gray-400 text-xs sm:text-sm">Last changed 30 days ago</p>
             </div>
-            <button className="w-full sm:w-auto px-2 sm:px-4 py-1.5 sm:py-2 bg-dark-600 text-white rounded-lg hover:bg-dark-500 transition-colors duration-200 text-xs sm:text-sm">
+            <button 
+              onClick={() => setShowChangePasswordModal(true)}
+              className="w-full sm:w-auto px-2 sm:px-4 py-1.5 sm:py-2 bg-dark-600 text-white rounded-lg hover:bg-dark-500 transition-colors duration-200 text-xs sm:text-sm"
+            >
               Change
             </button>
           </div>
@@ -176,6 +200,12 @@ const PersonalInfo: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+      />
     </div>
   );
 };

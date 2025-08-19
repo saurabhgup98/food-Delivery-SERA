@@ -85,6 +85,53 @@ export interface RestaurantResponse {
   };
 }
 
+export interface OrderItem {
+  itemId: string;
+  name: string;
+  price: string;
+  quantity: number;
+  customization?: {
+    size?: string;
+    spiceLevel?: string;
+    specialInstructions?: string;
+    totalPrice?: number;
+  };
+}
+
+export interface Order {
+  _id: string;
+  userId: string;
+  restaurantId: string;
+  restaurantName: string;
+  items: OrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  status: 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  deliveryAddress: string;
+  deliveryInstructions?: string;
+  estimatedDeliveryTime: string;
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  paymentMethod: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrdersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    orders: Order[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
+
 export interface Address {
   _id: string;
   userId: string;
@@ -139,10 +186,10 @@ export interface OrderItem {
   price: string;
   quantity: number;
   customization?: {
-    size: string;
-    spiceLevel: string;
-    specialInstructions: string;
-    totalPrice: number;
+    size?: string;
+    spiceLevel?: string;
+    specialInstructions?: string;
+    totalPrice?: number;
   };
 }
 
@@ -686,6 +733,8 @@ class ApiService {
   }> {
     return this.makeRequest(`/locations?type=cities&countryCode=${countryCode}&stateCode=${stateCode}`);
   }
+
+
 }
 
 export const apiService = new ApiService();
