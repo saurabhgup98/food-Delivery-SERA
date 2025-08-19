@@ -43,8 +43,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       }
 
       // Validate password strength
-      if (formData.newPassword.length < 8) {
-        setError('New password must be at least 8 characters long');
+      if (formData.newPassword.length < 6) {
+        setError('New password must be at least 6 characters long');
         return;
       }
 
@@ -55,9 +55,11 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       });
       
       if (response.success) {
-        alert('Password changed successfully!');
-        onClose();
-        setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        alert('Password changed successfully! Please log in again with your new password.');
+        // Clear any stored auth tokens to force re-login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
       } else {
         setError(response.message || 'Failed to change password');
       }
