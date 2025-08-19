@@ -2,6 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "framework": "create-react-app",
+  "productionBranch": "main",
+  "autoDeploy": true,
   "rewrites": [
     {
       "source": "/(.*)",
