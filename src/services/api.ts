@@ -201,6 +201,7 @@ class ApiService {
   private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     console.log('Making API request to:', url);
+    console.log('Request options:', options);
     
     // Get auth token from localStorage
     const token = localStorage.getItem('authToken');
@@ -217,6 +218,11 @@ class ApiService {
 
       console.log('Response status:', response.status);
       console.log('Response headers:', response.headers);
+      console.log('CORS headers:', {
+        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();

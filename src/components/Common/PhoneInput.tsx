@@ -52,9 +52,12 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   const fetchCountryCodes = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('Fetching country codes...');
       const response = await apiService.getCountryCodes();
+      console.log('Country codes response:', response);
       if (response.success) {
         setCountries(response.data.countries);
+        console.log('Countries set:', response.data.countries.length);
         // Set default to India if no country is selected
         if (!countryCode) {
           const india = response.data.countries.find((c: CountryCode) => c.code === 'IN');
