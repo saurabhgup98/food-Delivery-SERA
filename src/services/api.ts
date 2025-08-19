@@ -552,6 +552,133 @@ class ApiService {
       method: 'DELETE'
     });
   }
+
+  // Contact form methods
+  async submitContactForm(contactData: {
+    name: string;
+    email: string;
+    phone?: string;
+    preferredContact: string;
+    category: string;
+    orderReference?: string;
+    priority: string;
+    bestTime: string;
+    subject?: string;
+    message: string;
+    attachments?: File[];
+  }): Promise<{ success: boolean; message: string; data: { ticketNumber: string; submissionId: string } }> {
+    return this.makeRequest<{ success: boolean; message: string; data: { ticketNumber: string; submissionId: string } }>('/contact', {
+      method: 'POST',
+      body: JSON.stringify(contactData)
+    });
+  }
+
+  async getContactSubmissions(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    priority?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      submissions: any[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+      counts: {
+        total: number;
+        byStatus: Array<{ _id: string; count: number }>;
+        byCategory: Array<{ _id: string; count: number }>;
+        byPriority: Array<{ _id: string; count: number }>;
+      };
+    };
+  }> {
+    const queryParams = new URLSearchParams();
+    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const endpoint = `/contact${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.makeRequest(endpoint);
+  }
+
+  // Country codes and location methods
+  async getCountryCodes(): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      countries: Array<{
+        name: string;
+        code: string;
+        phoneCode: string;
+        flag: string;
+      }>;
+      total: number;
+    };
+  }> {
+    return this.makeRequest('/country-codes');
+  }
+
+  async getCountries(): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      countries: Array<{
+        name: string;
+        code: string;
+        code3: string;
+        flag: string;
+      }>;
+      total: number;
+    };
+  }> {
+    return this.makeRequest('/locations/countries');
+  }
+
+  async getStates(countryCode: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      states: Array<{
+        name: string;
+        code: string;
+        countryCode: string;
+      }>;
+      total: number;
+      countryCode: string;
+    };
+  }> {
+    return this.makeRequest(`/locations/states?countryCode=${countryCode}`);
+  }
+
+  async getCities(countryCode: string, stateCode: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      cities: Array<{
+        name: string;
+        code: string;
+        stateCode: string;
+        countryCode: string;
+        population: number;
+      }>;
+      total: number;
+      stateCode: string;
+      countryCode: string;
+    };
+  }> {
+    return this.makeRequest(`/locations/cities?countryCode=${countryCode}&stateCode=${stateCode}`);
+  }
 }
 
 export const apiService = new ApiService();

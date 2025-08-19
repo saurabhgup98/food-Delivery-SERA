@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import RestaurantCard from './RestaurantCard';
 import RestaurantListItem from './RestaurantListItem';
-import { apiService, Restaurant, MenuItem } from '../../services/api';
+import { apiService, Restaurant } from '../../services/api';
 import { AnimatedLoader } from '../Loader';
 
 // Debounce hook for search
@@ -208,56 +208,7 @@ const ExplorePage: React.FC = () => {
     setShowFilterModal(true);
   };
 
-  const cuisineOptions = [
-    { value: 'all', label: 'All Cuisines' },
-    { value: 'Indian', label: 'Indian' },
-    { value: 'Italian', label: 'Italian' },
-    { value: 'Chinese', label: 'Chinese' },
-    { value: 'American', label: 'American' },
-    { value: 'Mexican', label: 'Mexican' },
-    { value: 'Thai', label: 'Thai' },
-    { value: 'Japanese', label: 'Japanese' },
-    { value: 'Korean', label: 'Korean' },
-    { value: 'Mediterranean', label: 'Mediterranean' }
-  ];
 
-  const statusOptions = [
-    { value: 'all', label: 'All Status' },
-    { value: 'OPEN', label: 'Open Now' },
-    { value: 'CLOSED', label: 'Closed' },
-    { value: 'TEMPORARILY_CLOSED', label: 'Temporarily Closed' }
-  ];
-
-  const distanceOptions = [
-    { value: 'any', label: 'Any Distance' },
-    { value: '1km', label: 'Within 1km' },
-    { value: '3km', label: 'Within 3km' },
-    { value: '5km', label: 'Within 5km' },
-    { value: '10km', label: 'Within 10km' }
-  ];
-
-  const dietaryOptions = [
-    { value: 'all', label: 'All Dietary' },
-    { value: 'veg', label: 'Vegetarian' },
-    { value: 'non-veg', label: 'Non-Vegetarian' },
-    { value: 'both', label: 'Both' },
-    { value: 'jain', label: 'Jain' },
-    { value: 'vegan', label: 'Vegan' }
-  ];
-
-  const priceRangeOptions = [
-    { value: 'all', label: 'All Prices' },
-    { value: 'budget', label: 'Budget (₹100-300)' },
-    { value: 'mid-range', label: 'Mid-Range (₹300-600)' },
-    { value: 'premium', label: 'Premium (₹600+)' }
-  ];
-
-  const sortOptions = [
-    { value: 'rating', label: 'Rating' },
-    { value: 'deliveryTime', label: 'Delivery Time' },
-    { value: 'price', label: 'Price' },
-    { value: 'distance', label: 'Distance' }
-  ];
 
   if (loading) {
     return (

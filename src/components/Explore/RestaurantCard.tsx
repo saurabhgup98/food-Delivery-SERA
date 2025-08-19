@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Restaurant, MenuItem } from '../../services/api';
+import { Restaurant } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import RestaurantStatus from './RestaurantStatus';
 
@@ -66,40 +66,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
     return stars;
   };
 
-  const getDietaryIcon = (dietary: string) => {
-    switch (dietary) {
-      case 'veg': 
-        return (
-          <div className="w-4 h-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            🌿
-          </div>
-        );
-      case 'non-veg': 
-        return (
-          <div className="w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            🍖
-          </div>
-        );
-      case 'jain': 
-        return (
-          <div className="w-4 h-4 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            🕉️
-          </div>
-        );
-      case 'vegan': 
-        return (
-          <div className="w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            🌱
-          </div>
-        );
-      default: 
-        return (
-          <div className="w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            🍽️
-          </div>
-        );
-    }
-  };
+
 
   return (
     <div 

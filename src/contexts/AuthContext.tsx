@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { User } from '../types';
 
 // Backend API URL - Update this with your Vercel deployment URL

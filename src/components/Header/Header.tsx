@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
-  User, 
   Menu, 
   X,
   MapPin,
   Bell
 } from 'lucide-react';
-import { User as UserType } from '../../types';
+
 import { useAuth } from '../../contexts/AuthContext';
 import Navigation from '../Navigation/Navigation';
 import SearchBar from '../SearchBar/SearchBar';

@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { apiService } from '../../services/api';
+import PrimaryInput from '../Common/PrimaryInput';
+import PrimaryDropdown from '../Common/PrimaryDropdown';
+import PhoneInput from '../Common/PhoneInput';
+
 
 interface ContactFormProps {
   isOpen: boolean;
@@ -10,6 +15,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
     name: '',
     email: '',
     phone: '',
+    countryCode: 'IN',
     preferredContact: 'email',
     category: '',
     orderReference: '',
@@ -30,6 +36,25 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
     { value: 'technical-support', label: 'Technical Support', icon: '🔧' },
     { value: 'feedback-suggestions', label: 'Feedback/Suggestions', icon: '💭' },
     { value: 'other', label: 'Other', icon: '❓' },
+  ];
+
+  const contactMethodOptions = [
+    { value: 'email', label: 'Email', icon: '📧' },
+    { value: 'phone', label: 'Phone', icon: '📞' },
+    { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
+  ];
+
+  const priorityOptions = [
+    { value: 'low', label: 'Low', icon: '🟢' },
+    { value: 'medium', label: 'Medium', icon: '🟡' },
+    { value: 'high', label: 'High', icon: '🟠' },
+    { value: 'urgent', label: 'Urgent', icon: '🔴' },
+  ];
+
+  const bestTimeOptions = [
+    { value: 'morning', label: 'Morning', icon: '🌅' },
+    { value: 'afternoon', label: 'Afternoon', icon: '☀️' },
+    { value: 'evening', label: 'Evening', icon: '🌆' },
   ];
 
   const contactMethods = [
@@ -67,15 +92,14 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
     },
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [field]: value
     }));
 
     // Auto-generate subject based on category
-    if (name === 'category') {
+    if (field === 'category') {
       const category = issueCategories.find(cat => cat.value === value);
       if (category) {
         setFormData(prev => ({
@@ -101,12 +125,25 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
     e.preventDefault();
     setIsLoading(true);
     
-    setTimeout(() => {
+    try {
+      const response = await apiService.submitContactForm({
+        ...formData,
+        attachments: attachments
+      });
+      
+      if (response.success) {
+        console.log('Contact form submitted successfully:', response.data);
+        alert(`Thank you! Your ticket number is: ${response.data.ticketNumber}`);
+        onClose();
+      } else {
+        alert('Failed to submit contact form. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      alert('Failed to submit contact form. Please try again.');
+    } finally {
       setIsLoading(false);
-      console.log('Contact form submitted:', formData);
-      console.log('Attachments:', attachments);
-      onClose();
-    }, 2000);
+    }
   };
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
@@ -173,53 +210,38 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
                <div className="space-y-6 animate-fade-in">
                  <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Personal Information</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field w-full"
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field w-full"
-                      placeholder="Enter your email"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="input-field w-full"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
+                  <PrimaryInput
+                    type="text"
+                    value={formData.name}
+                    onChange={(value) => handleInputChange('name', value)}
+                    placeholder="Enter your full name"
+                    label="Full Name"
+                    required
+                  />
+                  <PrimaryInput
+                    type="email"
+                    value={formData.email}
+                    onChange={(value) => handleInputChange('email', value)}
+                    placeholder="Enter your email"
+                    label="Email Address"
+                    required
+                  />
+                  <PhoneInput
+                    value={formData.phone}
+                    onChange={(value) => handleInputChange('phone', value)}
+                    countryCode={formData.countryCode}
+                    onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
+                    placeholder="Enter your phone number"
+                    label="Phone Number"
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact Method</label>
-                    <select
-                      name="preferredContact"
+                    <PrimaryDropdown
                       value={formData.preferredContact}
-                      onChange={handleInputChange}
-                      className="input-field w-full"
-                    >
-                      <option value="email">Email</option>
-                      <option value="phone">Phone</option>
-                      <option value="whatsapp">WhatsApp</option>
-                    </select>
+                      onChange={(value) => handleInputChange('preferredContact', value)}
+                      options={contactMethodOptions}
+                      placeholder="Select contact method"
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -241,60 +263,41 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
                  <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Issue Details</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Issue Category *</label>
-                    <select
-                      name="category"
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Issue Category *
+                    </label>
+                    <PrimaryDropdown
                       value={formData.category}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field w-full"
-                    >
-                      <option value="">Select an issue category</option>
-                      {issueCategories.map((category) => (
-                        <option key={category.value} value={category.value}>
-                          {category.icon} {category.label}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(value) => handleInputChange('category', value)}
+                      options={issueCategories}
+                      placeholder="Select an issue category"
+                    />
                   </div>
-                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <PrimaryInput
+                      type="text"
+                      value={formData.orderReference}
+                      onChange={(value) => handleInputChange('orderReference', value)}
+                      placeholder="Order # (optional)"
+                      label="Order Reference"
+                    />
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Order Reference</label>
-                      <input
-                        type="text"
-                        name="orderReference"
-                        value={formData.orderReference}
-                        onChange={handleInputChange}
-                        className="input-field w-full"
-                        placeholder="Order # (optional)"
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Priority Level</label>
+                      <PrimaryDropdown
+                        value={formData.priority}
+                        onChange={(value) => handleInputChange('priority', value)}
+                        options={priorityOptions}
+                        placeholder="Select priority level"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Priority Level</label>
-                      <select
-                        name="priority"
-                        value={formData.priority}
-                        onChange={handleInputChange}
-                        className="input-field w-full"
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                      </select>
-                    </div>
-                    <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Best Time to Contact</label>
-                      <select
-                        name="bestTime"
+                      <PrimaryDropdown
                         value={formData.bestTime}
-                        onChange={handleInputChange}
-                        className="input-field w-full"
-                      >
-                        <option value="morning">Morning</option>
-                        <option value="afternoon">Afternoon</option>
-                        <option value="evening">Evening</option>
-                      </select>
+                        onChange={(value) => handleInputChange('bestTime', value)}
+                        options={bestTimeOptions}
+                        placeholder="Select best time"
+                      />
                     </div>
                   </div>
                 </div>
@@ -323,26 +326,22 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
                <div className="space-y-6 animate-fade-in">
                  <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Your Message</h3>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject</label>
-                    <input
-                      type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      className="input-field w-full"
-                      placeholder="Subject line"
-                    />
-                  </div>
+                  <PrimaryInput
+                    type="text"
+                    value={formData.subject}
+                    onChange={(value) => handleInputChange('subject', value)}
+                    placeholder="Subject line"
+                    label="Subject"
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Message *</label>
                     <textarea
                       name="message"
                       value={formData.message}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('message', e.target.value)}
                       required
                       rows={6}
-                      className="input-field w-full resize-none"
+                      className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent resize-none transition-all duration-300 hover:border-dark-500"
                       placeholder="Please describe your issue or inquiry in detail..."
                     />
                   </div>

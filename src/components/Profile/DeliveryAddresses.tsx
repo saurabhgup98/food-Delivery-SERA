@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiService, Address } from '../../services/api';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
 import PrimaryInput from '../Common/PrimaryInput';
+import LocationDropdown from '../Common/LocationDropdown';
 import { addressLabelOptions } from '../../data/dropdownOptions';
 
 const DeliveryAddresses: React.FC = () => {
@@ -14,8 +15,9 @@ const DeliveryAddresses: React.FC = () => {
     fullName: '',
     phone: '',
     address: '',
-    city: '',
+    country: 'IN',
     state: '',
+    city: '',
     pincode: '',
     isDefault: false,
     instructions: ''
@@ -74,8 +76,9 @@ const DeliveryAddresses: React.FC = () => {
         fullName: '',
         phone: '',
         address: '',
-        city: '',
+        country: 'IN',
         state: '',
+        city: '',
         pincode: '',
         isDefault: false,
         instructions: ''
@@ -96,8 +99,9 @@ const DeliveryAddresses: React.FC = () => {
       fullName: address.fullName,
       phone: address.phone,
       address: address.address,
-      city: address.city,
+      country: 'IN', // Default to India for existing addresses
       state: address.state,
+      city: address.city,
       pincode: address.pincode,
       isDefault: address.isDefault,
       instructions: address.instructions || ''
@@ -145,8 +149,9 @@ const DeliveryAddresses: React.FC = () => {
       fullName: '',
       phone: '',
       address: '',
-      city: '',
+      country: 'IN',
       state: '',
+      city: '',
       pincode: '',
       isDefault: false,
       instructions: ''
@@ -310,23 +315,35 @@ const DeliveryAddresses: React.FC = () => {
               />
             </div>
 
-            {/* City */}
-            <PrimaryInput
-              type="text"
-              value={formData.city}
-              onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-              placeholder="Enter city"
-              label="City"
-            />
+                         {/* Country */}
+             <LocationDropdown
+               type="country"
+               value={formData.country}
+               onChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+               placeholder="Select country"
+               label="Country"
+             />
 
-            {/* State */}
-            <PrimaryInput
-              type="text"
-              value={formData.state}
-              onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
-              placeholder="Enter state"
-              label="State"
-            />
+             {/* State */}
+             <LocationDropdown
+               type="state"
+               value={formData.state}
+               onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
+               countryCode={formData.country}
+               placeholder="Select state"
+               label="State"
+             />
+
+             {/* City */}
+             <LocationDropdown
+               type="city"
+               value={formData.city}
+               onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+               countryCode={formData.country}
+               stateCode={formData.state}
+               placeholder="Select city"
+               label="City"
+             />
 
             {/* Pincode */}
             <PrimaryInput

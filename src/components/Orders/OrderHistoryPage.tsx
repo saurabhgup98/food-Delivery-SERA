@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { apiService, Order as ApiOrder } from '../../services/api';
+import { apiService } from '../../services/api';
 
 interface Order {
   _id: string;

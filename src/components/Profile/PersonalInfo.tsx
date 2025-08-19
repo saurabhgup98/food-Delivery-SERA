@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
 import PrimaryInput from '../Common/PrimaryInput';
 import DatePrimary from '../Common/DatePrimary';
+import PhoneInput from '../Common/PhoneInput';
 import { genderOptions } from '../../data/dropdownOptions';
 
 
@@ -15,6 +16,7 @@ const PersonalInfo: React.FC = () => {
     name: user?.name || '',
     email: user?.email || '',
     phone: '',
+    countryCode: 'IN',
     dateOfBirth: '',
     gender: '',
   });
@@ -32,6 +34,7 @@ const PersonalInfo: React.FC = () => {
       name: user?.name || '',
       email: user?.email || '',
       phone: '',
+      countryCode: 'IN',
       dateOfBirth: '',
       gender: '',
     });
@@ -97,10 +100,11 @@ const PersonalInfo: React.FC = () => {
         />
 
         {/* Phone */}
-        <PrimaryInput
-          type="tel"
+        <PhoneInput
           value={formData.phone}
           onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+          countryCode={formData.countryCode}
+          onCountryCodeChange={(value) => setFormData(prev => ({ ...prev, countryCode: value }))}
           placeholder="Enter your phone number"
           label="Phone Number"
           disabled={!isEditing}

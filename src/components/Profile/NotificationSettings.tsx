@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-interface NotificationSettings {
+interface NotificationSettingsType {
   orderUpdates: boolean;
   promotionalOffers: boolean;
   newRestaurants: boolean;
@@ -14,7 +14,7 @@ interface NotificationSettings {
 }
 
 const NotificationSettings: React.FC = () => {
-  const [settings, setSettings] = useState<NotificationSettings>({
+  const [settings, setSettings] = useState<NotificationSettingsType>({
     orderUpdates: true,
     promotionalOffers: true,
     newRestaurants: false,
@@ -33,7 +33,7 @@ const NotificationSettings: React.FC = () => {
     endTime: '08:00'
   });
 
-  const handleToggle = (key: keyof NotificationSettings) => {
+  const handleToggle = (key: keyof NotificationSettingsType) => {
     setSettings(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -146,8 +146,8 @@ const NotificationSettings: React.FC = () => {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={settings[method.key as keyof NotificationSettings]}
-                  onChange={() => handleToggle(method.key as keyof NotificationSettings)}
+                  checked={settings[method.key as keyof NotificationSettingsType]}
+                  onChange={() => handleToggle(method.key as keyof NotificationSettingsType)}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-dark-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sera-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sera-orange"></div>
@@ -176,8 +176,8 @@ const NotificationSettings: React.FC = () => {
                   <label className="relative inline-flex items-center cursor-pointer ml-4">
                     <input
                       type="checkbox"
-                      checked={settings[setting.key as keyof NotificationSettings]}
-                      onChange={() => handleToggle(setting.key as keyof NotificationSettings)}
+                      checked={settings[setting.key as keyof NotificationSettingsType]}
+                      onChange={() => handleToggle(setting.key as keyof NotificationSettingsType)}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-dark-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sera-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sera-orange"></div>
