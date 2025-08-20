@@ -5,7 +5,7 @@ import QuickFilters from '../Common/QuickFilters';
 import RestaurantDisplay from '../Common/RestaurantDisplay';
 import FilterModal from '../Common/FilterModal';
 import { apiService, Restaurant } from '../../services/api';
-import { MapPin, Search } from 'lucide-react';
+import { MapPin, Search, X } from 'lucide-react';
 import HeartIcon from '../Icons/HeartIcon';
 import StarIcon from '../Icons/StarIcon';
 import FilterIcon from '../Icons/FilterIcon';
@@ -74,6 +74,14 @@ const FavoritesPage: React.FC = () => {
     }, 800); // 800ms delay
 
     return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Auto-search when word count reaches 3
+  useEffect(() => {
+    const wordCount = searchQuery.trim().split(/\s+/).filter(word => word.length > 0).length;
+    if (wordCount >= 3) {
+      setDebouncedSearchQuery(searchQuery);
+    }
   }, [searchQuery]);
 
   // Maintain focus on search input after search
@@ -147,6 +155,14 @@ const FavoritesPage: React.FC = () => {
     // Clear search if input is empty
     if (value.trim() === '') {
       setDebouncedSearchQuery('');
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
     }
   };
 
@@ -299,14 +315,23 @@ const FavoritesPage: React.FC = () => {
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                   placeholder="Search your favorite restaurants... (min 3 words)"
-                  className={`w-full bg-slate-700 border rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-sm ${
+                  className={`w-full bg-slate-700 border rounded-xl pl-10 pr-10 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-sm ${
                     searchQuery.trim() !== '' && !isSearchValid 
                       ? 'border-orange-500 focus:ring-orange-500' 
                       : 'border-slate-600 focus:ring-blue-500'
                   }`}
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
                 {searchQuery.trim() !== '' && !isSearchValid && (
-                  <div className="absolute -bottom-6 left-0 text-xs text-orange-400">
+                  <div className="absolute top-full left-0 mt-1 text-xs text-orange-400 z-10 bg-slate-800 px-2 py-1 rounded border border-orange-500/50">
                     Type at least 3 words to search
                   </div>
                 )}

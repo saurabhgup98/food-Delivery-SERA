@@ -144,16 +144,16 @@ const PrimaryDropdown: React.FC<PrimaryDropdownProps> = ({
     }
   };
 
-  // Calculate dropdown position
+  // Calculate dropdown position - prefer bottom, only use top if absolutely necessary
   const getDropdownPosition = () => {
     if (!dropdownRef.current) return 'bottom';
     
     const rect = dropdownRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
-    const dropdownHeight = Math.min(filteredOptions.length * 48 + 80, 300); // Approximate height
+    const dropdownHeight = Math.min(filteredOptions.length * 48 + 120, 300); // Approximate height
     
-    // Check if dropdown would go below viewport
-    if (rect.bottom + dropdownHeight > viewportHeight) {
+    // Only use top if there's absolutely no space below
+    if (rect.bottom + dropdownHeight > viewportHeight && rect.top > dropdownHeight) {
       return 'top';
     }
     return 'bottom';
@@ -217,10 +217,10 @@ const PrimaryDropdown: React.FC<PrimaryDropdownProps> = ({
       {/* Dropdown Menu - Fixed Positioning */}
       {isOpen && (
         <div 
-          className="fixed z-[9999] bg-dark-700 border border-dark-600 rounded-xl shadow-2xl"
+          className="fixed z-[9999] bg-dark-700 border border-dark-600 rounded-xl shadow-2xl max-w-sm"
           style={{
             left: dropdownRef.current?.getBoundingClientRect().left || 0,
-            width: dropdownRef.current?.getBoundingClientRect().width || 'auto',
+            width: Math.min(dropdownRef.current?.getBoundingClientRect().width || 300, 300),
             [dropdownPosition === 'top' ? 'bottom' : 'top']: 
               dropdownPosition === 'top' 
                 ? (window.innerHeight - (dropdownRef.current?.getBoundingClientRect().top || 0) + 8)
@@ -242,7 +242,7 @@ const PrimaryDropdown: React.FC<PrimaryDropdownProps> = ({
           {/* Options List */}
           <div 
             ref={optionsRef}
-            className="max-h-[300px] overflow-y-auto custom-scrollbar"
+            className="max-h-[300px] overflow-y-auto custom-scrollbar overflow-x-hidden"
             style={{ contain: 'layout style paint' }}
           >
             {filteredOptions.length === 0 ? (
@@ -271,7 +271,7 @@ const PrimaryDropdown: React.FC<PrimaryDropdownProps> = ({
                     ${index === filteredOptions.length - 1 ? 'rounded-b-xl' : ''}
                   `}
                 >
-                  <div className="flex items-center space-x-3 min-w-0">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
                     {option.icon && (
                       <span className="text-lg flex-shrink-0">{option.icon}</span>
                     )}
