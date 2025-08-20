@@ -54,9 +54,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden border border-slate-600/50">
+      <div className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-slate-600/50">
         {/* Modal Header - Always Visible */}
-        <div className="p-6 border-b border-slate-600/50 bg-gradient-to-r from-slate-700 to-slate-800">
+        <div className="p-6 border-b border-slate-600/50 bg-gradient-to-r from-slate-700 to-slate-800 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-white text-2xl font-bold">Advanced Filters</h2>
@@ -72,7 +72,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
         </div>
 
         {/* Modal Content - Scrollable */}
-        <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar min-h-0" style={{ contain: 'layout style paint' }}>
           {/* Status Section */}
           <div className="space-y-3">
             <h3 className="text-white font-semibold text-lg flex items-center">
@@ -199,7 +199,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
         </div>
 
         {/* Modal Footer - Always Visible */}
-        <div className="p-6 border-t border-slate-600/50 bg-gradient-to-r from-slate-700 to-slate-800">
+        <div className="p-6 border-t border-slate-600/50 bg-gradient-to-r from-slate-700 to-slate-800 flex-shrink-0">
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Clear All Filters Button */}
             <button
