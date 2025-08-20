@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Check, X, Clock, Star, MapPin, ShoppingBag, Gift, AlertCircle, Info } from 'lucide-react';
+import { Bell, X, MapPin } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -140,15 +140,31 @@ const NotificationsPage: React.FC = () => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'order':
-        return <ShoppingBag className="w-5 h-5 text-blue-500" />;
+        return (
+          <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 00-2-2H9a2 2 0 00-2 2v4.01" />
+          </svg>
+        );
       case 'delivery':
         return <MapPin className="w-5 h-5 text-green-500" />;
       case 'promotion':
-        return <Gift className="w-5 h-5 text-pink-500" />;
+        return (
+          <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+          </svg>
+        );
       case 'review':
-        return <Star className="w-5 h-5 text-yellow-500" />;
+        return (
+          <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        );
       case 'system':
-        return <Info className="w-5 h-5 text-gray-500" />;
+        return (
+          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
@@ -278,10 +294,12 @@ const NotificationsPage: React.FC = () => {
                           {notification.message}
                         </p>
                         <div className="flex items-center space-x-4">
-                          <span className="text-gray-500 text-xs flex items-center space-x-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{notification.timestamp}</span>
-                          </span>
+                                                   <span className="text-gray-500 text-xs flex items-center space-x-1">
+                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                           </svg>
+                           <span>{notification.timestamp}</span>
+                         </span>
                           {notification.amount && (
                             <span className="text-sera-orange text-xs font-medium">
                               {notification.amount}
@@ -308,7 +326,9 @@ const NotificationsPage: React.FC = () => {
                             className="p-1 text-gray-400 hover:text-green-400 transition-colors"
                             title="Mark as read"
                           >
-                            <Check className="w-4 h-4" />
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
                           </button>
                         )}
                         <button
