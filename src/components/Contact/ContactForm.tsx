@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import PrimaryInput from '../Common/PrimaryInput';
 import PrimaryDropdown from '../Common/PrimaryDropdown';
 import PhoneInput from '../Common/PhoneInput';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 interface ContactFormProps {
@@ -11,10 +12,12 @@ interface ContactFormProps {
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    whatsappNumber: '',
     countryCode: 'IN',
     preferredContact: 'email',
     category: '',
@@ -27,6 +30,18 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [attachments, setAttachments] = useState<File[]>([]);
+
+  // Auto-fill user details when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      }));
+    }
+  }, [user]);
 
   const issueCategories = [
     { value: 'order-problems', label: 'Order Problems', icon: '📦' },
@@ -126,10 +141,17 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     
     try {
-      const response = await apiService.submitContactForm({
+      // Prepare contact data with WhatsApp number if applicable
+      const contactData = {
         ...formData,
-        attachments: attachments
-      });
+        attachments: attachments,
+        // Use WhatsApp number if provided and WhatsApp is preferred method
+        contactNumber: formData.preferredContact === 'whatsapp' && formData.whatsappNumber 
+          ? formData.whatsappNumber 
+          : formData.phone
+      };
+      
+      const response = await apiService.submitContactForm(contactData);
       
       if (response.success) {
         console.log('Contact form submitted successfully:', response.data);
@@ -209,46 +231,99 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
              {currentStep === 1 && (
                <div className="space-y-6 animate-fade-in">
                  <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Personal Information</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <PrimaryInput
-                    type="text"
-                    value={formData.name}
-                    onChange={(value) => handleInputChange('name', value)}
-                    placeholder="Enter your full name"
-                    label="Full Name"
-                    required
-                  />
-                  <PrimaryInput
-                    type="email"
-                    value={formData.email}
-                    onChange={(value) => handleInputChange('email', value)}
-                    placeholder="Enter your email"
-                    label="Email Address"
-                    required
-                  />
-                  <PhoneInput
-                    value={formData.phone}
-                    onChange={(value) => handleInputChange('phone', value)}
-                    countryCode={formData.countryCode}
-                    onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
-                    placeholder="Enter your phone number"
-                    label="Phone Number"
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact Method</label>
-                    <PrimaryDropdown
-                      value={formData.preferredContact}
-                      onChange={(value) => handleInputChange('preferredContact', value)}
-                      options={contactMethodOptions}
-                      placeholder="Select contact method"
-                    />
-                  </div>
-                </div>
+                 
+                 {/* User Info Section - Auto-filled and read-only for logged-in users */}
+                 {user ? (
+                   <div className="bg-dark-700/50 rounded-lg p-4 border border-dark-600">
+                     <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                       <span className="mr-2">👤</span>
+                       Your Account Information
+                     </h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div>
+                         <label className="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
+                         <div className="px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white/80">
+                           {formData.name || 'Not provided'}
+                         </div>
+                       </div>
+                       <div>
+                         <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
+                         <div className="px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white/80">
+                           {formData.email || 'Not provided'}
+                         </div>
+                       </div>
+                       <div>
+                         <label className="block text-sm font-medium text-gray-400 mb-1">Phone Number</label>
+                         <div className="px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white/80">
+                           {formData.phone || 'Not provided'}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 ) : (
+                   /* Manual input for non-logged-in users */
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <PrimaryInput
+                       type="text"
+                       value={formData.name}
+                       onChange={(value) => handleInputChange('name', value)}
+                       placeholder="Enter your full name"
+                       label="Full Name"
+                       required
+                     />
+                     <PrimaryInput
+                       type="email"
+                       value={formData.email}
+                       onChange={(value) => handleInputChange('email', value)}
+                       placeholder="Enter your email"
+                       label="Email Address"
+                       required
+                     />
+                     <PhoneInput
+                       value={formData.phone}
+                       onChange={(value) => handleInputChange('phone', value)}
+                       countryCode={formData.countryCode}
+                       onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
+                       placeholder="Enter your phone number"
+                       label="Phone Number"
+                     />
+                   </div>
+                 )}
+
+                 {/* Contact Preferences */}
+                 <div className="space-y-4">
+                   <div>
+                     <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact Method</label>
+                     <PrimaryDropdown
+                       value={formData.preferredContact}
+                       onChange={(value) => handleInputChange('preferredContact', value)}
+                       options={contactMethodOptions}
+                       placeholder="Select contact method"
+                     />
+                   </div>
+                   
+                   {/* WhatsApp Number - Show only when WhatsApp is selected */}
+                   {formData.preferredContact === 'whatsapp' && (
+                     <div>
+                       <label className="block text-sm font-medium text-gray-300 mb-2">
+                         WhatsApp Number <span className="text-gray-400">(if different from your registered phone)</span>
+                       </label>
+                       <PhoneInput
+                         value={formData.whatsappNumber}
+                         onChange={(value) => handleInputChange('whatsappNumber', value)}
+                         countryCode={formData.countryCode}
+                         onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
+                         placeholder="Enter your WhatsApp number"
+                         label=""
+                       />
+                     </div>
+                   )}
+                 </div>
                 <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={nextStep}
-                    disabled={!formData.name || !formData.email}
+                    disabled={!formData.name || !formData.email || (formData.preferredContact === 'whatsapp' && !formData.whatsappNumber)}
                     className="btn-secondary px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next Step

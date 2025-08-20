@@ -130,7 +130,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, transform: 'translateZ(0)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -138,7 +138,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
       />
       
       {/* Modal */}
-      <div className="relative bg-dark-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-dark-600 transform transition-all duration-300" style={{ position: 'relative', zIndex: 10000 }}>
+      <div className="relative bg-dark-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-dark-600 transform transition-all duration-300" style={{ position: 'relative', zIndex: 10000, transform: 'translateZ(0)', margin: 'auto' }}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-dark-700 flex-shrink-0">
           <div className="flex items-center space-x-3">
