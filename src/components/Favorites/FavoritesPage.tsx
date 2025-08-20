@@ -288,8 +288,8 @@ const FavoritesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Compact Hero Section */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-16">
+      {/* Compact Hero Section - Positioned below main header */}
       <div ref={headerRef} className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-sera-pink/20 via-sera-orange/20 to-sera-pink/20"></div>
         <div className="relative bg-gradient-to-r from-sera-pink to-sera-orange border-b border-slate-700/50">
@@ -333,7 +333,7 @@ const FavoritesPage: React.FC = () => {
       </div>
 
       {/* Smart Sticky Search and Filter Header */}
-      <div className={`fixed top-0 left-0 right-0 z-50 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-300 ease-in-out ${
+      <div className={`sticky top-0 z-50 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-300 ease-in-out ${
         isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -426,7 +426,7 @@ const FavoritesPage: React.FC = () => {
       </div>
 
       {/* Restaurant Display with smooth scrolling */}
-      <div className="pb-8 pt-32">
+      <div className="pb-8">
         <RestaurantDisplay
           restaurants={restaurants}
           viewMode={viewMode}
