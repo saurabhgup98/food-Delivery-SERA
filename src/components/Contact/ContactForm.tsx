@@ -232,93 +232,112 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
                <div className="space-y-6 animate-fade-in">
                  <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Personal Information</h3>
                  
-                 {/* User Info Section - Auto-filled and read-only for logged-in users */}
-                 {user ? (
-                   <div className="bg-dark-700/50 rounded-lg p-4 border border-dark-600">
-                     <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                       <span className="mr-2">👤</span>
-                       Your Account Information
-                     </h4>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 {/* Line 1: Name and Email - Always visible */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {user ? (
+                     <>
                        <div>
-                         <label className="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
-                         <div className="px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white/80">
+                         <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                         <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
                            {formData.name || 'Not provided'}
                          </div>
                        </div>
                        <div>
-                         <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
-                         <div className="px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white/80">
+                         <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                         <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
                            {formData.email || 'Not provided'}
                          </div>
                        </div>
-                       <div>
-                         <label className="block text-sm font-medium text-gray-400 mb-1">Phone Number</label>
-                         <div className="px-4 py-3 bg-dark-600 border border-dark-500 rounded-lg text-white/80">
-                           {formData.phone || 'Not provided'}
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 ) : (
-                   /* Manual input for non-logged-in users */
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <PrimaryInput
-                       type="text"
-                       value={formData.name}
-                       onChange={(value) => handleInputChange('name', value)}
-                       placeholder="Enter your full name"
-                       label="Full Name"
-                       required
-                     />
-                     <PrimaryInput
-                       type="email"
-                       value={formData.email}
-                       onChange={(value) => handleInputChange('email', value)}
-                       placeholder="Enter your email"
-                       label="Email Address"
-                       required
-                     />
+                     </>
+                   ) : (
+                     <>
+                       <PrimaryInput
+                         type="text"
+                         value={formData.name}
+                         onChange={(value) => handleInputChange('name', value)}
+                         placeholder="Enter your full name"
+                         label="Full Name"
+                         required
+                       />
+                       <PrimaryInput
+                         type="email"
+                         value={formData.email}
+                         onChange={(value) => handleInputChange('email', value)}
+                         placeholder="Enter your email"
+                         label="Email Address"
+                         required
+                       />
+                     </>
+                   )}
+                 </div>
+
+                 {/* Line 2: Preferred Contact Method - Single Line */}
+                 <div>
+                   <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact Method</label>
+                   <PrimaryDropdown
+                     value={formData.preferredContact}
+                     onChange={(value) => handleInputChange('preferredContact', value)}
+                     options={contactMethodOptions}
+                     placeholder="Select contact method"
+                   />
+                 </div>
+
+                 {/* Line 3: Contact Number Section - Conditional based on selection */}
+                 {formData.preferredContact === 'whatsapp' && (
+                   <div>
+                     <label className="block text-sm font-medium text-gray-300 mb-2">
+                       WhatsApp Number <span className="text-gray-400">(if different from your registered phone)</span>
+                     </label>
                      <PhoneInput
-                       value={formData.phone}
-                       onChange={(value) => handleInputChange('phone', value)}
+                       value={formData.whatsappNumber}
+                       onChange={(value) => handleInputChange('whatsappNumber', value)}
                        countryCode={formData.countryCode}
                        onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
-                       placeholder="Enter your phone number"
-                       label="Phone Number"
+                       placeholder="Enter your WhatsApp number"
+                       label=""
                      />
                    </div>
                  )}
 
-                 {/* Contact Preferences */}
-                 <div className="space-y-4">
+                 {formData.preferredContact === 'phone' && (
                    <div>
-                     <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact Method</label>
-                     <PrimaryDropdown
-                       value={formData.preferredContact}
-                       onChange={(value) => handleInputChange('preferredContact', value)}
-                       options={contactMethodOptions}
-                       placeholder="Select contact method"
-                     />
-                   </div>
-                   
-                   {/* WhatsApp Number - Show only when WhatsApp is selected */}
-                   {formData.preferredContact === 'whatsapp' && (
-                     <div>
-                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                         WhatsApp Number <span className="text-gray-400">(if different from your registered phone)</span>
-                       </label>
+                     <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                     {user ? (
+                       <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
+                         {formData.phone || 'Not provided'}
+                       </div>
+                     ) : (
                        <PhoneInput
-                         value={formData.whatsappNumber}
-                         onChange={(value) => handleInputChange('whatsappNumber', value)}
+                         value={formData.phone}
+                         onChange={(value) => handleInputChange('phone', value)}
                          countryCode={formData.countryCode}
                          onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
-                         placeholder="Enter your WhatsApp number"
+                         placeholder="Enter your phone number"
                          label=""
                        />
-                     </div>
-                   )}
-                 </div>
+                     )}
+                   </div>
+                 )}
+
+                 {formData.preferredContact === 'email' && (
+                   <div>
+                     <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number (for account verification)</label>
+                     {user ? (
+                       <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
+                         {formData.phone || 'Not provided'}
+                       </div>
+                     ) : (
+                       <PhoneInput
+                         value={formData.phone}
+                         onChange={(value) => handleInputChange('phone', value)}
+                         countryCode={formData.countryCode}
+                         onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
+                         placeholder="Enter your phone number"
+                         label=""
+                       />
+                     )}
+                   </div>
+                 )}
                 <div className="flex justify-end">
                   <button
                     type="button"

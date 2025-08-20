@@ -11,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Navigation from '../Navigation/Navigation';
 import SearchBar from '../SearchBar/SearchBar';
 import { CartIcon } from '../Cart';
+import NotificationsDropdown from '../Notifications/NotificationsDropdown';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -21,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { user, isLoading, openLoginModal, openSignupModal, logout } = useAuth();
   const navigate = useNavigate();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -59,6 +61,11 @@ const Header: React.FC<HeaderProps> = ({
 
   const handleProfileOptionClick = () => {
     setIsProfileDropdownOpen(false);
+  };
+
+  const handleNotificationsToggle = () => {
+    setIsNotificationsOpen(!isNotificationsOpen);
+    setIsProfileDropdownOpen(false); // Close profile dropdown if open
   };
 
   // Get first letter of user's name for profile circle
@@ -122,13 +129,24 @@ const Header: React.FC<HeaderProps> = ({
                 <span className="text-sm font-medium">Deliver to</span>
               </div>
 
-              {/* Notifications */}
-              <button className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-sera-yellow rounded-full text-xs flex items-center justify-center text-dark-900 font-bold">
-                  3
-                </span>
-              </button>
+                             {/* Notifications */}
+               <div className="relative">
+                 <button 
+                   onClick={handleNotificationsToggle}
+                   className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                 >
+                   <Bell className="w-5 h-5" />
+                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-sera-yellow rounded-full text-xs flex items-center justify-center text-dark-900 font-bold">
+                     3
+                   </span>
+                 </button>
+                 
+                 {/* Notifications Dropdown */}
+                 <NotificationsDropdown 
+                   isOpen={isNotificationsOpen}
+                   onClose={() => setIsNotificationsOpen(false)}
+                 />
+               </div>
 
               {/* Cart */}
               <CartIcon />

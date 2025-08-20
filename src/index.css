@@ -221,4 +221,11 @@
   .bg-gradient-secondary {
     @apply bg-gradient-to-r from-sera-blue to-sera-darkBlue;
   }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }

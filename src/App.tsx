@@ -12,6 +12,7 @@ import RestaurantDetail from './components/Restaurant/RestaurantDetail';
 import CartModal from './components/Cart/CartModal';
 import ProfilePage from './components/Profile/ProfilePage';
 import OrderHistoryPage from './components/Orders/OrderHistoryPage';
+import NotificationsPage from './components/Notifications/NotificationsPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import { useCart } from './contexts/CartContext';
 import './index.css';
@@ -43,6 +44,7 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Routes>
 
         {/* Global Floating Cart Button */}
