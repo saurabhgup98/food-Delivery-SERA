@@ -274,26 +274,38 @@ const FavoritesPage: React.FC = () => {
       <div ref={headerRef} className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 via-pink-600/10 to-purple-600/10"></div>
         <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-red-500 to-pink-500 rounded-full mb-4 shadow-lg">
-                <HeartIcon className="w-6 h-6 text-white" filled={true} />
+              {/* Hero Content - Compact Layout */}
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-4 mb-3">
+                {/* Love Icon - Only on large screens, horizontal with text */}
+                <div className="hidden lg:flex items-center gap-3">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-red-500 to-pink-500 rounded-full shadow-lg">
+                    <HeartIcon className="w-4 h-4 text-white" filled={true} />
+                  </div>
+                </div>
+                
+                {/* Main Title */}
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                  Favorite Restaurants
+                </h1>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                Favorite Restaurants
-              </h1>
-              <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              
+              {/* Description */}
+              <p className="text-gray-300 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-3">
                 Your saved restaurants and favorite places to eat.
               </p>
-              <div className="flex items-center justify-center mt-4 space-x-4 text-gray-400">
+              
+              {/* Features */}
+              <div className="flex items-center justify-center space-x-4 text-gray-400">
                 <div className="flex items-center space-x-2">
-                  <StarIcon className="w-4 h-4 text-yellow-400" filled={true} />
-                  <span className="text-sm">Personalized picks</span>
+                  <StarIcon className="w-3 h-3 text-yellow-400" filled={true} />
+                  <span className="text-xs">Personalized picks</span>
                 </div>
                 <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
                 <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm">Quick access</span>
+                  <MapPin className="w-3 h-3 text-blue-400" />
+                  <span className="text-xs">Quick access</span>
                 </div>
               </div>
             </div>
