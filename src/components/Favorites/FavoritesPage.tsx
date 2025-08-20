@@ -46,13 +46,29 @@ const FavoritesPage: React.FC = () => {
   // Debounced search state
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
-  // Handle scroll for sticky header with throttling
+  // Smart sticky header state
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Handle scroll for smart sticky header
   useEffect(() => {
     let ticking = false;
     
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // Show header if scrolling up (even 1px) or at the top
+          if (currentScrollY < lastScrollY || currentScrollY <= 0) {
+            setIsHeaderVisible(true);
+          } 
+          // Hide header if scrolling down and not at the top
+          else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            setIsHeaderVisible(false);
+          }
+          
+          setLastScrollY(currentScrollY);
           ticking = false;
         });
         ticking = true;
@@ -61,7 +77,7 @@ const FavoritesPage: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   // Debounced search effect
   useEffect(() => {
@@ -144,8 +160,9 @@ const FavoritesPage: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Force search on form submit regardless of word count
+    // Force search on form submit regardless of word count and show header
     setDebouncedSearchQuery(searchQuery);
+    setIsHeaderVisible(true);
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +223,8 @@ const FavoritesPage: React.FC = () => {
     setFreeDelivery(tempFreeDelivery);
     setShowFilterModal(false);
     
-    // Smooth scroll to top when filters are applied
+    // Show header and scroll to top when filters are applied
+    setIsHeaderVisible(true);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -227,7 +245,8 @@ const FavoritesPage: React.FC = () => {
     setSearchQuery('');
     setDebouncedSearchQuery('');
     
-    // Smooth scroll to top when filters are cleared
+    // Show header and scroll to top when filters are cleared
+    setIsHeaderVisible(true);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -313,8 +332,10 @@ const FavoritesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Always Sticky Search and Filter Header */}
-      <div className="sticky-header sticky top-0 z-40 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg">
+      {/* Smart Sticky Search and Filter Header */}
+      <div className={`fixed top-0 left-0 right-0 z-50 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-300 ease-in-out ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col lg:flex-row gap-3 items-center">
             {/* Search Bar */}
@@ -405,7 +426,7 @@ const FavoritesPage: React.FC = () => {
       </div>
 
       {/* Restaurant Display with smooth scrolling */}
-      <div className="pb-8">
+      <div className="pb-8 pt-32">
         <RestaurantDisplay
           restaurants={restaurants}
           viewMode={viewMode}

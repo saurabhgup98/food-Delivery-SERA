@@ -103,7 +103,7 @@
   /* Smooth scrolling optimizations */
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 120px; /* Account for sticky header */
+    scroll-padding-top: 0; /* Remove padding that was causing header to hide */
   }
 
   /* Optimize grid layout to prevent flickering */
@@ -125,7 +125,7 @@
   }
 
   /* Optimize sticky header performance */
-  .sticky-header {
+  .sticky {
     will-change: transform;
     transform: translateZ(0);
     backface-visibility: hidden;
