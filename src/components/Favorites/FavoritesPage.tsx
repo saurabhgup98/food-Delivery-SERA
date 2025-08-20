@@ -272,32 +272,32 @@ const FavoritesPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Compact Hero Section */}
       <div ref={headerRef} className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 via-pink-600/10 to-purple-600/10"></div>
-        <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-sera-pink/20 via-sera-orange/20 to-sera-pink/20"></div>
+        <div className="relative bg-gradient-to-r from-sera-pink to-sera-orange border-b border-slate-700/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
             <div className="text-center">
               {/* Hero Content - Compact Layout */}
               <div className="flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-4 mb-3">
                 {/* Love Icon - Only on large screens, horizontal with text */}
                 <div className="hidden lg:flex items-center gap-3">
-                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-red-500 to-pink-500 rounded-full shadow-lg">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full shadow-lg border border-white/30">
                     <HeartIcon className="w-4 h-4 text-white" filled={true} />
                   </div>
                 </div>
                 
                 {/* Main Title */}
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
                   Favorite Restaurants
                 </h1>
               </div>
               
               {/* Description */}
-              <p className="text-gray-300 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-3">
+              <p className="text-white/90 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-3">
                 Your saved restaurants and favorite places to eat.
               </p>
               
               {/* Features */}
-              <div className="flex items-center justify-center space-x-4 text-gray-400">
+              <div className="flex items-center justify-center space-x-4 text-white/80">
                 <div className="flex items-center space-x-2">
                   <StarIcon className="w-3 h-3 text-yellow-400" filled={true} />
                   <span className="text-xs">Personalized picks</span>

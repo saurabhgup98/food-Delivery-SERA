@@ -1,12 +1,12 @@
 import { DropdownOption } from './dropdownOptions';
 
-// Status options
+// Status options - Updated to match actual restaurant status values
 export const statusOptions: DropdownOption[] = [
   { value: 'all', label: 'All Status', icon: '🏪' },
-  { value: 'open', label: 'Open Now', icon: '🟢' },
-  { value: 'closed', label: 'Closed', icon: '🔴' },
-  { value: 'busy', label: 'Busy', icon: '🟡' },
-  { value: 'temporarily_closed', label: 'Temporarily Closed', icon: '⚠️' }
+  { value: 'OPEN', label: 'Open', icon: '🟢' },
+  { value: 'CLOSED', label: 'Closed', icon: '🔴' },
+  { value: 'TEMPORARILY_CLOSED', label: 'Temporarily Closed', icon: '⚠️' },
+  { value: 'PERMANENTLY_CLOSED', label: 'Permanently Closed', icon: '🚫' }
 ];
 
 // Distance options
