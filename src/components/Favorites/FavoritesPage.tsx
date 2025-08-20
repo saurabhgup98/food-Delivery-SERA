@@ -333,7 +333,7 @@ const FavoritesPage: React.FC = () => {
       </div>
 
       {/* Smart Sticky Search and Filter Header */}
-      <div className={`sticky top-16 z-40 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-300 ease-in-out ${
+      <div className={`sticky top-16 z-40 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-400 ease-in-out ${
         isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">

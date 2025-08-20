@@ -154,11 +154,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
             <div className="space-y-2">
               <label className="text-white text-sm font-medium">Minimum Rating</label>
               <div className="flex flex-wrap gap-2">
-                {['4+', '4.5+', '5'].map((rating) => (
+                {['1+', '2+', '3+', '4+', '4.5+', '5'].map((rating) => (
                   <button
                     key={rating}
                     onClick={() => setTempRatingFilter(tempRatingFilter === rating ? '' : rating)}
-                    className={`px-4 py-2 rounded-lg border transition-all duration-200 font-medium ${
+                    className={`px-3 py-2 rounded-lg border transition-all duration-200 font-medium text-sm ${
                       tempRatingFilter === rating
                         ? 'bg-yellow-600/20 border-yellow-500/50 text-yellow-400 shadow-sm'
                         : 'bg-slate-700/50 text-gray-300 border-slate-600/50 hover:bg-slate-600/50 hover:border-slate-500/50'
