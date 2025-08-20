@@ -49,7 +49,6 @@ const FavoritesPage: React.FC = () => {
   // Smart sticky header state
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [isSticky, setIsSticky] = useState(false);
 
   // Handle scroll for smart sticky header
   useEffect(() => {
@@ -59,24 +58,14 @@ const FavoritesPage: React.FC = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          const heroHeight = headerRef.current?.offsetHeight || 200; // Approximate hero height
           
-          // Enable sticky behavior only after hero section is scrolled past
-          if (currentScrollY > heroHeight) {
-            setIsSticky(true);
-            
-            // Show header if scrolling up (even 1px)
-            if (currentScrollY < lastScrollY) {
-              setIsHeaderVisible(true);
-            } 
-            // Hide header if scrolling down
-            else if (currentScrollY > lastScrollY) {
-              setIsHeaderVisible(false);
-            }
-          } else {
-            // When at top or in hero section, always show header
-            setIsSticky(false);
+          // Show header if scrolling up (even 1px) or at the top
+          if (currentScrollY < lastScrollY || currentScrollY <= 100) {
             setIsHeaderVisible(true);
+          } 
+          // Hide header if scrolling down and not at the top
+          else if (currentScrollY > lastScrollY && currentScrollY > 200) {
+            setIsHeaderVisible(false);
           }
           
           setLastScrollY(currentScrollY);
@@ -174,7 +163,6 @@ const FavoritesPage: React.FC = () => {
     // Force search on form submit regardless of word count and show header
     setDebouncedSearchQuery(searchQuery);
     setIsHeaderVisible(true);
-    setIsSticky(false);
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +225,6 @@ const FavoritesPage: React.FC = () => {
     
     // Show header and scroll to top when filters are applied
     setIsHeaderVisible(true);
-    setIsSticky(false);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -260,7 +247,6 @@ const FavoritesPage: React.FC = () => {
     
     // Show header and scroll to top when filters are cleared
     setIsHeaderVisible(true);
-    setIsSticky(false);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -347,8 +333,8 @@ const FavoritesPage: React.FC = () => {
       </div>
 
       {/* Smart Sticky Search and Filter Header */}
-      <div className={`${isSticky ? 'fixed top-16 left-0 right-0 z-40' : 'relative'} bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-all duration-300 ease-in-out ${
-        isSticky && !isHeaderVisible ? '-translate-y-full' : 'translate-y-0'
+      <div className={`sticky top-16 z-40 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-300 ease-in-out ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col lg:flex-row gap-3 items-center">
