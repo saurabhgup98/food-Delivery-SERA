@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, MapPin } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { apiService } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -27,17 +27,17 @@ const NotificationsPage: React.FC = () => {
 
   // Fetch notifications on component mount
   useEffect(() => {
-    if (user?._id) {
+    if (user?.id) {
       fetchNotifications();
     }
-  }, [user?._id]);
+  }, [user?.id]);
 
   const fetchNotifications = async () => {
-    if (!user?._id) return;
+    if (!user?.id) return;
     
     setLoading(true);
     try {
-      const response = await apiService.getNotifications(user._id);
+      const response = await apiService.getNotifications(user.id);
       if (response.success) {
         setNotifications(response.data.notifications);
       }

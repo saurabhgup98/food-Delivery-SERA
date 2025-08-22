@@ -59,11 +59,17 @@ export interface Order {
 }
 
 export interface Notification {
-  id: string;
+  _id: string;
   userId: string;
   title: string;
   message: string;
-  type: 'order' | 'promotion' | 'system';
+  type: 'security' | 'registration' | 'review' | 'promo' | 'birthday';
   isRead: boolean;
+  action: 'none' | 'rate' | 'use_code' | 'view_order';
+  orderId?: string;
+  promoCode?: string;
+  expiresAt?: string;
+  sentEmail: boolean;
   createdAt: string;
+  updatedAt: string;
 }

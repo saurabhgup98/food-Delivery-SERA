@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, X, MapPin } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -34,17 +34,17 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
 
   // Fetch notifications when dropdown opens
   useEffect(() => {
-    if (isOpen && user?._id) {
+    if (isOpen && user?.id) {
       fetchNotifications();
     }
-  }, [isOpen, user?._id]);
+  }, [isOpen, user?.id]);
 
   const fetchNotifications = async () => {
-    if (!user?._id) return;
+    if (!user?.id) return;
     
     setLoading(true);
     try {
-      const response = await apiService.getNotifications(user._id);
+      const response = await apiService.getNotifications(user.id);
       if (response.success) {
         setNotifications(response.data.notifications);
       }
@@ -104,7 +104,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
   };
 
   const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications(prev => prev.filter(notification => notification._id !== id));
   };
 
   const getNotificationIcon = (type: string) => {
