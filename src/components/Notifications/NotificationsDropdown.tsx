@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { apiService } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Notification {
-  id: string;
-  type: 'order' | 'promotion' | 'system' | 'delivery' | 'review';
+  _id: string;
+  userId: string;
   title: string;
   message: string;
-  timestamp: string;
+  type: 'security' | 'registration' | 'review' | 'promo' | 'birthday';
   isRead: boolean;
-  icon: string;
-  action?: string;
+  action: 'none' | 'rate' | 'use_code' | 'view_order';
   orderId?: string;
-  amount?: string;
+  promoCode?: string;
+  expiresAt?: string;
+  sentEmail: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface NotificationsDropdownProps {
@@ -21,64 +26,34 @@ interface NotificationsDropdownProps {
 }
 
 const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, onClose }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'order',
-      title: 'Order Confirmed! 🎉',
-      message: 'Your order #ORD-2024-001 has been confirmed and is being prepared.',
-      timestamp: '2 minutes ago',
-      isRead: false,
-      icon: '📦',
-      action: 'Track Order',
-      orderId: 'ORD-2024-001'
-    },
-    {
-      id: '2',
-      type: 'delivery',
-      title: 'Your order is on the way! 🚚',
-      message: 'Order #ORD-2024-002 is out for delivery. Expected arrival: 25-30 minutes.',
-      timestamp: '15 minutes ago',
-      isRead: false,
-      icon: '🚚',
-      action: 'Track Delivery',
-      orderId: 'ORD-2024-002'
-    },
-    {
-      id: '3',
-      type: 'promotion',
-      title: 'Special Offer! 🎁',
-      message: 'Get 20% off on your next order. Use code: SERA20. Valid until tomorrow.',
-      timestamp: '1 hour ago',
-      isRead: true,
-      icon: '🎁',
-      action: 'Use Code'
-    },
-    {
-      id: '4',
-      type: 'review',
-      title: 'Rate your recent order ⭐',
-      message: 'How was your experience with Spice Garden? Share your feedback!',
-      timestamp: '2 hours ago',
-      isRead: true,
-      icon: '⭐',
-      action: 'Rate Now',
-      orderId: 'ORD-2024-003'
-    },
-    {
-      id: '5',
-      type: 'system',
-      title: 'Payment Successful 💳',
-      message: 'Payment of ₹450 has been processed successfully for order #ORD-2024-004.',
-      timestamp: '3 hours ago',
-      isRead: true,
-      icon: '💳',
-      amount: '₹450',
-      orderId: 'ORD-2024-004'
-    }
-  ]);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch notifications when dropdown opens
+  useEffect(() => {
+    if (isOpen && user?._id) {
+      fetchNotifications();
+    }
+  }, [isOpen, user?._id]);
+
+  const fetchNotifications = async () => {
+    if (!user?._id) return;
+    
+    setLoading(true);
+    try {
+      const response = await apiService.getNotifications(user._id);
+      if (response.success) {
+        setNotifications(response.data.notifications);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,20 +72,35 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
     };
   }, [isOpen, onClose]);
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
+  const markAsRead = async (id: string) => {
+    try {
+      await apiService.updateNotification(id, { isRead: true });
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification._id === id 
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      );
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter(n => !n.isRead);
+      await Promise.all(
+        unreadNotifications.map(notification => 
+          apiService.updateNotification(notification._id, { isRead: true })
+        )
+      );
+      setNotifications(prev => 
+        prev.map(notification => ({ ...notification, isRead: true }))
+      );
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
   };
 
   const deleteNotification = (id: string) => {
@@ -119,18 +109,16 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'order':
+      case 'security':
         return (
-          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 00-2-2H9a2 2 0 00-2 2v4.01" />
+          <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         );
-      case 'delivery':
-        return <MapPin className="w-4 h-4 text-green-500" />;
-      case 'promotion':
+      case 'registration':
         return (
-          <svg className="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+          <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         );
       case 'review':
@@ -139,10 +127,16 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
         );
-      case 'system':
+      case 'promo':
         return (
-          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg className="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+          </svg>
+        );
+      case 'birthday':
+        return (
+          <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         );
       default:
@@ -152,22 +146,33 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
 
   const getNotificationColor = (type: string) => {
     switch (type) {
-      case 'order':
-        return 'border-l-blue-500 bg-blue-500/5';
-      case 'delivery':
+      case 'security':
+        return 'border-l-red-500 bg-red-500/5';
+      case 'registration':
         return 'border-l-green-500 bg-green-500/5';
-      case 'promotion':
-        return 'border-l-pink-500 bg-pink-500/5';
       case 'review':
         return 'border-l-yellow-500 bg-yellow-500/5';
-      case 'system':
-        return 'border-l-gray-500 bg-gray-500/5';
+      case 'promo':
+        return 'border-l-pink-500 bg-pink-500/5';
+      case 'birthday':
+        return 'border-l-purple-500 bg-purple-500/5';
       default:
         return 'border-l-gray-500 bg-gray-500/5';
     }
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
 
   if (!isOpen) return null;
 
@@ -234,82 +239,91 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ isOpen, o
             </div>
           ) : (
             <div className="p-2">
-              {notifications.slice(0, 5).map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-3 rounded-lg border-l-4 transition-all duration-200 hover:bg-dark-700/50 mb-2 ${
-                    getNotificationColor(notification.type)
-                  } ${!notification.isRead ? 'ring-1 ring-sera-blue/20' : ''}`}
-                >
-                  <div className="flex items-start space-x-3">
-                    {/* Icon */}
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-dark-700 rounded-lg flex items-center justify-center">
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h4 className="text-white font-medium text-xs truncate">
-                              {notification.title}
-                            </h4>
-                            {!notification.isRead && (
-                              <div className="w-1.5 h-1.5 bg-sera-blue rounded-full animate-pulse"></div>
-                            )}
-                          </div>
-                          <p className="text-gray-400 text-xs mb-2 line-clamp-2">
-                            {notification.message}
-                          </p>
-                          <div className="flex items-center space-x-3">
-                                                       <span className="text-gray-500 text-xs flex items-center space-x-1">
-                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                             </svg>
-                             <span>{notification.timestamp}</span>
-                           </span>
-                            {notification.amount && (
-                              <span className="text-sera-orange text-xs font-medium">
-                                {notification.amount}
-                              </span>
-                            )}
-                          </div>
+              {loading ? (
+                <div className="p-4 text-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-sera-blue mx-auto"></div>
+                  <p className="text-gray-400 text-xs mt-2">Loading notifications...</p>
+                </div>
+              ) : (
+                notifications.slice(0, 5).map((notification) => (
+                  <div
+                    key={notification._id}
+                    className={`p-3 rounded-lg border-l-4 transition-all duration-200 hover:bg-dark-700/50 mb-2 ${
+                      getNotificationColor(notification.type)
+                    } ${!notification.isRead ? 'ring-1 ring-sera-blue/20' : ''}`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      {/* Icon */}
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-dark-700 rounded-lg flex items-center justify-center">
+                          {getNotificationIcon(notification.type)}
                         </div>
+                      </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center space-x-1">
-                          {notification.action && (
-                            <button className="px-2 py-1 bg-sera-blue text-white text-xs rounded hover:bg-blue-600 transition-colors">
-                              {notification.action}
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <h4 className="text-white font-medium text-xs truncate">
+                                {notification.title}
+                              </h4>
+                              {!notification.isRead && (
+                                <div className="w-1.5 h-1.5 bg-sera-blue rounded-full animate-pulse"></div>
+                              )}
+                            </div>
+                            <p className="text-gray-400 text-xs mb-2 line-clamp-2">
+                              {notification.message}
+                            </p>
+                            <div className="flex items-center space-x-3">
+                              <span className="text-gray-500 text-xs flex items-center space-x-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{formatTimestamp(notification.createdAt)}</span>
+                              </span>
+                              {notification.promoCode && (
+                                <span className="text-sera-orange text-xs font-medium">
+                                  {notification.promoCode}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center space-x-1">
+                            {notification.action !== 'none' && (
+                              <button className="px-2 py-1 bg-sera-blue text-white text-xs rounded hover:bg-blue-600 transition-colors">
+                                {notification.action === 'use_code' ? 'Use Code' : 
+                                 notification.action === 'rate' ? 'Rate Now' : 
+                                 notification.action === 'view_order' ? 'View Order' : notification.action}
+                              </button>
+                            )}
+                            {!notification.isRead && (
+                              <button
+                                onClick={() => markAsRead(notification._id)}
+                                className="p-1 text-gray-400 hover:text-green-400 transition-colors"
+                                title="Mark as read"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </button>
+                            )}
+                            <button
+                              onClick={() => deleteNotification(notification._id)}
+                              className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                              title="Delete"
+                            >
+                              <X className="w-3 h-3" />
                             </button>
-                          )}
-                                                     {!notification.isRead && (
-                             <button
-                               onClick={() => markAsRead(notification.id)}
-                               className="p-1 text-gray-400 hover:text-green-400 transition-colors"
-                               title="Mark as read"
-                             >
-                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                               </svg>
-                             </button>
-                           )}
-                          <button
-                            onClick={() => deleteNotification(notification.id)}
-                            className="p-1 text-gray-400 hover:text-red-400 transition-colors"
-                            title="Delete"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
         </div>

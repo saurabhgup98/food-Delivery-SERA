@@ -762,6 +762,106 @@ class ApiService {
     });
   }
 
+  // Notification methods
+  async getNotifications(userId: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      notifications: Array<{
+        _id: string;
+        userId: string;
+        title: string;
+        message: string;
+        type: 'security' | 'registration' | 'review' | 'promo' | 'birthday';
+        isRead: boolean;
+        action: 'none' | 'rate' | 'use_code' | 'view_order';
+        orderId?: string;
+        promoCode?: string;
+        expiresAt?: string;
+        sentEmail: boolean;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+    };
+  }> {
+    return this.makeRequest(`/app?action=notifications&userId=${userId}`);
+  }
+
+  async createNotification(notificationData: {
+    userId: string;
+    title: string;
+    message: string;
+    type: 'security' | 'registration' | 'review' | 'promo' | 'birthday';
+    action?: 'none' | 'rate' | 'use_code' | 'view_order';
+    orderId?: string;
+    promoCode?: string;
+    expiresAt?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: { notificationId: string };
+  }> {
+    return this.makeRequest('/app?action=notifications', {
+      method: 'POST',
+      body: JSON.stringify(notificationData)
+    });
+  }
+
+  async updateNotification(notificationId: string, updateData: {
+    isRead?: boolean;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: { notification: any };
+  }> {
+    return this.makeRequest(`/app?action=notifications&notificationId=${notificationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData)
+    });
+  }
+
+  // Promotion methods
+  async createPromoCode(promoData: {
+    userId: string;
+    type: 'birthday' | 'promo';
+    discountPercentage?: number;
+    minimumOrderAmount?: number;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      promoCode: string;
+      discountPercentage: number;
+      minimumOrderAmount: number;
+      expiresAt: string;
+    };
+  }> {
+    return this.makeRequest('/app?action=promotions', {
+      method: 'POST',
+      body: JSON.stringify(promoData)
+    });
+  }
+
+  async getPromoCodes(userId: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      promoCodes: Array<{
+        _id: string;
+        code: string;
+        userId: string;
+        type: 'birthday' | 'promo';
+        discountPercentage: number;
+        minimumOrderAmount: number;
+        isUsed: boolean;
+        expiresAt: string;
+        createdAt: string;
+      }>;
+    };
+  }> {
+    return this.makeRequest(`/app?action=promotions&userId=${userId}`);
+  }
+
 }
 
 export const apiService = new ApiService();
