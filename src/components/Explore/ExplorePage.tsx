@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Search,
-  MapPin
+  MapPin,
+  X
 } from 'lucide-react';
-import RestaurantCard from './RestaurantCard';
-import RestaurantListItem from './RestaurantListItem';
+import QuickFilters from '../Common/QuickFilters';
+import RestaurantDisplay from '../Common/RestaurantDisplay';
+import FilterModal from '../Common/FilterModal';
+import FilterIcon from '../Icons/FilterIcon';
 import { apiService, Restaurant } from '../../services/api';
 import { AnimatedLoader } from '../Loader';
 
@@ -61,8 +64,60 @@ const ExplorePage: React.FC = () => {
   const [offersOnly, setOffersOnly] = useState(false);
   const [freeDelivery, setFreeDelivery] = useState(false);
 
+  // Search input ref and validation
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Debounced search query
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  // Smart sticky header state
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Handle scroll for smart sticky header
+  useEffect(() => {
+    let ticking = false;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // Show header if scrolling up (even 1px) or at the top
+          if (currentScrollY < lastScrollY || currentScrollY <= 100) {
+            setIsHeaderVisible(true);
+          } 
+          // Hide header if scrolling down and not at the top
+          else if (currentScrollY > lastScrollY && currentScrollY > 200) {
+            setIsHeaderVisible(false);
+          }
+          
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Search validation
+  const wordCount = searchQuery.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const isSearchValid = wordCount >= 3 || searchQuery.trim() === '';
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
 
   // Fetch restaurants from backend
   const fetchRestaurants = useCallback(async () => {
@@ -149,7 +204,8 @@ const ExplorePage: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is now debounced, so no need to manually trigger
+    // Force search on form submit regardless of word count and show header
+    setIsHeaderVisible(true);
   };
 
   const clearFilters = () => {
@@ -174,6 +230,13 @@ const ExplorePage: React.FC = () => {
     setTempRatingFilter('4+');
     setTempOffersOnly(false);
     setTempFreeDelivery(false);
+    
+    // Show header and scroll to top when filters are cleared
+    setIsHeaderVisible(true);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const applyFilters = () => {
@@ -188,6 +251,13 @@ const ExplorePage: React.FC = () => {
     setFreeDelivery(tempFreeDelivery);
     
     setShowFilterModal(false);
+    
+    // Show header and scroll to top when filters are applied
+    setIsHeaderVisible(true);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const handleRatingFilter = (rating: string) => {
@@ -241,431 +311,180 @@ const ExplorePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Hero Section */}
-      <div className="bg-slate-900 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-              Explore Restaurants
-            </h1>
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-              Discover amazing food from the best restaurants near you
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Compact Hero Section - Positioned below main header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-sera-pink/20 via-sera-orange/20 to-sera-pink/20"></div>
+        <div className="relative bg-gradient-to-r from-sera-pink to-sera-orange border-b border-slate-700/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+            <div className="text-center">
+              {/* Hero Content - Compact Layout */}
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-4 mb-3">
+                {/* Search Icon - Only on large screens, horizontal with text */}
+                <div className="hidden lg:flex items-center gap-3">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full shadow-lg border border-white/30">
+                    <Search className="w-4 h-4 text-white" />
+                  </div>
+                </div>
+                
+                {/* Main Title */}
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
+                  Explore Restaurants
+                </h1>
+              </div>
+              
+              {/* Description */}
+              <p className="text-white/90 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-3">
+                Discover amazing food from the best restaurants near you.
+              </p>
+              
+              {/* Features */}
+              <div className="flex items-center justify-center space-x-4 text-white/80">
+                <div className="flex items-center space-x-2">
+                  <svg className="w-3 h-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                  <span className="text-xs">Top rated</span>
+                </div>
+                <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-3 h-3 text-blue-400" />
+                  <span className="text-xs">Near you</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {/* Smart Sticky Search and Filter Header */}
+      <div className={`sticky top-16 z-40 bg-slate-800/95 backdrop-blur-md border-b border-slate-700/50 shadow-lg transition-transform duration-400 ease-in-out ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col lg:flex-row gap-3 items-center">
             {/* Search Bar */}
-            <div className="flex-1 w-full">
+            <div className="flex-1 w-full lg:w-auto">
               <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search restaurants, cuisines, or dishes..."
-                  className="w-full px-4 py-2.5 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
+                  onChange={handleSearchInputChange}
+                  placeholder="Search restaurants, cuisines, or dishes... (min 3 words)"
+                  className={`w-full bg-slate-700 border rounded-xl pl-10 pr-10 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-sm ${
+                    searchQuery.trim() !== '' && !isSearchValid 
+                      ? 'border-orange-500 focus:ring-orange-500' 
+                      : 'border-slate-600 focus:ring-blue-500'
+                  }`}
                 />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+                {searchQuery.trim() !== '' && !isSearchValid && (
+                  <div className="absolute top-full left-0 mt-1 text-xs text-orange-400 z-10 bg-slate-800 px-2 py-1 rounded border border-orange-500/50">
+                    Type at least 3 words to search
+                  </div>
+                )}
               </form>
             </div>
 
             {/* Filter Controls */}
             <div className="flex flex-wrap gap-2">
               {/* Location */}
-              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>Deliver to: Current Location</span>
+              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2.5 rounded-xl text-white hover:bg-slate-600 transition-all duration-200 text-xs font-medium shadow-sm hover:shadow-md">
+                <MapPin className="w-3 h-3" />
+                <span>Current Location</span>
               </button>
 
-              {/* Rating Dropdown */}
-              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-                <span className="text-yellow-400">⭐</span>
-                <span>Rating</span>
-                <span className="text-gray-400">▼</span>
-              </button>
-
-                             {/* Filter Toggle */}
-               <button 
-                 onClick={openFilterModal}
-                 className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border bg-slate-700 border-slate-600 hover:bg-slate-600"
-               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-                </svg>
+              {/* Filter Toggle */}
+              <button 
+                onClick={openFilterModal}
+                className="flex items-center space-x-2 px-3 py-2.5 rounded-xl text-white transition-all duration-200 text-xs font-medium border bg-gradient-to-r from-blue-600 to-blue-700 border-blue-600 hover:from-blue-700 hover:to-blue-800 shadow-sm hover:shadow-md"
+              >
+                <FilterIcon className="w-3 h-3" />
                 <span>Filters</span>
-                <span className="text-gray-400">▼</span>
               </button>
 
               {/* View Toggle */}
-              <div className="flex bg-slate-700 border border-slate-600 rounded-lg overflow-hidden">
-                <button 
+              <div className="flex bg-slate-700 rounded-xl p-1 border border-slate-600">
+                <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 text-sm transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-sera-blue text-white' 
-                      : 'text-gray-400 hover:text-white'
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                    viewMode === 'grid'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-300 hover:text-white'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
-                  </svg>
+                  Grid
                 </button>
-                <button 
+                <button
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-sera-blue text-white' 
-                      : 'text-gray-400 hover:text-white'
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-300 hover:text-white'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-                  </svg>
+                  List
                 </button>
               </div>
-
-              {/* Map View Button */}
-              <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-                <MapPin className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </div>
+
+        {/* Compact Quick Filters - Always visible */}
+        <QuickFilters
+          selectedVegFilter={selectedVegFilter}
+          onVegFilterChange={setSelectedVegFilter}
+          selectedRatingFilter={selectedRatingFilter}
+          onRatingFilterChange={setSelectedRatingFilter}
+          className="border-t border-slate-700/50"
+        />
       </div>
 
-      {/* Quick Filters */}
-      <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <p className="text-gray-400 text-sm mb-3">Quick Filters:</p>
-          <div className="flex flex-wrap gap-2">
-            {/* Dietary Filters */}
-            <button 
-              onClick={() => setSelectedVegFilter(!selectedVegFilter)}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedVegFilter 
-                  ? 'bg-green-600 border-green-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>🌿</span>
-              <span>Veg Only</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🍗</span>
-              <span>Non-Veg</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🟣</span>
-              <span>Both</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🟣</span>
-              <span>Jain</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🌱</span>
-              <span>Vegan</span>
-            </button>
 
-            {/* Cuisine Filters */}
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🇮🇳</span>
-              <span>Indian</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🇨🇳</span>
-              <span>Chinese</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-white hover:bg-slate-600 transition-colors text-sm">
-              <span>🇮🇹</span>
-              <span>Italian</span>
-            </button>
-
-            {/* Rating Filters */}
-            <button 
-              onClick={() => handleRatingFilter('4+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '4+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>4+ Stars</span>
-            </button>
-            <button 
-              onClick={() => handleRatingFilter('3+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '3+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>3+ Stars</span>
-            </button>
-            <button 
-              onClick={() => handleRatingFilter('2+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '2+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>2+ Stars</span>
-            </button>
-            <button 
-              onClick={() => handleRatingFilter('1+')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-white transition-colors text-sm border ${
-                selectedRatingFilter === '1+' 
-                  ? 'bg-slate-600 border-slate-500' 
-                  : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-              }`}
-            >
-              <span>⭐</span>
-              <span>1+ Stars</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Modal Overlay */}
+      {/* Enhanced Filter Modal */}
       {showFilterModal && (
-                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-           <div className="bg-slate-800 rounded-lg shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-slate-700">
-              <h2 className="text-white text-xl font-semibold">Filters</h2>
-            </div>
-
-                         {/* Modal Content */}
-             <div className="p-6 space-y-8">
-                                                           {/* Status Section */}
-                <div>
-                  <h3 className="text-white font-medium mb-3">Status</h3>
-                  <select
-                    value={tempStatus}
-                    onChange={(e) => setTempStatus(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="open">Open Now</option>
-                    <option value="closed">Closed</option>
-                    <option value="busy">Busy</option>
-                    <option value="temporarily_closed">Temporarily Closed</option>
-                  </select>
-                </div>
-
-                                                           {/* Distance Section */}
-                <div>
-                  <h3 className="text-white font-medium mb-3">Distance</h3>
-                  <select
-                    value={tempDistance}
-                    onChange={(e) => setTempDistance(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                  >
-                    <option value="any">Any Distance</option>
-                    <option value="0-1">0-1 km</option>
-                    <option value="1-3">1-3 km</option>
-                    <option value="3-5">3-5 km</option>
-                    <option value="5-10">5-10 km</option>
-                    <option value="10+">10+ km</option>
-                  </select>
-                </div>
-
-                                                           {/* Cuisine Section */}
-                <div>
-                  <h3 className="text-white font-medium mb-3">Cuisine Type</h3>
-                  <select
-                    value={tempCuisine}
-                    onChange={(e) => setTempCuisine(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                  >
-                    <option value="all">All Cuisines</option>
-                    <option value="Indian">Indian</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Chinese">Chinese</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Thai">Thai</option>
-                    <option value="Mexican">Mexican</option>
-                    <option value="Mediterranean">Mediterranean</option>
-                    <option value="Korean">Korean</option>
-                    <option value="Vietnamese">Vietnamese</option>
-                    <option value="French">French</option>
-                  </select>
-                </div>
-
-                               {/* Dietary Section */}
-                <div>
-                  <h3 className="text-white font-medium mb-3">Dietary Preferences</h3>
-                  <select
-                    value={tempDietary}
-                    onChange={(e) => setTempDietary(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                  >
-                    <option value="all">All Dietary</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="non-vegetarian">Non-Vegetarian</option>
-                    <option value="jain">Jain</option>
-                    <option value="gluten-free">Gluten-Free</option>
-                  </select>
-                </div>
-
-                               {/* Price Range Section */}
-                <div>
-                  <h3 className="text-white font-medium mb-3">Price Range</h3>
-                  <select
-                    value={tempPriceRange}
-                    onChange={(e) => setTempPriceRange(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue"
-                  >
-                    <option value="all">All Prices</option>
-                    <option value="budget">Budget ($)</option>
-                    <option value="mid-range">Mid-Range ($$)</option>
-                    <option value="premium">Premium ($$$)</option>
-                  </select>
-                </div>
-
-               {/* Quick Filters Section */}
-               <div>
-                 <h3 className="text-white font-medium mb-3">Quick Filters</h3>
-                 <div className="space-y-3">
-                                       {/* Rating Filter */}
-                    <div>
-                      <label className="text-white text-sm mb-2 block">Minimum Rating</label>
-                      <div className="flex space-x-2">
-                        {['4+', '4.5+', '5'].map((rating) => (
-                          <button
-                            key={rating}
-                            onClick={() => setTempRatingFilter(rating)}
-                            className={`px-3 py-2 rounded-lg border transition-colors ${
-                              tempRatingFilter === rating
-                                ? 'bg-sera-blue/20 border-sera-blue text-sera-blue'
-                                : 'bg-slate-700 text-gray-300 border-slate-600 hover:bg-slate-600'
-                            }`}
-                          >
-                            <span className="inline mr-1">⭐</span>
-                            {rating}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                                       {/* Offers Only */}
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={tempOffersOnly}
-                        onChange={(e) => setTempOffersOnly(e.target.checked)}
-                        className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
-                      />
-                      <span className="text-white">Offers Only</span>
-                      <span className="text-gray-400">🎁</span>
-                    </label>
-
-                    {/* Free Delivery */}
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={tempFreeDelivery}
-                        onChange={(e) => setTempFreeDelivery(e.target.checked)}
-                        className="w-4 h-4 text-sera-blue bg-slate-700 border-slate-600 rounded focus:ring-sera-blue focus:ring-2"
-                      />
-                      <span className="text-white">Free Delivery</span>
-                      <span className="text-gray-400">🚚</span>
-                    </label>
-                 </div>
-               </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-slate-700 space-y-3">
-              {/* Action Buttons */}
-              <div className="flex space-x-3">
-                <button
-                  onClick={applyFilters}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <span className="text-green-400">✓</span>
-                  <span>Apply</span>
-                </button>
-                <button
-                  onClick={() => setShowFilterModal(false)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors"
-                >
-                  <span className="text-red-400">✕</span>
-                  <span>Cancel</span>
-                </button>
-              </div>
-
-              {/* Clear All Filters Button */}
-              <button
-                onClick={clearFilters}
-                className="w-full flex items-center justify-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-              >
-                <span className="text-white">🗑️</span>
-                <span>Clear All Filters</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <FilterModal
+          tempStatus={tempStatus}
+          setTempStatus={setTempStatus}
+          tempCuisine={tempCuisine}
+          setTempCuisine={setTempCuisine}
+          tempDietary={tempDietary}
+          setTempDietary={setTempDietary}
+          tempPriceRange={tempPriceRange}
+          setTempPriceRange={setTempPriceRange}
+          tempDistance={tempDistance}
+          setTempDistance={setTempDistance}
+          tempRatingFilter={tempRatingFilter}
+          setTempRatingFilter={setTempRatingFilter}
+          tempOffersOnly={tempOffersOnly}
+          setTempOffersOnly={setTempOffersOnly}
+          tempFreeDelivery={tempFreeDelivery}
+          setTempFreeDelivery={setTempFreeDelivery}
+          onApply={applyFilters}
+          onCancel={() => setShowFilterModal(false)}
+          onClear={clearFilters}
+        />
       )}
 
-      {/* Restaurant List */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Results Header */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-white font-semibold">
-            {restaurants.length} Restaurants Found
-          </div>
-          <div className="text-gray-400 text-sm">
-            Showing {restaurants.length} of {restaurants.length} restaurants
-          </div>
-        </div>
-
-        {restaurants.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🍽️</div>
-            <h2 className="text-white text-2xl font-semibold mb-2">No restaurants found</h2>
-            <p className="text-gray-400 mb-6">Try adjusting your search or filters</p>
-            <button
-              onClick={clearFilters}
-              className="bg-sera-blue text-white px-6 py-3 rounded-lg hover:bg-sera-blue/80 transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-            : 'space-y-4'
-          }>
-                         {restaurants.map(restaurant => (
-               viewMode === 'grid' ? (
-                                   <RestaurantCard
-                    key={restaurant._id}
-                    restaurant={restaurant}
-                    onFavoriteToggle={handleFavoriteToggle}
-                    onViewMenu={handleViewMenu}
-                  />
-               ) : (
-                 <RestaurantListItem
-                   key={restaurant._id}
-                   restaurant={restaurant}
-                   onFavoriteToggle={handleFavoriteToggle}
-                   onViewMenu={handleViewMenu}
-                 />
-               )
-             ))}
-          </div>
-        )}
+      {/* Restaurant Display with smooth scrolling */}
+      <div className="pb-8">
+        <RestaurantDisplay
+          restaurants={restaurants}
+          viewMode={viewMode}
+          onFavoriteToggle={handleFavoriteToggle}
+          onViewMenu={handleViewMenu}
+          onClearFilters={clearFilters}
+        />
       </div>
     </div>
   );
