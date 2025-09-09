@@ -1,10 +1,29 @@
 export interface User {
   id: string;
+  _id?: string; // MongoDB ObjectId format (for compatibility)
   name: string;
   email: string;
-  role: 'admin' | 'business_owner' | 'customer';
+  emailVerified: boolean;
+  appRegistered: { name: string; role: string; }[];
+  oauthProvider?: 'google' | 'facebook' | 'github' | 'local';
+  role?: string; // App-specific role
+  appEndpoint?: string; // App-specific endpoint
   phone?: string;
   avatar?: string;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    tokens: AuthTokens;
+  };
 }
 
 export interface Restaurant {
