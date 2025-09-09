@@ -696,8 +696,9 @@ const RestaurantDetail: React.FC = () => {
               <p className="text-gray-400">No menu items available for the selected filters</p>
             </div>
           ) : (
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-             {itemsToShow.map(item => {
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {itemsToShow.map(item => {
                                const quantity = getItemQuantity(item._id);
                 const isHovered = hoveredDishId === item._id;
                
@@ -940,21 +941,22 @@ const RestaurantDetail: React.FC = () => {
                  </div>
                );
              })}
-           </div>
-         );
+              </div>
+              
+              {/* View All Button */}
+              {hasMoreItems && (
+                <div className="mt-8 text-center">
+                  <button 
+                    onClick={() => setShowAllItems(!showAllItems)}
+                    className="px-8 py-3 bg-gradient-to-r from-sera-blue to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30 font-semibold"
+                  >
+                    {showAllItems ? 'Show Less' : `View All Menu (${displayItems.length} items)`}
+                  </button>
+                </div>
+              )}
+            </>
+          );
        })()}
-
-        {/* View All Button */}
-        {hasMoreItems && (
-          <div className="mt-8 text-center">
-            <button 
-              onClick={() => setShowAllItems(!showAllItems)}
-              className="px-8 py-3 bg-gradient-to-r from-sera-blue to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30 font-semibold"
-            >
-              {showAllItems ? 'Show Less' : `View All Menu (${displayItems.length} items)`}
-            </button>
-          </div>
-        )}
       </div>
 
              {/* Floating Cart Button */}
