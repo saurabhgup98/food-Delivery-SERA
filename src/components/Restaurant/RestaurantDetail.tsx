@@ -11,6 +11,8 @@ import FilterModal, { FilterSelections } from './FilterModal';
 import DishCustomizationModal from './DishCustomizationModal';
 import CartModal from '../Cart/CartModal';
 import { AnimatedLoader } from '../Loader';
+import PrimaryDropdown from '../Common/PrimaryDropdown';
+import { DropdownOption } from '../../data/dropdownOptions';
 
 // Debounce hook for search
 const useDebounce = (value: string, delay: number) => {
@@ -47,6 +49,7 @@ const RestaurantDetail: React.FC = () => {
   const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
   const [hoveredDishId, setHoveredDishId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
 
   // State for API data
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -219,6 +222,27 @@ const RestaurantDetail: React.FC = () => {
       count: filteredMenuItems.filter(item => item.category === category).length
     }));
   }, [filteredMenuItems]);
+
+  // Dropdown options for categories
+  const categoryOptions: DropdownOption[] = useMemo(() => {
+    const options: DropdownOption[] = [
+      { value: 'all', label: 'All Categories', icon: '🍽️' }
+    ];
+    
+    menuCategories.forEach(category => {
+      options.push({
+        value: category.id,
+        label: `${category.name} (${category.count})`,
+        icon: category.id === 'starters' ? '🥗' : 
+              category.id === 'mains' ? '🍛' :
+              category.id === 'breads' ? '🍞' :
+              category.id === 'desserts' ? '🍰' :
+              category.id === 'beverages' ? '🥤' : '🍽️'
+      });
+    });
+    
+    return options;
+  }, [menuCategories]);
 
   // Calculate tab counts based on ALL menu items (not filtered ones)
   const tabCounts = useMemo(() => {
@@ -463,50 +487,36 @@ const RestaurantDetail: React.FC = () => {
       {/* Search & Filter Bar */}
       <div className="sticky top-16 z-40 bg-dark-800 border-b border-dark-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
             {/* Search Input */}
-            <div className="flex-1 w-full lg:w-auto">
+            <div className="flex-1 w-full md:w-auto">
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search in menu..."
-                  className="w-full px-4 py-3 pl-12 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-blue focus:border-transparent"
+                  className="w-full px-4 py-2.5 pl-10 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
                 />
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               </div>
             </div>
 
             {/* Category Filter */}
-            <div className="relative group">
-              <select 
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sera-blue appearance-none cursor-pointer transition-all duration-300 hover:border-dark-500 group-hover:border-dark-400 pr-10"
-              >
-                <option value="all">All Categories</option>
-                {menuCategories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name} ({category.count})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400 transition-transform duration-300 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-              {/* Dropdown overlay for visual integration */}
-              <div className="absolute inset-0 border border-transparent rounded-lg pointer-events-none transition-all duration-300 group-hover:border-dark-400 group-focus-within:border-sera-blue"></div>
-            </div>
+            <PrimaryDropdown
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              options={categoryOptions}
+              placeholder="All Categories"
+              className="min-w-[200px]"
+            />
 
             {/* Filter Button */}
             <button
               onClick={() => setIsFilterOpen(true)}
-              className="flex items-center space-x-2 bg-dark-700 border border-dark-600 px-4 py-3 rounded-lg text-white hover:bg-dark-600 transition-colors"
+              className="flex items-center space-x-2 bg-slate-700 border border-slate-600 px-4 py-2.5 rounded-xl text-white hover:bg-slate-600 transition-colors text-sm font-medium"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
               <span>Filters</span>
             </button>
           </div>
@@ -522,7 +532,7 @@ const RestaurantDetail: React.FC = () => {
 
       {/* Quick Filter Chips */}
       {filterValues && (
-        <div className="bg-dark-800 border-b border-dark-700 px-4 py-3">
+        <div className="sticky top-[120px] z-30 bg-dark-800 border-b border-dark-700 px-4 py-3 shadow-lg">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-wrap gap-2">
               {filterValues.dietary.map(diet => (
@@ -674,6 +684,11 @@ const RestaurantDetail: React.FC = () => {
           }
 
           console.log('Current displayItems state:', displayItems);
+          
+          // Limit items to 8 if not showing all
+          const itemsToShow = showAllItems ? displayItems : displayItems.slice(0, 8);
+          const hasMoreItems = displayItems.length > 8;
+          
           return displayItems.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-lg mb-2">🍽️</div>
@@ -682,7 +697,7 @@ const RestaurantDetail: React.FC = () => {
             </div>
           ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-             {displayItems.map(item => {
+             {itemsToShow.map(item => {
                                const quantity = getItemQuantity(item._id);
                 const isHovered = hoveredDishId === item._id;
                
@@ -930,11 +945,16 @@ const RestaurantDetail: React.FC = () => {
        })()}
 
         {/* View All Button */}
-        <div className="mt-8 text-center">
-          <button className="px-8 py-3 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition-colors">
-            View All Menu Items
-          </button>
-        </div>
+        {hasMoreItems && (
+          <div className="mt-8 text-center">
+            <button 
+              onClick={() => setShowAllItems(!showAllItems)}
+              className="px-8 py-3 bg-gradient-to-r from-sera-blue to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-blue-500/30 font-semibold"
+            >
+              {showAllItems ? 'Show Less' : `View All Menu (${displayItems.length} items)`}
+            </button>
+          </div>
+        )}
       </div>
 
              {/* Floating Cart Button */}

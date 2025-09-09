@@ -756,8 +756,8 @@ class ApiService {
     success: boolean;
     message: string;
   }> {
-    return this.makeRequest('/user?action=change-password', {
-      method: 'PUT',
+    return this.makeRequest('/user/change-password', {
+      method: 'POST',
       body: JSON.stringify(passwordData),
     });
   }

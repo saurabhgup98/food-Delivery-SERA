@@ -133,6 +133,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           if (data.success && data.data.user) {
             const userData = data.data.user;
+            
+            // Extract role from appRegistered array for this app
+            const appRegistration = userData.appRegistered?.find(app => 
+              app.name === FOOD_DELIVERY_APP_URL
+            );
+            const userRole = appRegistration?.role || 'user';
+            
             setUser({
               id: userData.id || userData._id || '',
               name: userData.name,
@@ -140,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               emailVerified: userData.emailVerified || false,
               appRegistered: userData.appRegistered || [],
               oauthProvider: userData.oauthProvider || 'local',
-              role: userData.role || 'user',
+              role: userRole,
               appEndpoint: userData.appEndpoint || FOOD_DELIVERY_APP_URL,
             });
             console.log('User session restored successfully');
@@ -224,6 +231,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setTokens(data.data.tokens);
         localStorage.setItem('user', JSON.stringify(data.data.user));
         
+        // Extract role from appRegistered array for this app
+        const appRegistration = data.data.user.appRegistered?.find(app => 
+          app.name === FOOD_DELIVERY_APP_URL
+        );
+        const userRole = appRegistration?.role || 'user';
+        
         // Set user
         setUser({
           id: data.data.user.id || data.data.user._id || '',
@@ -232,7 +245,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           emailVerified: data.data.user.emailVerified || false,
           appRegistered: data.data.user.appRegistered || [],
           oauthProvider: data.data.user.oauthProvider || 'local',
-          role: data.data.user.role || 'user',
+          role: userRole,
           appEndpoint: data.data.user.appEndpoint || FOOD_DELIVERY_APP_URL,
         });
         
@@ -282,6 +295,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setTokens(data.data.tokens);
         localStorage.setItem('user', JSON.stringify(data.data.user));
         
+        // Extract role from appRegistered array for this app
+        const appRegistration = data.data.user.appRegistered?.find(app => 
+          app.name === FOOD_DELIVERY_APP_URL
+        );
+        const userRole = appRegistration?.role || 'user';
+        
         // Set user
         setUser({
           id: data.data.user.id || data.data.user._id || '',
@@ -290,7 +309,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           emailVerified: data.data.user.emailVerified || false,
           appRegistered: data.data.user.appRegistered || [],
           oauthProvider: data.data.user.oauthProvider || 'local',
-          role: data.data.user.role || 'user',
+          role: userRole,
           appEndpoint: data.data.user.appEndpoint || FOOD_DELIVERY_APP_URL,
         });
         

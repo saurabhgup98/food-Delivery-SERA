@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import PrimaryDropdown from '../Common/PrimaryDropdown';
+import { DropdownOption } from '../../data/dropdownOptions';
 
 interface Order {
   _id: string;
@@ -28,6 +30,17 @@ const OrderHistoryPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Dropdown options for status filter
+  const statusOptions: DropdownOption[] = [
+    { value: 'all', label: 'All Orders', icon: '📋' },
+    { value: 'pending', label: 'Pending', icon: '⏳' },
+    { value: 'confirmed', label: 'Confirmed', icon: '✅' },
+    { value: 'preparing', label: 'Preparing', icon: '👨‍🍳' },
+    { value: 'out_for_delivery', label: 'Out for Delivery', icon: '🚚' },
+    { value: 'delivered', label: 'Delivered', icon: '🎉' },
+    { value: 'cancelled', label: 'Cancelled', icon: '❌' }
+  ];
 
   // Fetch user orders
   useEffect(() => {
@@ -186,19 +199,13 @@ const OrderHistoryPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                 Filter by Status
               </label>
-              <select
+              <PrimaryDropdown
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent text-sm sm:text-base"
-              >
-                                 <option value="all">All Orders</option>
-                 <option value="pending">Pending</option>
-                 <option value="confirmed">Confirmed</option>
-                 <option value="preparing">Preparing</option>
-                 <option value="out_for_delivery">Out for Delivery</option>
-                 <option value="delivered">Delivered</option>
-                 <option value="cancelled">Cancelled</option>
-              </select>
+                onChange={setFilterStatus}
+                options={statusOptions}
+                placeholder="All Orders"
+                className="w-full"
+              />
             </div>
           </div>
         </div>
