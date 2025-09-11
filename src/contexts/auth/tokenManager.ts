@@ -62,6 +62,7 @@ export const refreshAccessToken = async (): Promise<boolean> => {
   try {
     const response = await makeApiCall('/auth/refresh', {
       method: 'POST',
+      baseURL: 'https://simple-auth-service.vercel.app/api',
       body: JSON.stringify({ refreshToken }),
     });
 

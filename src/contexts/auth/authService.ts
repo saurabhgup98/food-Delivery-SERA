@@ -16,6 +16,7 @@ export const loginUser = async (
   try {
     const data: AuthResponse = await makeApiCall('/auth/login', {
       method: 'POST',
+      baseURL: 'https://simple-auth-service.vercel.app/api',
       body: JSON.stringify({ 
         email, 
         password, 
@@ -55,6 +56,7 @@ export const registerUser = async (
   try {
     const data: AuthResponse = await makeApiCall('/auth/register', {
       method: 'POST',
+      baseURL: 'https://simple-auth-service.vercel.app/api',
       body: JSON.stringify({ 
         name, 
         email, 
@@ -94,6 +96,7 @@ export const logoutUser = async (): Promise<{ success: boolean; error?: string }
     if (refreshToken) {
       await makeApiCall('/auth/logout', {
         method: 'POST',
+        baseURL: 'https://simple-auth-service.vercel.app/api',
         body: JSON.stringify({ refreshToken }),
       });
     }
@@ -119,7 +122,9 @@ export const logoutUser = async (): Promise<{ success: boolean; error?: string }
  */
 export const getUserProfile = async (): Promise<{ success: boolean; user?: User; error?: string }> => {
   try {
-    const data = await makeApiCall('/user/profile');
+    const data = await makeApiCall('/user/profile', {
+      baseURL: 'https://simple-auth-service.vercel.app/api'
+    });
     
     if (data.success && data.data.user) {
       const user = createUserFromApiData(data.data.user);

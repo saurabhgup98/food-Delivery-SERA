@@ -20,7 +20,7 @@ export const makeApiCall = async <T = any>(
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> => {
   const {
-    baseURL = '',
+    baseURL = 'https://simple-auth-service.vercel.app/api', // Default to auth service
     timeout = 10000,
     headers = {},
     ...fetchOptions
@@ -43,18 +43,36 @@ export const makeApiCall = async <T = any>(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    const response = await fetch(`${baseURL}${endpoint}`, {
+    const fullUrl = `${baseURL}${endpoint}`;
+    console.log('Making API call to:', fullUrl, 'with config:', config);
+
+    const response = await fetch(fullUrl, {
       ...config,
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
-    const data = await response.json();
     
+    // Check if response is ok before trying to parse JSON
     if (!response.ok) {
-      throw new Error(data.error || data.message || 'API request failed');
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch {
+        // If we can't parse JSON, use the status text
+        console.error('Failed to parse error response as JSON');
+      }
+      throw new Error(errorMessage);
     }
-    
+
+    // Check if response has content before parsing JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Response is not JSON');
+    }
+
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error('API Error:', error);
