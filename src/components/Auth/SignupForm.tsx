@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import PrimaryInput from '../Common/PrimaryInput';
 
 interface SignupFormProps {
   isOpen: boolean;
@@ -16,15 +17,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
     confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [field]: value
     }));
     // Clear error when user starts typing
     if (error) setError('');
@@ -89,79 +87,51 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
               </div>
             )}
 
-            <div className="space-y-2">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300">Full Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                className="input-field w-full"
-                placeholder="Enter your full name"
-              />
-            </div>
+            <PrimaryInput
+              type="text"
+              label="Full Name"
+              value={formData.name}
+              onChange={(value) => handleInputChange('name', value)}
+              placeholder="Enter your full name"
+              required
+              name="name"
+              autoComplete="name"
+            />
 
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="input-field w-full"
-                placeholder="Enter your email"
-              />
-            </div>
+            <PrimaryInput
+              type="email"
+              label="Email Address"
+              value={formData.email}
+              onChange={(value) => handleInputChange('email', value)}
+              placeholder="Enter your email"
+              required
+              name="email"
+              autoComplete="email"
+            />
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  className="input-field w-full pr-10"
-                  placeholder="Create a password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-            </div>
+            <PrimaryInput
+              type="password"
+              label="Password"
+              value={formData.password}
+              onChange={(value) => handleInputChange('password', value)}
+              placeholder="Create a password"
+              required
+              name="password"
+              autoComplete="new-password"
+              showDataToggle={true}
+            />
 
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300">Confirm Password</label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  required
-                  className="input-field w-full pr-10"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
-                >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-            </div>
+            <PrimaryInput
+              type="password"
+              label="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={(value) => handleInputChange('confirmPassword', value)}
+              placeholder="Confirm your password"
+              required
+              name="confirmPassword"
+              autoComplete="new-password"
+              showDataToggle={true}
+            />
 
             <button
               type="submit"

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import PrimaryInput from "../Common/PrimaryInput";
 
 interface LoginFormProps {
   isOpen: boolean;
@@ -7,38 +8,41 @@ interface LoginFormProps {
   onSwitchToSignup: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup }) => {
+const LoginForm: React.FC<LoginFormProps> = ({
+  isOpen,
+  onClose,
+  onSwitchToSignup,
+}) => {
+  
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [field]: value,
     }));
     // Clear error when user starts typing
-    if (error) setError('');
+    if (error) setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       const success = await login(formData.email, formData.password);
       if (!success) {
-        setError('Invalid email or password. Please try again.');
+        setError("Invalid email or password. Please try again.");
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -48,19 +52,37 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
-      
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+      />
+
       <div className="relative w-full max-w-md animate-slide-up">
         <div className="bg-dark-800 rounded-2xl shadow-2xl border border-dark-700 overflow-hidden">
           <div className="relative p-6 bg-gradient-to-r from-sera-pink to-sera-orange">
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
-            
+
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Welcome Back
+              </h2>
               <p className="text-white/80">Sign in to your SERA account</p>
             </div>
           </div>
@@ -72,54 +94,40 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, onSwitchToSignup
               </div>
             )}
 
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="input-field w-full"
-                placeholder="Enter your email"
-              />
-            </div>
+            <PrimaryInput
+              type="email"
+              label="Email Address"
+              value={formData.email}
+              onChange={(value) => handleInputChange("email", value)}
+              placeholder="Enter your email"
+              required
+              name="email"
+              autoComplete="email"
+            />
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  className="input-field w-full pr-10"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-            </div>
+            <PrimaryInput
+              type="password"
+              label="Password"
+              value={formData.password}
+              onChange={(value) => handleInputChange("password", value)}
+              placeholder="Enter your password"
+              required
+              name="password"
+              autoComplete="current-password"
+              showDataToggle={true}
+            />
 
             <button
               type="submit"
               disabled={isLoading}
               className="w-full btn-primary py-3 text-lg font-semibold"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? "Signing in..." : "Sign In"}
             </button>
 
             <div className="text-center">
               <p className="text-gray-400">
-                Don't have an account?{' '}
+                Don't have an account?{" "}
                 <button
                   type="button"
                   onClick={onSwitchToSignup}
