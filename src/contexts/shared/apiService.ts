@@ -41,7 +41,10 @@ export const makeApiCall = async <T = any>(
   try {
     // Create abort controller for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const timeoutId = setTimeout(() => {
+      console.log('Request timeout after', timeout, 'ms');
+      controller.abort();
+    }, timeout);
 
     const fullUrl = `${baseURL}${endpoint}`;
     console.log('Making API call to:', fullUrl, 'with config:', config);
@@ -76,6 +79,17 @@ export const makeApiCall = async <T = any>(
     return data;
   } catch (error) {
     console.error('API Error:', error);
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - please check your internet connection and try again');
+      }
+      if (error.message.includes('Failed to fetch')) {
+        throw new Error('Network error - please check your internet connection');
+      }
+    }
+    
     throw error;
   }
 };
