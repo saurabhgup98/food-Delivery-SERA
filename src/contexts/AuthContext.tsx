@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType, AuthProviderProps, User } from './types';
 import { useModalManager } from './auth/modalManager';
 import * as tokenManager from './auth/tokenManager';
-import * as authService from './auth/authService';
+import { loginUser, registerUser, logoutUser, checkAuthentication } from './auth/authService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -27,7 +27,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Checking auth on page load...');
       
       try {
-        const result = await authService.checkAuthentication();
+        const result = await checkAuthentication();
         if (result.success && result.user) {
           setUser(result.user);
           console.log('User session restored successfully');
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const result = await authService.loginUser(email, password);
+      const result = await loginUser(email, password);
       if (result.success && result.user) {
         setUser(result.user);
         modalManager.closeLoginModal();
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await authService.logoutUser();
+      await logoutUser();
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const result = await authService.registerUser(name, email, password);
+      const result = await registerUser(name, email, password);
       if (result.success && result.user) {
         setUser(result.user);
         modalManager.closeSignupModal();
