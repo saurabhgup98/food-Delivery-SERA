@@ -31,7 +31,6 @@ export interface AuthResponse {
   message: string;
   data: {
     user: User;
-    tokens: AuthTokens;
   };
 }
 
@@ -39,13 +38,12 @@ export interface AuthResponse {
 export interface User {
   id: string;
   _id?: string; // Optional for backward compatibility
-  name: string;
+  username: string;
+  name?: string; // For backward compatibility
   email: string;
-  emailVerified: boolean;
-  appRegistered: AppRegistration[];
-  oauthProvider: 'local' | 'google' | 'facebook' | 'github';
   role: 'user' | 'business-user' | 'admin' | 'superadmin';
   appEndpoint: string;
+  appIdentifier: string;
   phone?: string;
   avatar?: string;
 }
@@ -142,5 +140,5 @@ export type CartAction =
   | { type: 'CLEAR_CART' };
 
 // ===== API CONFIGURATION =====
-export const AUTH_API_BASE_URL = 'https://simple-auth-service.vercel.app/api';
-export const FOOD_DELIVERY_APP_URL = 'https://food-delivery-app-frontend.vercel.app';
+export const AUTH_API_BASE_URL = 'https://simple-authentication-service.vercel.app/api';
+export const FOOD_DELIVERY_APP_URL = 'https://food-delivery-sera.vercel.app';

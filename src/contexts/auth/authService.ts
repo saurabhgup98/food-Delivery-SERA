@@ -1,8 +1,7 @@
 // Authentication service functions
 
 import { makeApiCall } from '../shared/apiService';
-import { tokenStorage, userStorage } from '../shared/localStorage';
-import { setTokens, getRefreshToken } from './tokenManager';
+import { userStorage } from '../shared/localStorage';
 import { createUserFromApiData } from './userUtils';
 import { AuthResponse, User, FOOD_DELIVERY_APP_URL } from '../types';
 
@@ -46,7 +45,7 @@ export const loginUser = async (
     const data: AuthResponse = await retryAuthCall(() => 
       makeApiCall('/auth/login', {
         method: 'POST',
-        baseURL: 'https://simple-auth-service.vercel.app/api',
+        baseURL: 'https://simple-authentication-service.vercel.app/api',
         timeout: 15000, // Increased timeout for auth operations
         body: JSON.stringify({ 
           email, 
@@ -56,9 +55,8 @@ export const loginUser = async (
       })
     );
 
-    if (data.success && data.data.tokens) {
-      // Store tokens and user data
-      setTokens(data.data.tokens);
+    if (data.success && data.data.user) {
+      // Store user data (no tokens in new system)
       userStorage.setUser(data.data.user);
       
       // Create user object with proper role extraction
@@ -89,21 +87,20 @@ export const registerUser = async (
     const data: AuthResponse = await retryAuthCall(() => 
       makeApiCall('/auth/register', {
         method: 'POST',
-        baseURL: 'https://simple-auth-service.vercel.app/api',
+        baseURL: 'https://simple-authentication-service.vercel.app/api',
         timeout: 15000, // Increased timeout for auth operations
         body: JSON.stringify({ 
-          name, 
+          username: name, 
           email, 
           password, 
-          appName: FOOD_DELIVERY_APP_URL,
+          appEndpoint: FOOD_DELIVERY_APP_URL,
           role: 'user'
         }),
       })
     );
 
-    if (data.success && data.data.tokens) {
-      // Store tokens and user data
-      setTokens(data.data.tokens);
+    if (data.success && data.data.user) {
+      // Store user data (no tokens in new system)
       userStorage.setUser(data.data.user);
       
       // Create user object with proper role extraction
@@ -127,28 +124,17 @@ export const registerUser = async (
  */
 export const logoutUser = async (): Promise<{ success: boolean; error?: string }> => {
   try {
-    const refreshToken = getRefreshToken();
-    if (refreshToken) {
-      await makeApiCall('/auth/logout', {
-        method: 'POST',
-        baseURL: 'https://simple-auth-service.vercel.app/api',
-        body: JSON.stringify({ refreshToken }),
-      });
-    }
-    
-    // Clear local storage regardless of API call success
-    tokenStorage.clearAll();
+    // Clear local storage (no API call needed in new system)
     userStorage.clearUser();
     
     return { success: true };
   } catch (error) {
-    console.error('Logout API call failed:', error);
+    console.error('Logout failed:', error);
     
-    // Still clear local storage even if API call fails
-    tokenStorage.clearAll();
+    // Still clear local storage even if there's an error
     userStorage.clearUser();
     
-    return { success: true }; // Consider logout successful even if API fails
+    return { success: true }; // Consider logout successful even if there's an error
   }
 };
 
@@ -157,16 +143,14 @@ export const logoutUser = async (): Promise<{ success: boolean; error?: string }
  */
 export const getUserProfile = async (): Promise<{ success: boolean; user?: User; error?: string }> => {
   try {
-    const data = await makeApiCall('/user/profile', {
-      baseURL: 'https://simple-auth-service.vercel.app/api'
-    });
-    
-    if (data.success && data.data.user) {
-      const user = createUserFromApiData(data.data.user);
+    // In the new system, we get user data from localStorage
+    const storedUser = userStorage.getUser();
+    if (storedUser) {
+      const user = createUserFromApiData(storedUser);
       return { success: true, user };
     }
     
-    return { success: false, error: 'Failed to get user profile' };
+    return { success: false, error: 'No user data found' };
   } catch (error) {
     console.error('Get user profile failed:', error);
     return { 
@@ -181,15 +165,14 @@ export const getUserProfile = async (): Promise<{ success: boolean; user?: User;
  */
 export const checkAuthentication = async (): Promise<{ success: boolean; user?: User; error?: string }> => {
   try {
-    // First try to get user from localStorage
+    // Get user from localStorage
     const storedUser = userStorage.getUser();
     if (storedUser) {
       const user = createUserFromApiData(storedUser);
       return { success: true, user };
     }
     
-    // If no stored user, try to get from server
-    return await getUserProfile();
+    return { success: false, error: 'No user data found' };
   } catch (error) {
     console.error('Authentication check failed:', error);
     return { 

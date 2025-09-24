@@ -21,18 +21,15 @@ export const extractUserRole = (
  * Create user object from API response data
  */
 export const createUserFromApiData = (userData: any): User => {
-  const userRole = extractUserRole(userData.appRegistered);
-  
   return {
     id: userData.id || userData._id || '',
     _id: userData._id,
-    name: userData.name,
+    username: userData.username || userData.name || '',
+    name: userData.username || userData.name || '', // For backward compatibility
     email: userData.email,
-    emailVerified: userData.emailVerified || false,
-    appRegistered: userData.appRegistered || [],
-    oauthProvider: userData.oauthProvider || 'local',
-    role: userRole as 'user' | 'business-user' | 'admin' | 'superadmin',
+    role: userData.role || 'user',
     appEndpoint: userData.appEndpoint || FOOD_DELIVERY_APP_URL,
+    appIdentifier: userData.appIdentifier || 'sera-food-customer-app',
   };
 };
 
@@ -44,7 +41,7 @@ export const validateUserData = (userData: any): boolean => {
     return false;
   }
   
-  const requiredFields = ['name', 'email'];
+  const requiredFields = ['username', 'email'];
   return requiredFields.every(field => userData[field] !== undefined && userData[field] !== null);
 };
 
@@ -83,16 +80,19 @@ export const isBusinessUser = (user: User | null): boolean => {
  */
 export const getUserDisplayName = (user: User | null): string => {
   if (!user) return 'Guest';
-  return user.name || user.email || 'Unknown User';
+  return user.username || user.name || user.email || 'Unknown User';
 };
 
 /**
  * Get user initials for avatar
  */
 export const getUserInitials = (user: User | null): string => {
-  if (!user || !user.name) return 'U';
+  if (!user) return 'U';
   
-  const names = user.name.trim().split(' ');
+  const name = user.username || user.name;
+  if (!name) return 'U';
+  
+  const names = name.trim().split(' ');
   if (names.length === 1) {
     return names[0].charAt(0).toUpperCase();
   }

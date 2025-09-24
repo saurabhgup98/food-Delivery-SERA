@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType, AuthProviderProps, User } from './types';
 import { useModalManager } from './auth/modalManager';
-import * as tokenManager from './auth/tokenManager';
 import { loginUser, registerUser, logoutUser, checkAuthentication } from './auth/authService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,7 +20,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Use modal manager hook
   const modalManager = useModalManager();
 
-  // Check for existing token on app load
+  // Check for existing user on app load
   useEffect(() => {
     const checkAuth = async () => {
       console.log('Checking auth on page load...');
@@ -32,16 +31,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(result.user);
           console.log('User session restored successfully');
         } else {
-          // Try to refresh token if authentication check failed
-          const refreshed = await tokenManager.autoRefreshToken();
-          if (!refreshed) {
-            tokenManager.clearTokens();
-            console.log('Tokens cleared due to auth failure');
-          }
+          console.log('No user session found');
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        tokenManager.clearTokens();
       }
       
       setIsLoading(false);
@@ -50,21 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Auto-refresh token every 14 minutes
-  useEffect(() => {
-    const tokenRefreshInterval = setInterval(async () => {
-      const accessToken = tokenManager.getAccessToken();
-      if (accessToken) {
-        try {
-          await tokenManager.autoRefreshToken();
-        } catch (error) {
-          console.error('Auto token refresh failed:', error);
-        }
-      }
-    }, 14 * 60 * 1000); // 14 minutes
-
-    return () => clearInterval(tokenRefreshInterval);
-  }, []);
+  // No token refresh needed in new system
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {

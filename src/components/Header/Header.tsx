@@ -69,7 +69,8 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   // Get first letter of user's name for profile circle
-  const getUserInitial = (name: string) => {
+  const getUserInitial = (name: string | undefined) => {
+    if (!name) return 'U';
     return name.charAt(0).toUpperCase();
   };
 
@@ -170,10 +171,10 @@ const Header: React.FC<HeaderProps> = ({
                     {/* User Profile Circle with First Letter */}
                     <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full flex items-center justify-center border-2 border-white/40 hover:border-white/60 transition-all duration-200 shadow-lg hover:shadow-xl">
                       <span className="text-white font-bold text-sm">
-                        {getUserInitial(user.name)}
+                        {getUserInitial(user.username || user.name)}
                       </span>
                     </div>
-                    <span className="hidden sm:block text-sm font-medium">{user.name}</span>
+                    <span className="hidden sm:block text-sm font-medium">{user.username || user.name}</span>
                   </button>
                   
                   {/* Enhanced Dropdown Menu */}
@@ -190,7 +191,7 @@ const Header: React.FC<HeaderProps> = ({
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-sera-blue to-sera-blue/80 rounded-full flex items-center justify-center border-2 border-sera-blue/30 shadow-lg">
                           <span className="text-white font-bold text-lg">
-                            {getUserInitial(user.name)}
+                            {getUserInitial(user.username || user.name)}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
