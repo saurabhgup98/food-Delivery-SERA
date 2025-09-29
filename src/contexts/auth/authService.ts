@@ -5,34 +5,7 @@ import { userStorage } from '../shared/localStorage';
 import { createUserFromApiData } from './userUtils';
 import { AuthResponse, User, FOOD_DELIVERY_APP_URL } from '../types';
 
-/**
- * Retry auth API call with exponential backoff
- */
-const retryAuthCall = async <T>(
-  apiCall: () => Promise<T>,
-  maxRetries: number = 2
-): Promise<T> => {
-  let lastError: Error | undefined;
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await apiCall();
-    } catch (error) {
-      lastError = error as Error;
-      console.log(`Auth API attempt ${attempt} failed:`, error);
-      
-      if (attempt === maxRetries) {
-        break;
-      }
-      
-      // Wait before retry (exponential backoff)
-      const delay = Math.pow(2, attempt) * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-  
-  throw new Error(lastError?.message || 'Auth API call failed after retries');
-};
+// Removed retry logic - direct API calls only
 
 /**
  * Login user with email and password
@@ -42,18 +15,16 @@ export const loginUser = async (
   password: string
 ): Promise<{ success: boolean; user?: User; error?: string }> => {
   try {
-    const data: AuthResponse = await retryAuthCall(() => 
-      makeApiCall('/auth/login', {
-        method: 'POST',
-        baseURL: 'https://simple-authentication-service.vercel.app/api',
-        timeout: 15000, // Increased timeout for auth operations
-        body: JSON.stringify({ 
-          email, 
-          password, 
-          appEndpoint: FOOD_DELIVERY_APP_URL 
-        }),
-      })
-    );
+    const data: AuthResponse = await makeApiCall('/auth/login', {
+      method: 'POST',
+      baseURL: 'https://simple-authentication-service.vercel.app/api',
+      timeout: 15000, // Increased timeout for auth operations
+      body: JSON.stringify({ 
+        email, 
+        password, 
+        appEndpoint: FOOD_DELIVERY_APP_URL 
+      }),
+    });
 
     if (data.success && data.data.user) {
       // Store user data (no tokens in new system)
@@ -84,20 +55,17 @@ export const registerUser = async (
   password: string
 ): Promise<{ success: boolean; user?: User; error?: string }> => {
   try {
-    const data: AuthResponse = await retryAuthCall(() => 
-      makeApiCall('/auth/register', {
-        method: 'POST',
-        baseURL: 'https://simple-authentication-service.vercel.app/api',
-        timeout: 15000, // Increased timeout for auth operations
-        body: JSON.stringify({ 
-          username: name, 
-          email, 
-          password, 
-          appEndpoint: FOOD_DELIVERY_APP_URL,
-          role: 'user'
-        }),
-      })
-    );
+    const data: AuthResponse = await makeApiCall('/auth/register', {
+      method: 'POST',
+      baseURL: 'https://simple-authentication-service.vercel.app/api',
+      timeout: 15000, // Increased timeout for auth operations
+      body: JSON.stringify({ 
+        name: name, 
+        email, 
+        password, 
+        appEndpoint: FOOD_DELIVERY_APP_URL
+      }),
+    });
 
     if (data.success && data.data.user) {
       // Store user data (no tokens in new system)

@@ -48,25 +48,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
     }
     
     try {
-      // First fetch test data from database
-      const testDataResponse = await fetch('https://food-delivery-backend-sera.vercel.app/api/test-data?type=login&limit=5', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      const testData = await testDataResponse.json();
-      
-      if (testData.success && testData.data.testData.length > 0) {
-        // Show alert with fetched data
-        const latestData = testData.data.testData[0];
-        alert(`✅ Data fetched successfully!\n\nLatest stored data:\n- ID: ${latestData._id}\n- Type: ${latestData.type}\n- Email: ${latestData.data.email}\n- Random ID: ${latestData.data.randomId}\n- Random Number: ${latestData.data.randomNumber}\n- Timestamp: ${new Date(latestData.data.timestamp).toLocaleString()}\n- Message: ${latestData.data.message}\n\nTotal records found: ${testData.data.count}`);
-      } else {
-        alert('✅ No test data found in database yet. Try logging in first to create some data!');
-      }
-
-      // Then proceed with actual registration
       const success = await register(formData.name, formData.email, formData.password);
       if (!success) {
         setError('Registration failed. Please try again.');

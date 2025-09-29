@@ -20,19 +20,16 @@ export const makeApiCall = async <T = any>(
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> => {
   const {
-    baseURL = 'https://simple-auth-service.vercel.app/api', // Default to auth service
+    baseURL = 'https://simple-authentication-service.vercel.app/api', // Updated to new auth service
     timeout = 10000,
     headers = {},
     ...fetchOptions
   } = options;
 
-  // Get access token from localStorage
-  const accessToken = localStorage.getItem('accessToken');
-  
+  // No token management needed in new authentication system
   const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
-      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       ...headers,
     },
     ...fetchOptions,

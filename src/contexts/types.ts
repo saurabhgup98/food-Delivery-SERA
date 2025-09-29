@@ -49,8 +49,13 @@ export interface User {
 }
 
 export interface AppRegistration {
-  name: string;
+  appIdentifier: string;
   role: 'user' | 'business-user' | 'admin' | 'superadmin';
+  isActive: boolean;
+  activatedAt: string;
+  deactivatedAt?: string;
+  deactivatedBy?: string;
+  deactivationReason?: string;
 }
 
 // ===== CART CONTEXT TYPES =====
@@ -141,4 +146,4 @@ export type CartAction =
 
 // ===== API CONFIGURATION =====
 export const AUTH_API_BASE_URL = 'https://simple-authentication-service.vercel.app/api';
-export const FOOD_DELIVERY_APP_URL = 'https://food-delivery-sera.vercel.app';
+export const FOOD_DELIVERY_APP_URL = 'https://food-delivery-app-frontend.vercel.app';

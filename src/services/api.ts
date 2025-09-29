@@ -250,14 +250,11 @@ class ApiService {
     console.log('Making API request to:', url);
     console.log('Request options:', options);
     
-    // Get access token from localStorage
-    const token = localStorage.getItem('accessToken');
-    
+    // No token management needed in new authentication system
     try {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
           ...options?.headers,
         },
         ...options,

@@ -13,7 +13,7 @@ export const extractUserRole = (
     return 'user';
   }
   
-  const appRegistration = appRegistered.find(app => app.name === appUrl);
+  const appRegistration = appRegistered.find(app => app.appIdentifier === appUrl);
   return appRegistration?.role || 'user';
 };
 
@@ -28,7 +28,7 @@ export const createUserFromApiData = (userData: any): User => {
     name: userData.username || userData.name || '', // For backward compatibility
     email: userData.email,
     role: userData.role || 'user',
-    appEndpoint: userData.appEndpoint || FOOD_DELIVERY_APP_URL,
+    appEndpoint: FOOD_DELIVERY_APP_URL,
     appIdentifier: userData.appIdentifier || 'sera-food-customer-app',
   };
 };
