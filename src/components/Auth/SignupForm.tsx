@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import PrimaryInput from '../Common/PrimaryInput';
+import { OAuthProvider } from './components/OAuthProvider';
+import { OAUTH_PROVIDERS } from './constants/authConstants';
+import { useOAuthAuth } from './hooks/AuthFormHooks';
 
 interface SignupFormProps {
   isOpen: boolean;
@@ -9,15 +12,14 @@ interface SignupFormProps {
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogin }) => {
-  const { register } = useAuth();
+  const { register, isLoading, error, clearError } = useAuth();
+  const { handleOAuthLogin } = useOAuthAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -25,37 +27,34 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
       [field]: value
     }));
     // Clear error when user starts typing
-    if (error) setError('');
+    if (error) clearError();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
+    clearError();
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
       return;
     }
 
     // Validate password length
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setIsLoading(false);
       return;
     }
     
     try {
-      const success = await register(formData.name, formData.email, formData.password);
-      if (!success) {
-        setError('Registration failed. Please try again.');
-      }
+      await register({
+        username: formData.name,
+        email: formData.email,
+        password: formData.password,
+        appEndpoint: window.location.origin,
+        role: 'user',
+      });
+      onClose();
     } catch (err) {
-      setError('Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('Registration error:', err);
     }
   };
 
@@ -140,6 +139,27 @@ const SignupForm: React.FC<SignupFormProps> = ({ isOpen, onClose, onSwitchToLogi
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </button>
+
+            {/* OAuth Section */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-dark-800 text-gray-400">Or continue with</span>
+              </div>
+            </div>
+
+            {/* OAuth Providers */}
+            <div className="space-y-3">
+              {OAUTH_PROVIDERS.map((provider) => (
+                <OAuthProvider
+                  key={provider.id}
+                  provider={provider}
+                  disabled={isLoading}
+                />
+              ))}
+            </div>
 
             <div className="text-center">
               <p className="text-gray-400">

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useModalManager } from '../../contexts/auth/modalManager';
 // Using SVG icons instead of lucide-react to avoid import issues
 
 const HeroSection: React.FC = () => {
-  const { openSignupModal } = useAuth();
+  const { openSignupModal } = useModalManager();
   
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">

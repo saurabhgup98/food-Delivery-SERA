@@ -1,11 +1,25 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthContextType, AuthProviderProps, User } from './types';
-import { useModalManager } from './auth/modalManager';
-import { loginUser, registerUser, logoutUser, checkAuthentication } from './auth/authService';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authApi } from '../services/api/index';
+import { User, LoginRequest, RegisterRequest, AuthResponse } from '../services/api/types';
+
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (credentials: LoginRequest) => Promise<AuthResponse>;
+  register: (userData: RegisterRequest) => Promise<AuthResponse>;
+  logout: () => Promise<void>;
+  error: string | null;
+  clearError: () => void;
+}
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -16,83 +30,120 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Use modal manager hook
-  const modalManager = useModalManager();
+  const [error, setError] = useState<string | null>(null);
 
-  // Check for existing user on app load
+  // Initialize authentication state
   useEffect(() => {
-    const checkAuth = async () => {
-      console.log('Checking auth on page load...');
-      
+    const initializeAuth = async () => {
       try {
-        const result = await checkAuthentication();
-        if (result.success && result.user) {
-          setUser(result.user);
-          console.log('User session restored successfully');
-        } else {
-          console.log('No user session found');
+        const isAuth = authApi.isAuthenticated();
+        const currentUser = authApi.getCurrentUser();
+
+        if (isAuth && currentUser) {
+          setUser(currentUser);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error("Auth initialization error:", error);
+        // Clear invalid tokens
+        authApi.logout();
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
-    checkAuth();
+    initializeAuth();
   }, []);
 
-  // No token refresh needed in new system
-
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      const result = await loginUser(email, password);
-      if (result.success && result.user) {
-        setUser(result.user);
-        modalManager.closeLoginModal();
-        return true;
+      setIsLoading(true);
+      setError(null);
+
+      const response = await authApi.login(credentials);
+
+      if (response.success && response.data.user) {
+        // Create user object with role information from response
+        const userWithRole = {
+          ...response.data.user,
+          role: response.data.role,
+          availableRoles: response.data.availableRoles,
+          appIdentifier: response.data.appIdentifier,
+          authMethod: response.data.authMethod
+        };
+        setUser(userWithRole);
+        localStorage.setItem("isLoggedIn", "true");
       }
-      return false;
-    } catch (error) {
-      console.error('Login failed:', error);
-      return false;
+
+      return response;
+    } catch (error: any) {
+      const errorMessage = error.message || "Login failed";
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = async () => {
+  const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      await logoutUser();
-      setUser(null);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Still clear user state even if logout API fails
-      setUser(null);
-    }
-  };
+      setIsLoading(true);
+      setError(null);
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    try {
-      const result = await registerUser(name, email, password);
-      if (result.success && result.user) {
-        setUser(result.user);
-        modalManager.closeSignupModal();
-        return true;
+      const response = await authApi.register(userData);
+
+      if (response.success && response.data.user) {
+        // Create user object with role information from response
+        const userWithRole = {
+          ...response.data.user,
+          role: response.data.role,
+          availableRoles: response.data.availableRoles,
+          appIdentifier: response.data.appIdentifier,
+          authMethod: response.data.authMethod
+        };
+        setUser(userWithRole);
+        localStorage.setItem("isLoggedIn", "true");
       }
-      return false;
-    } catch (error) {
-      console.error('Registration failed:', error);
-      return false;
+
+      return response;
+    } catch (error: any) {
+      const errorMessage = error.message || "Registration failed";
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const value = {
+  const logout = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      await authApi.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      handleLogout();
+    }
+  };
+
+  const handleLogout = (): void => {
+    setUser(null);
+    localStorage.removeItem("isLoggedIn");
+    setIsLoading(false);
+  };
+
+  const clearError = (): void => {
+    setError(null);
+  };
+
+  const value: AuthContextType = {
     user,
+    isAuthenticated: !!user,
     isLoading,
-    ...modalManager,
     login,
-    logout,
     register,
+    logout,
+    error,
+    clearError,
   };
 
   return (

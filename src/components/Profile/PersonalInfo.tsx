@@ -15,7 +15,7 @@ const PersonalInfo: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user?.username || '',
     email: user?.email || '',
     phone: '',
     countryCode: 'IN',
@@ -32,7 +32,7 @@ const PersonalInfo: React.FC = () => {
         setFormData(prev => ({
           ...prev,
           ...parsed,
-          name: parsed.name || user?.name || '',
+          name: parsed.name || user?.username || '',
           email: parsed.email || user?.email || '',
         }));
       } catch (error) {
@@ -52,7 +52,7 @@ const PersonalInfo: React.FC = () => {
 
   const handleCancel = () => {
     setFormData({
-      name: user?.name || '',
+      name: user?.username || '',
       email: user?.email || '',
       phone: '',
       countryCode: 'IN',
@@ -83,7 +83,7 @@ const PersonalInfo: React.FC = () => {
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-sera-blue to-blue-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg border-4 border-sera-blue/30">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
+              {user?.username?.charAt(0).toUpperCase() || 'U'}
             </div>
             {isEditing && (
               <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-sera-orange text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors duration-200 text-sm shadow-lg">

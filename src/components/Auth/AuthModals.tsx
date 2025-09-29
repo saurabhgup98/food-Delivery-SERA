@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useModalManager } from '../../contexts/auth/modalManager';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 
@@ -11,7 +11,7 @@ const AuthModals: React.FC = () => {
     closeSignupModal,
     switchToSignup,
     switchToLogin,
-  } = useAuth();
+  } = useModalManager();
 
   return (
     <>

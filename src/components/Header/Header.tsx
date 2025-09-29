@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { useModalManager } from '../../contexts/auth/modalManager';
 import Navigation from '../Navigation/Navigation';
 import SearchBar from '../SearchBar/SearchBar';
 import { CartIcon } from '../Cart';
@@ -23,7 +24,8 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const { user, isLoading, openLoginModal, openSignupModal, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
+  const { openLoginModal, openSignupModal } = useModalManager();
   const navigate = useNavigate();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -171,10 +173,10 @@ const Header: React.FC<HeaderProps> = ({
                     {/* User Profile Circle with First Letter */}
                     <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full flex items-center justify-center border-2 border-white/40 hover:border-white/60 transition-all duration-200 shadow-lg hover:shadow-xl">
                       <span className="text-white font-bold text-sm">
-                        {getUserInitial(user.username || user.name)}
+                        {getUserInitial(user.username)}
                       </span>
                     </div>
-                    <span className="hidden sm:block text-sm font-medium">{user.username || user.name}</span>
+                    <span className="hidden sm:block text-sm font-medium">{user.username}</span>
                   </button>
                   
                   {/* Enhanced Dropdown Menu */}
@@ -191,11 +193,11 @@ const Header: React.FC<HeaderProps> = ({
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-sera-blue to-sera-blue/80 rounded-full flex items-center justify-center border-2 border-sera-blue/30 shadow-lg">
                           <span className="text-white font-bold text-lg">
-                            {getUserInitial(user.username || user.name)}
+                            {getUserInitial(user.username)}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-semibold text-sm truncate">{user.name}</p>
+                          <p className="text-white font-semibold text-sm truncate">{user.username}</p>
                           <p className="text-gray-400 text-xs truncate">{user.email}</p>
                           <div className="flex items-center mt-1">
                             <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>

@@ -36,9 +36,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
     if (user) {
       setFormData(prev => ({
         ...prev,
-        name: user.name || '',
+        name: user.username || '',
         email: user.email || '',
-        phone: user.phone || '',
+        phone: '',
       }));
     }
   }, [user]);

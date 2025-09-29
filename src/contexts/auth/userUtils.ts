@@ -80,7 +80,7 @@ export const isBusinessUser = (user: User | null): boolean => {
  */
 export const getUserDisplayName = (user: User | null): string => {
   if (!user) return 'Guest';
-  return user.username || user.name || user.email || 'Unknown User';
+  return user.username || user.email || 'Unknown User';
 };
 
 /**
@@ -89,7 +89,7 @@ export const getUserDisplayName = (user: User | null): string => {
 export const getUserInitials = (user: User | null): string => {
   if (!user) return 'U';
   
-  const name = user.username || user.name;
+  const name = user.username;
   if (!name) return 'U';
   
   const names = name.trim().split(' ');

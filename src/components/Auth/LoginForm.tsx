@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import PrimaryInput from "../Common/PrimaryInput";
+import { OAuthProvider } from "./components/OAuthProvider";
+import { OAUTH_PROVIDERS } from "./constants/authConstants";
+import { useOAuthAuth } from "./hooks/AuthFormHooks";
 
 interface LoginFormProps {
   isOpen: boolean;
@@ -14,13 +17,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToSignup,
 }) => {
   
-  const { login } = useAuth();
+  const { login, isLoading, error, clearError } = useAuth();
+  const { handleOAuthLogin } = useOAuthAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -28,24 +30,22 @@ const LoginForm: React.FC<LoginFormProps> = ({
       [field]: value,
     }));
     // Clear error when user starts typing
-    if (error) setError("");
+    if (error) clearError();
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    clearError();
 
     try {
-      const success = await login(formData.email, formData.password);
-      if (!success) {
-        setError("Invalid email or password. Please try again.");
-      }
+      await login({
+        email: formData.email,
+        password: formData.password,
+        appEndpoint: window.location.origin,
+      });
+      onClose();
     } catch (err) {
-      setError("Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+      console.error('Login error:', err);
     }
   };
 
@@ -127,6 +127,27 @@ const LoginForm: React.FC<LoginFormProps> = ({
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </button>
+
+            {/* OAuth Section */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-dark-800 text-gray-400">Or continue with</span>
+              </div>
+            </div>
+
+            {/* OAuth Providers */}
+            <div className="space-y-3">
+              {OAUTH_PROVIDERS.map((provider) => (
+                <OAuthProvider
+                  key={provider.id}
+                  provider={provider}
+                  disabled={isLoading}
+                />
+              ))}
+            </div>
 
             <div className="text-center">
               <p className="text-gray-400">

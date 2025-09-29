@@ -115,14 +115,14 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col items-center sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="relative">
               <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-sera-blue to-blue-500 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg border-4 border-sera-blue/30">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                {user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-dark-800">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse m-auto mt-1"></div>
               </div>
             </div>
             <div className="flex-1 min-w-0 text-center sm:text-left">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">{user?.name || 'User'}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">{user?.username || 'User'}</h2>
               <p className="text-gray-300 text-sm sm:text-base mb-3">{user?.email}</p>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">

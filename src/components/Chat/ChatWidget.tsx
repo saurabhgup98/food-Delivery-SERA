@@ -62,7 +62,7 @@ const ChatWidget: React.FC = () => {
     try {
       const data = await apiService.sendChatMessage(inputText, {
         isLoggedIn: !!user,
-        userName: user?.name,
+        userName: user?.username,
         cartItems: cartState.items.length,
         cartTotal: cartState.totalAmount
       });

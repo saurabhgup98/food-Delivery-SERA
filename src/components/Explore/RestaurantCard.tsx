@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Restaurant } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useModalManager } from '../../contexts/auth/modalManager';
 import RestaurantStatus from './RestaurantStatus';
 
 interface RestaurantCardProps {
@@ -16,7 +17,8 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
   onViewMenu 
 }) => {
   const navigate = useNavigate();
-  const { user, openLoginModal } = useAuth();
+  const { user } = useAuth();
+  const { openLoginModal } = useModalManager();
   const [isHovered, setIsHovered] = useState(false);
 
   const handleFavoriteClick = () => {
