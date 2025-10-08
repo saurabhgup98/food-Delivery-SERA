@@ -3,8 +3,9 @@ import { apiService, Address } from '../services/api';
 import { 
   INITIAL_FORM_DATA, 
   createFormDataFromAddress, 
-  resetFormData,
-  SUCCESS_MESSAGES,
+  resetFormData, 
+  transformFormDataToAddress,
+  SUCCESS_MESSAGES, 
   ERROR_MESSAGES 
 } from '../config/addressConfig';
 
@@ -45,7 +46,8 @@ export const useAddressManagement = () => {
 
       if (editingAddress) {
         // Update existing address
-        const response = await apiService.updateAddress(editingAddress._id, formData);
+        const addressData = transformFormDataToAddress(formData);
+        const response = await apiService.updateAddress(editingAddress._id, addressData);
         
         if (response.success && response.data && response.data.address) {
           setAddresses(prev => prev.map(addr => 
@@ -59,7 +61,8 @@ export const useAddressManagement = () => {
         }
       } else {
         // Add new address
-        const response = await apiService.createAddress(formData);
+        const addressData = transformFormDataToAddress(formData);
+        const response = await apiService.createAddress(addressData);
         
         if (response.success && response.data && response.data.address) {
           setAddresses(prev => [...prev, response.data.address]);

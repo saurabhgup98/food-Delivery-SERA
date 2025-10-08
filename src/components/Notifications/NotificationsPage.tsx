@@ -1,23 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
-import { apiService } from '../../services/api';
+import { apiService, Notification } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
-
-interface Notification {
-  _id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'security' | 'registration' | 'review' | 'promo' | 'birthday';
-  isRead: boolean;
-  action: 'none' | 'rate' | 'use_code' | 'view_order';
-  orderId?: string;
-  promoCode?: string;
-  expiresAt?: string;
-  sentEmail: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
 const NotificationsPage: React.FC = () => {
   const { user } = useAuth();

@@ -72,7 +72,7 @@ const ChatWidget: React.FC = () => {
         const filtered = prev.filter(msg => !msg.isLoading);
         return [...filtered, {
           id: Date.now().toString(),
-          text: data.response || 'Sorry, I couldn\'t process your request. Please try again.',
+          text: data.data?.chatMessage?.message || 'Sorry, I couldn\'t process your request. Please try again.',
           sender: 'ai',
           timestamp: new Date()
         }];

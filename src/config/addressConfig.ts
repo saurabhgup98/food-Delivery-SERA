@@ -15,16 +15,30 @@ export const INITIAL_FORM_DATA = {
 };
 
 export const createFormDataFromAddress = (address: Address) => ({
-  label: address.label,
-  fullName: address.fullName,
-  phone: address.phone,
+  label: address.type, // Map type to label for form
+  fullName: address.name, // Map name to fullName for form
+  phone: address.phone || '', // Map phone field
   address: address.address,
-  country: 'IN', // Default to India for existing addresses
+  country: address.country,
   state: address.state,
   city: address.city,
   pincode: address.pincode,
   isDefault: address.isDefault,
   instructions: address.instructions || ''
+});
+
+// Transform form data to Address type for API calls
+export const transformFormDataToAddress = (formData: typeof INITIAL_FORM_DATA) => ({
+  type: formData.label as 'home' | 'work' | 'other',
+  name: formData.fullName,
+  phone: formData.phone,
+  address: formData.address,
+  city: formData.city,
+  state: formData.state,
+  pincode: formData.pincode,
+  country: formData.country,
+  isDefault: formData.isDefault,
+  instructions: formData.instructions
 });
 
 // Function to reset form data to initial state

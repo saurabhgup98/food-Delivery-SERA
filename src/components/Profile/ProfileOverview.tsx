@@ -1,8 +1,7 @@
 import React from 'react';
-import { User } from '../../services/api/types';
 
 interface ProfileOverviewProps {
-  user: User;
+  user: any; // Flexible type to work with both old and new User types
   totalSpent: number;
 }
 

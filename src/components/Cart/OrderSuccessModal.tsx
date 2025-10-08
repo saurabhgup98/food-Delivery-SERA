@@ -145,7 +145,7 @@ const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({ isOpen, onClose, 
                     {item.quantity}x {item.name}
                   </span>
                   <span className="text-white">
-                    ₹{item.customization?.totalPrice || parseInt(item.price.replace('₹', '')) * item.quantity}
+                    ₹{parseInt(item.price.replace('₹', '')) * item.quantity}
                   </span>
                 </div>
               ))}

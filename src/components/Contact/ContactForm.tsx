@@ -155,7 +155,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
       
       if (response.success) {
         console.log('Contact form submitted successfully:', response.data);
-        alert(`Thank you! Your ticket number is: ${response.data.ticketNumber}`);
+        alert(`Thank you! Your message has been submitted successfully.`);
         onClose();
       } else {
         alert('Failed to submit contact form. Please try again.');

@@ -99,7 +99,7 @@ const RestaurantDetail: React.FC = () => {
       });
       
       if (response.success) {
-        setMenuItems(response.data.menuItems);
+        setMenuItems(response.data.menu);
       }
     } catch (err) {
       console.error('Error fetching menu items:', err);

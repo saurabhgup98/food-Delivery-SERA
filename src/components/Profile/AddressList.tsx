@@ -22,7 +22,7 @@ const AddressList: React.FC<AddressListProps> = ({
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-3">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {address.label}
+                  {address.type}
                 </span>
                 {address.isDefault && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -32,7 +32,7 @@ const AddressList: React.FC<AddressListProps> = ({
               </div>
 
               <div className="space-y-1">
-                <p className="text-white font-medium">{address.fullName}</p>
+                <p className="text-white font-medium">{address.name}</p>
                 <p className="text-gray-400">{address.phone}</p>
                 <p className="text-gray-300">
                   {address.address}, {address.city}, {address.state} - {address.pincode}

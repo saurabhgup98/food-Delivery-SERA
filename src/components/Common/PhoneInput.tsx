@@ -56,11 +56,16 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       const response = await apiService.getCountryCodes();
       console.log('Country codes response:', response);
       if (response.success) {
-        setCountries(response.data.countries);
+        // Transform Country[] to CountryCode[] by adding flag property
+        const countryCodes = response.data.countries.map((country: any) => ({
+          ...country,
+          flag: `🇮🇳` // Default flag, should be mapped properly in real implementation
+        }));
+        setCountries(countryCodes);
         console.log('Countries set:', response.data.countries.length);
         // Set default to India if no country is selected
         if (!countryCode) {
-          const india = response.data.countries.find((c: CountryCode) => c.code === 'IN');
+          const india = countryCodes.find((c: CountryCode) => c.code === 'IN');
           if (india) {
             setSelectedCountry(india);
             onCountryCodeChange(india.code);

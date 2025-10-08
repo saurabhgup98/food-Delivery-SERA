@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { apiService, Address } from '../../services/api';
+import { transformFormDataToAddress } from '../../config/addressConfig';
 
 interface AddressSelectionModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ const AddressSelectionModal: React.FC<AddressSelectionModalProps> = ({
     city: '',
     state: '',
     pincode: '',
+    country: 'IN', // Default to India
     isDefault: false,
     instructions: ''
   });
@@ -65,7 +67,8 @@ const AddressSelectionModal: React.FC<AddressSelectionModalProps> = ({
       setLoading(true);
       setError(null);
 
-      const response = await apiService.createAddress(formData);
+      const addressData = transformFormDataToAddress(formData);
+      const response = await apiService.createAddress(addressData);
       if (response.success) {
         setAddresses(prev => [...prev, response.data.address]);
         setIsAddingNew(false);
@@ -77,6 +80,7 @@ const AddressSelectionModal: React.FC<AddressSelectionModalProps> = ({
           city: '',
           state: '',
           pincode: '',
+          country: 'IN',
           isDefault: false,
           instructions: ''
         });
@@ -156,7 +160,7 @@ const AddressSelectionModal: React.FC<AddressSelectionModalProps> = ({
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {address.label}
+                              {address.type}
                             </span>
                             {address.isDefault && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -164,7 +168,7 @@ const AddressSelectionModal: React.FC<AddressSelectionModalProps> = ({
                               </span>
                             )}
                           </div>
-                          <p className="text-white font-medium">{address.fullName}</p>
+                          <p className="text-white font-medium">{address.name}</p>
                           <p className="text-gray-400 text-sm">{address.phone}</p>
                           <p className="text-gray-300 text-sm">
                             {address.address}, {address.city}, {address.state} - {address.pincode}

@@ -32,7 +32,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
 
   const calculateSubtotal = () => {
     return state.items.reduce((total, item) => {
-      return total + (item.customization?.totalPrice || parseInt(item.price.replace('₹', '')) * item.quantity);
+      return total + (parseInt(item.price.replace('₹', '')) * item.quantity);
     }, 0);
   };
 
@@ -89,7 +89,8 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        customization: item.customization
+        customization: item.customization,
+        totalPrice: (parseFloat(item.price.replace('₹', '')) * item.quantity).toFixed(2)
       }));
 
       const orderData: CreateOrderRequest = {
@@ -209,7 +210,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
 
                       <div className="flex items-center justify-between mt-3">
                         <div className="text-sera-orange font-semibold text-sm sm:text-base">
-                          ₹{item.customization?.totalPrice || parseInt(item.price.replace('₹', '')) * item.quantity}
+                          ₹{parseInt(item.price.replace('₹', '')) * item.quantity}
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
@@ -260,7 +261,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {selectedAddress.label}
+                          {selectedAddress.type}
                         </span>
                         {selectedAddress.isDefault && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -268,7 +269,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                           </span>
                         )}
                       </div>
-                      <p className="text-white font-medium text-sm">{selectedAddress.fullName}</p>
+                      <p className="text-white font-medium text-sm">{selectedAddress.name}</p>
                       <p className="text-gray-400 text-sm">{selectedAddress.phone}</p>
                       <p className="text-gray-300 text-sm">
                         {selectedAddress.address}, {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}

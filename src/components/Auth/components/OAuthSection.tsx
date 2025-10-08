@@ -1,7 +1,7 @@
 import React from 'react';
 import { OAUTH_PROVIDERS } from '../config/formConfig';
 import { getOAuthIcon } from './OAuthIcons';
-import { API_BASE_URL } from '../../../services/api/constants';
+import { API_BASE_URL } from '../../../services/api';
 import { OAuthSectionProps } from '../interfaces/authInterfaces';
 
 const OAuthSection: React.FC<OAuthSectionProps> = ({ disabled = false }) => {
