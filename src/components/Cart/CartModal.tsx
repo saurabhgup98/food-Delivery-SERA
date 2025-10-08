@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { apiService, CreateOrderRequest, Order, Address } from '../../services/api';
 import OrderSuccessModal from './OrderSuccessModal';
 import AddressSelectionModal from './AddressSelectionModal';
+import IconTextBtnPrimary from '../buttons/IconTextBtnPrimary';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
 
   const getCustomizationText = (item: any) => {
     if (!item.customization) return '';
-    
+
     const parts: string[] = [];
     if (item.customization.size && item.customization.size !== 'medium') {
       parts.push(item.customization.size);
@@ -54,7 +55,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     if (item.customization.spiceLevel && item.customization.spiceLevel !== 'mild') {
       parts.push(item.customization.spiceLevel);
     }
-    
+
     return parts.length > 0 ? `(${parts.join(', ')})` : '';
   };
 
@@ -102,7 +103,6 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
         deliveryInstructions: deliveryInstructions || selectedAddress.instructions || undefined
       };
 
-      console.log('Placing order:', orderData);
 
       const response = await apiService.createOrder(orderData);
 
@@ -132,11 +132,11 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, transform: 'translateZ(0)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-dark-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-dark-600 transform transition-all duration-300" style={{ position: 'relative', zIndex: 10000, transform: 'translateZ(0)', margin: 'auto' }}>
         {/* Header */}
@@ -163,20 +163,22 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
               <ShoppingCart className="w-16 h-16 text-gray-500 mb-4" />
               <h3 className="text-white text-lg font-semibold mb-2">Your cart is empty</h3>
               <p className="text-gray-400 text-sm mb-6">Add some delicious items to get started!</p>
-              <button
+              <IconTextBtnPrimary
                 onClick={onClose}
-                className="bg-sera-blue text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-              >
-                Start Ordering
-              </button>
+                text="Start Ordering"
+                variant="primary"
+                bgColor="bg-sera-blue"
+                hoverBgColor="hover:bg-blue-600"
+                size="md"
+              />
             </div>
           ) : (
             <div className="space-y-4">
               {state.items.map((item) => (
                 <div key={item.uniqueId} className="bg-dark-700 rounded-lg p-4">
                   <div className="flex items-start space-x-4">
-                    <img 
-                      src={item.image} 
+                    <img
+                      src={item.image}
                       alt={item.name}
                       className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                     />
@@ -204,28 +206,28 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                           🗑️
                         </button>
                       </div>
-                      
+
                       <div className="flex items-center justify-between mt-3">
                         <div className="text-sera-orange font-semibold text-sm sm:text-base">
                           ₹{item.customization?.totalPrice || parseInt(item.price.replace('₹', '')) * item.quantity}
                         </div>
-                                                 <div className="flex items-center space-x-2">
-                           <button
-                             onClick={() => handleQuantityChange(item.uniqueId, item.quantity - 1)}
-                             className="w-8 h-8 bg-dark-600 text-white rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors"
-                           >
-                             -
-                           </button>
-                           <span className="text-white font-semibold min-w-[20px] text-center">
-                             {item.quantity}
-                           </span>
-                           <button
-                             onClick={() => handleQuantityChange(item.uniqueId, item.quantity + 1)}
-                             className="w-8 h-8 bg-dark-600 text-white rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors"
-                           >
-                             +
-                           </button>
-                         </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleQuantityChange(item.uniqueId, item.quantity - 1)}
+                            className="w-8 h-8 bg-dark-600 text-white rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="text-white font-semibold min-w-[20px] text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => handleQuantityChange(item.uniqueId, item.quantity + 1)}
+                            className="w-8 h-8 bg-dark-600 text-white rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -326,19 +328,26 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
 
             {/* Action Buttons */}
             <div className="flex space-x-3">
-              <button
+              <IconTextBtnPrimary
                 onClick={clearCart}
-                className="flex-1 bg-dark-700 text-white px-4 py-3 rounded-lg font-semibold hover:bg-dark-600 transition-colors"
-              >
-                Clear Cart
-              </button>
-              <button
+                text="Clear Cart"
+                icon={<X className="w-4 h-4" />}
+                variant="secondary"
+                bgColor="bg-dark-700"
+                hoverBgColor="hover:bg-dark-600"
+                size="md"
+                className="flex-1"
+              />
+              <IconTextBtnPrimary
                 onClick={handlePlaceOrder}
                 disabled={isPlacingOrder}
-                className="flex-1 bg-gradient-to-r from-sera-blue to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
-              </button>
+                text={isPlacingOrder ? 'Placing Order...' : 'Place Order'}
+                variant="primary"
+                bgColor="bg-gradient-to-r from-sera-blue to-blue-600"
+                hoverBgColor="hover:from-blue-600 hover:to-blue-700"
+                size="md"
+                className="flex-1"
+              />
             </div>
           </div>
         )}

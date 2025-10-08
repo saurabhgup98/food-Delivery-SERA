@@ -1,157 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { apiService } from '../../services/api';
+import React from 'react';
 import ValidationModal from '../Common/ValidationModal';
-
-interface DietaryPreferences {
-  vegetarian: boolean;
-  vegan: boolean;
-  glutenFree: boolean;
-  dairyFree: boolean;
-  nutFree: boolean;
-  seafoodFree: boolean;
-  eggFree: boolean;
-}
-
-interface CuisinePreferences {
-  indian: boolean;
-  chinese: boolean;
-  italian: boolean;
-  mexican: boolean;
-  thai: boolean;
-  japanese: boolean;
-  mediterranean: boolean;
-  american: boolean;
-}
+import { DietaryPreferences, CuisinePreferences } from './interfaces/foodPreferenceInterfaces';
+import {
+  SPICE_LEVEL_OPTIONS,
+  CALORIE_PREFERENCE_OPTIONS,
+  COMMON_ALLERGIES
+} from '../../config/foodPreferenceConfig';
+import { useFoodPreferences } from '../../hooks/useFoodPreferences';
 
 const FoodPreferences: React.FC = () => {
-  const [dietaryPreferences, setDietaryPreferences] = useState<DietaryPreferences>({
-    vegetarian: false,
-    vegan: false,
-    glutenFree: false,
-    dairyFree: false,
-    nutFree: false,
-    seafoodFree: false,
-    eggFree: false,
-  });
-
-  const [cuisinePreferences, setCuisinePreferences] = useState<CuisinePreferences>({
-    indian: false,
-    chinese: false,
-    italian: false,
-    mexican: false,
-    thai: false,
-    japanese: false,
-    mediterranean: false,
-    american: false,
-  });
-
-  const [spiceLevel, setSpiceLevel] = useState('medium');
-  const [caloriePreference, setCaloriePreference] = useState('moderate');
-  const [allergies, setAllergies] = useState<string[]>([]);
-  const [customAllergies, setCustomAllergies] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [showValidationModal, setShowValidationModal] = useState(false);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
-
-  const handleDietaryChange = (key: keyof DietaryPreferences) => {
-    setDietaryPreferences(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
-
-  const handleCuisineChange = (key: keyof CuisinePreferences) => {
-    setCuisinePreferences(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
-
-  // Load saved preferences on component mount
-  useEffect(() => {
-    loadPreferences();
-  }, []);
-
-  const loadPreferences = async () => {
-    try {
-      // For now, we'll use localStorage to persist preferences
-      const savedPreferences = localStorage.getItem('foodPreferences');
-      if (savedPreferences) {
-        const parsed = JSON.parse(savedPreferences);
-        setDietaryPreferences(parsed.dietaryPreferences || dietaryPreferences);
-        setCuisinePreferences(parsed.cuisinePreferences || cuisinePreferences);
-        setSpiceLevel(parsed.spiceLevel || 'medium');
-        setCaloriePreference(parsed.caloriePreference || 'moderate');
-        setAllergies(parsed.allergies || []);
-      }
-    } catch (error) {
-      console.error('Error loading preferences:', error);
-    }
-  };
-
-  const handleAllergyToggle = (allergy: string) => {
-    setAllergies(prev => 
-      prev.includes(allergy) 
-        ? prev.filter(a => a !== allergy)
-        : [...prev, allergy]
-    );
-  };
-
-  const addCustomAllergy = () => {
-    if (customAllergies.trim() && !allergies.includes(customAllergies.trim())) {
-      setAllergies(prev => [...prev, customAllergies.trim()]);
-      setCustomAllergies('');
-    }
-  };
-
-  const removeAllergy = (allergy: string) => {
-    setAllergies(prev => prev.filter(a => a !== allergy));
-  };
-
-  const handleSave = async () => {
-    try {
-      setIsLoading(true);
-      
-             // Validate required fields
-       const requiredFields: string[] = [];
-       if (Object.values(dietaryPreferences).every(v => !v)) {
-         requiredFields.push('At least one dietary preference');
-       }
-       if (Object.values(cuisinePreferences).every(v => !v)) {
-         requiredFields.push('At least one cuisine preference');
-       }
-      
-      if (requiredFields.length > 0) {
-        setMissingFields(requiredFields);
-        setShowValidationModal(true);
-        return;
-      }
-
-             const preferencesData = {
-         dietaryPreferences,
-         cuisinePreferences,
-         spiceLevel,
-         caloriePreference,
-         allergies
-       };
-
-       // Save to localStorage for now (can be replaced with API call later)
-       localStorage.setItem('foodPreferences', JSON.stringify(preferencesData));
-       
-       // Simulate API call
-       await new Promise(resolve => setTimeout(resolve, 1000));
-       
-       alert('Food preferences saved successfully!');
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-      alert('Failed to save preferences. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    // State
+    dietaryPreferences,
+    cuisinePreferences,
+    spiceLevel,
+    caloriePreference,
+    allergies,
+    customAllergies,
+    isLoading,
+    showValidationModal,
+    missingFields,
+    
+    // Setters
+    setSpiceLevel,
+    setCaloriePreference,
+    setCustomAllergies,
+    
+    // Handlers
+    handleDietaryChange,
+    handleCuisineChange,
+    handleAllergyToggle,
+    addCustomAllergy,
+    removeAllergy,
+    handleSave,
+    closeValidationModal
+  } = useFoodPreferences();
 
   return (
     <div className="space-y-8">
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -177,47 +64,44 @@ const FoodPreferences: React.FC = () => {
       {/* Dietary Restrictions */}
       <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
         <h4 className="text-white font-medium mb-4">Dietary Restrictions</h4>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           {Object.entries(dietaryPreferences).map(([key, value]) => (
-             <div key={key} className={`flex items-center p-3 rounded-lg border-2 transition-all duration-200 ${
-               value 
-                 ? 'border-sera-orange bg-orange-600/10' 
-                 : 'border-dark-600 bg-dark-600/50 hover:border-dark-500'
-             }`}>
-               <input
-                 type="checkbox"
-                 id={key}
-                 checked={value}
-                 onChange={() => handleDietaryChange(key as keyof DietaryPreferences)}
-                 className="w-4 h-4 text-sera-orange bg-dark-600 border-dark-500 rounded focus:ring-sera-orange focus:ring-2"
-               />
-               <label htmlFor={key} className={`ml-2 text-sm capitalize cursor-pointer ${
-                 value ? 'text-sera-orange font-medium' : 'text-gray-300'
-               }`}>
-                 {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-               </label>
-             </div>
-           ))}
-         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Object.entries(dietaryPreferences).map(([key, value]) => (
+            <div key={key} className={`flex items-center p-3 rounded-lg border-2 transition-all duration-200 ${value
+                ? 'border-sera-orange bg-orange-600/10'
+                : 'border-dark-600 bg-dark-600/50 hover:border-dark-500'
+              }`}>
+              <input
+                type="checkbox"
+                id={key}
+                checked={value}
+                onChange={() => handleDietaryChange(key as keyof DietaryPreferences)}
+                className="w-4 h-4 text-sera-orange bg-dark-600 border-dark-500 rounded focus:ring-sera-orange focus:ring-2"
+              />
+              <label htmlFor={key} className={`ml-2 text-sm capitalize cursor-pointer ${value ? 'text-sera-orange font-medium' : 'text-gray-300'
+                }`}>
+                {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Allergies */}
       <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
         <h4 className="text-white font-medium mb-4">Allergies & Intolerances</h4>
-        
+
         {/* Common Allergies */}
         <div className="mb-4">
           <p className="text-gray-400 text-sm mb-3">Common Allergies:</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {['Peanuts', 'Tree Nuts', 'Milk', 'Eggs', 'Soy', 'Wheat', 'Fish', 'Shellfish'].map(allergy => (
+            {COMMON_ALLERGIES.map(allergy => (
               <button
                 key={allergy}
                 onClick={() => handleAllergyToggle(allergy)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  allergies.includes(allergy)
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${allergies.includes(allergy)
                     ? 'bg-red-600 text-white'
                     : 'bg-dark-600 text-gray-300 hover:bg-dark-500'
-                }`}
+                  }`}
               >
                 {allergy}
               </button>
@@ -273,20 +157,14 @@ const FoodPreferences: React.FC = () => {
       <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
         <h4 className="text-white font-medium mb-4">Spice Level Preference</h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          {[
-            { value: 'mild', label: 'Mild', emoji: '🌶️' },
-            { value: 'medium', label: 'Medium', emoji: '🌶️🌶️' },
-            { value: 'hot', label: 'Hot', emoji: '🌶️🌶️🌶️' },
-            { value: 'extra-hot', label: 'Extra Hot', emoji: '🌶️🌶️🌶️🌶️' }
-          ].map(level => (
+          {SPICE_LEVEL_OPTIONS.map(level => (
             <button
               key={level.value}
               onClick={() => setSpiceLevel(level.value)}
-              className={`p-4 rounded-lg border-2 transition-colors duration-200 ${
-                spiceLevel === level.value
+              className={`p-4 rounded-lg border-2 transition-colors duration-200 ${spiceLevel === level.value
                   ? 'border-sera-orange bg-orange-600/20 text-sera-orange'
                   : 'border-dark-600 bg-dark-600 text-gray-300 hover:border-dark-500'
-              }`}
+                }`}
             >
               <div className="text-2xl mb-2">{level.emoji}</div>
               <div className="text-sm font-medium">{level.label}</div>
@@ -299,19 +177,14 @@ const FoodPreferences: React.FC = () => {
       <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
         <h4 className="text-white font-medium mb-4">Calorie Preference</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {[
-            { value: 'low', label: 'Low Calorie', desc: 'Under 500 cal' },
-            { value: 'moderate', label: 'Moderate', desc: '500-800 cal' },
-            { value: 'high', label: 'High Calorie', desc: '800+ cal' }
-          ].map(pref => (
+          {CALORIE_PREFERENCE_OPTIONS.map(pref => (
             <button
               key={pref.value}
               onClick={() => setCaloriePreference(pref.value)}
-              className={`p-4 rounded-lg border-2 transition-colors duration-200 ${
-                caloriePreference === pref.value
+              className={`p-4 rounded-lg border-2 transition-colors duration-200 ${caloriePreference === pref.value
                   ? 'border-sera-orange bg-orange-600/20 text-sera-orange'
                   : 'border-dark-600 bg-dark-600 text-gray-300 hover:border-dark-500'
-              }`}
+                }`}
             >
               <div className="font-medium">{pref.label}</div>
               <div className="text-sm opacity-75">{pref.desc}</div>
@@ -319,8 +192,6 @@ const FoodPreferences: React.FC = () => {
           ))}
         </div>
       </div>
-
-
 
       {/* Cuisine Preferences */}
       <div className="bg-dark-700 rounded-lg p-6 border border-dark-600">
@@ -331,11 +202,10 @@ const FoodPreferences: React.FC = () => {
             <button
               key={key}
               onClick={() => handleCuisineChange(key as keyof CuisinePreferences)}
-              className={`p-3 rounded-lg border-2 transition-colors duration-200 ${
-                value
+              className={`p-3 rounded-lg border-2 transition-colors duration-200 ${value
                   ? 'border-sera-orange bg-orange-600/20 text-sera-orange'
                   : 'border-dark-600 bg-dark-600 text-gray-300 hover:border-dark-500'
-              }`}
+                }`}
             >
               <div className="capitalize">{key}</div>
             </button>
@@ -346,7 +216,7 @@ const FoodPreferences: React.FC = () => {
       {/* Validation Modal */}
       <ValidationModal
         isOpen={showValidationModal}
-        onClose={() => setShowValidationModal(false)}
+        onClose={closeValidationModal}
         missingFields={missingFields}
         title="Food Preferences Required"
       />

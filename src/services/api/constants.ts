@@ -1,6 +1,7 @@
 // API Constants - Centralized configuration and endpoints
+import { API_CONFIG } from '../../config/environment';
 
-export const API_BASE_URL = 'https://simple-authentication-service.vercel.app';
+export const API_BASE_URL = API_CONFIG.baseURL;
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -16,7 +17,7 @@ export const API_ENDPOINTS = {
   githubAuth: '/api/oauth/github',
 } as const;
 
-export const API_CONFIG = {
+export const HTTP_CONFIG = {
   timeout: 10000,
   retryAttempts: 3,
   headers: {

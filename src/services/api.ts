@@ -1,4 +1,9 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://food-delivery-backend-sera.vercel.app/api';
+// Import API configuration
+import { API_CONFIG } from '../config/environment';
+
+// Use backend URL from environment config
+const API_BASE_URL = API_CONFIG.backendURL;
+const AUTH_API_URL = API_CONFIG.baseURL;
 
 export interface Restaurant {
   _id: string;
@@ -247,26 +252,22 @@ export interface OrdersResponse {
 class ApiService {
   private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('Making API request to:', url);
-    console.log('Request options:', options);
     
     // No token management needed in new authentication system
     try {
       const response = await fetch(url, {
+        method: options?.method || 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Origin': window.location.origin,
           ...options?.headers,
         },
+        mode: 'cors',
+        credentials: 'omit',
         ...options,
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      console.log('CORS headers:', {
-        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
-        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
-        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
-      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -275,7 +276,6 @@ class ApiService {
       }
 
       const data = await response.json();
-      console.log('Response data:', data);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
@@ -341,7 +341,6 @@ class ApiService {
 
   // Get popular food items for a restaurant (mock data for now)
   async getRestaurantFoodItems(restaurantId: string): Promise<{ success: boolean; data: { foodItems: MenuItem[] } }> {
-    console.log('Fetching food items for restaurant:', restaurantId);
     
     // Mock food data based on restaurant cuisine
     const mockFoodData: Record<string, MenuItem[]> = {
@@ -486,7 +485,6 @@ class ApiService {
     const cuisine = 'indian';
     const foodItems = mockFoodData[cuisine] || mockFoodData['indian'];
     
-    console.log('Returning food items:', foodItems.length, 'items for cuisine:', cuisine);
 
     return {
       success: true,
@@ -592,7 +590,6 @@ class ApiService {
     isDefault?: boolean;
     instructions?: string;
   }): Promise<AddressResponse> {
-    console.log('API updateAddress called with:', { addressId, addressData }); // Debug log
     return this.makeRequest<AddressResponse>('/user?action=update-address', {
       method: 'PUT',
       body: JSON.stringify({ id: addressId, ...addressData })

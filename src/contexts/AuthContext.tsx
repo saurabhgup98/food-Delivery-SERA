@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { authApi } from '../services/api/index';
 import { User, LoginRequest, RegisterRequest, AuthResponse } from '../services/api/types';
 
@@ -11,6 +11,15 @@ interface AuthContextType {
   logout: () => Promise<void>;
   error: string | null;
   clearError: () => void;
+  // Modal management
+  isLoginModalOpen: boolean;
+  isSignupModalOpen: boolean;
+  openLoginModal: () => void;
+  openSignupModal: () => void;
+  closeLoginModal: () => void;
+  closeSignupModal: () => void;
+  switchToSignup: () => void;
+  switchToLogin: () => void;
 }
 
 interface AuthProviderProps {
@@ -31,6 +40,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Modal state
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
 
   // Initialize authentication state
   useEffect(() => {
@@ -72,11 +85,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
         setUser(userWithRole);
         localStorage.setItem("isLoggedIn", "true");
+        // Close login modal on successful login
+        setIsLoginModalOpen(false);
       }
 
       return response;
     } catch (error: any) {
-      const errorMessage = error.message || "Login failed";
+      // Handle different types of errors
+      let errorMessage = "Login failed";
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
       setError(errorMessage);
       throw error;
     } finally {
@@ -102,11 +127,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
         setUser(userWithRole);
         localStorage.setItem("isLoggedIn", "true");
+        // Close signup modal on successful registration
+        setIsSignupModalOpen(false);
       }
 
       return response;
     } catch (error: any) {
-      const errorMessage = error.message || "Registration failed";
+      // Handle different types of errors
+      let errorMessage = "Registration failed";
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
       setError(errorMessage);
       throw error;
     } finally {
@@ -135,6 +172,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
   };
 
+
+  // Modal management functions
+  const openLoginModal = useCallback(() => {
+    setIsLoginModalOpen(true);
+    setIsSignupModalOpen(false);
+  }, []);
+
+  const openSignupModal = useCallback(() => {
+    setIsSignupModalOpen(true);
+    setIsLoginModalOpen(false);
+  }, []);
+
+  const closeLoginModal = useCallback(() => {
+    setIsLoginModalOpen(false);
+  }, []);
+
+  const closeSignupModal = useCallback(() => {
+    setIsSignupModalOpen(false);
+  }, []);
+
+  const switchToSignup = useCallback(() => {
+    setIsLoginModalOpen(false);
+    setIsSignupModalOpen(true);
+  }, []);
+
+  const switchToLogin = useCallback(() => {
+    setIsSignupModalOpen(false);
+    setIsLoginModalOpen(true);
+  }, []);
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -144,6 +211,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     error,
     clearError,
+    // Modal management
+    isLoginModalOpen,
+    isSignupModalOpen,
+    openLoginModal,
+    openSignupModal,
+    closeLoginModal,
+    closeSignupModal,
+    switchToSignup,
+    switchToLogin,
   };
 
   return (

@@ -1,0 +1,9 @@
+{
+  "short_name": "SERA Food Delivery",
+  "name": "SERA Food Delivery App",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a1a1a",
+  "background_color": "#1a1a1a"
+}

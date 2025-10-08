@@ -1,15 +1,14 @@
-// HTTP Client - Centralized HTTP request handling
+// HTTP Client - Core HTTP request functionality
 
-import { API_CONFIG } from './constants';
-import { ApiResponse, ApiError } from './types';
+import { ApiResponse } from './types';
+import { HTTP_CONFIG } from './constants';
+import { getAccessToken, handleApiError } from './utils';
 
 export class HttpClient {
   private baseURL: string;
-  private timeout: number;
 
-  constructor(baseURL: string, timeout: number = API_CONFIG.timeout) {
+  constructor(baseURL: string) {
     this.baseURL = baseURL;
-    this.timeout = timeout;
   }
 
   private async makeRequest<T>(
@@ -17,67 +16,68 @@ export class HttpClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
-      ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...HTTP_CONFIG.headers,
         ...options.headers,
       },
+      ...options,
+    };
+
+    // Add authorization header if token exists
+    const token = getAccessToken();
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    // Add app endpoint header for all requests
+    config.headers = {
+      ...config.headers,
+      'x-app-endpoint': 'http://127.0.0.1:3001',
     };
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-      const response = await fetch(url, {
-        ...config,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
+      const response = await fetch(url, config);
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new Error('Request timeout - please check your internet connection');
-        }
-        if (error.message.includes('Failed to fetch')) {
-          throw new Error('Network error - please check your internet connection');
-        }
-      }
-      throw error;
+      const apiError = handleApiError(error);
+      throw apiError;
     }
   }
 
-  async get<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>(endpoint, { ...options, method: 'GET' });
+  /** GET request */
+  async get<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+    return this.makeRequest<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any, options?: RequestInit): Promise<ApiResponse<T>> {
+  /** POST request */
+  async post<T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
-      ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async put<T>(endpoint: string, data?: any, options?: RequestInit): Promise<ApiResponse<T>> {
+  /** PUT request */
+  async put<T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
-      ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async delete<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>(endpoint, { ...options, method: 'DELETE' });
+  /** DELETE request */
+  async delete<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+    return this.makeRequest<T>(endpoint, { method: 'DELETE' });
   }
 }

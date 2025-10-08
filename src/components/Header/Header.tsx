@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { useModalManager } from '../../contexts/auth/modalManager';
 import Navigation from '../Navigation/Navigation';
 import SearchBar from '../SearchBar/SearchBar';
 import { CartIcon } from '../Cart';
@@ -24,8 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const { user, isLoading, logout } = useAuth();
-  const { openLoginModal, openSignupModal } = useModalManager();
+  const { user, isLoading, logout, openLoginModal, openSignupModal } = useAuth();
   const navigate = useNavigate();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 

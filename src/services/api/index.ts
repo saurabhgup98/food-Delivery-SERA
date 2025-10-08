@@ -3,14 +3,14 @@
 import { HttpClient } from './httpClient';
 import { AuthService } from './auth';
 import { OAuthService } from './oauth';
-import { API_BASE_URL, API_CONFIG } from './constants';
+import { API_BASE_URL, HTTP_CONFIG } from './constants';
 
 // Create HTTP client
-const httpClient = new HttpClient(API_BASE_URL, API_CONFIG.timeout);
+const httpClient = new HttpClient(API_BASE_URL);
 
 // Create service instances
 const authService = new AuthService(httpClient);
-const oauthService = new OAuthService(API_BASE_URL);
+const oauthService = new OAuthService(httpClient, API_BASE_URL);
 
 // Create API client
 class ApiClient {

@@ -5,12 +5,12 @@ import {
   MapPin,
   X
 } from 'lucide-react';
-import QuickFilters from '../Common/QuickFilters';
-import RestaurantDisplay from '../Common/RestaurantDisplay';
-import FilterModal from '../Common/FilterModal';
-import FilterIcon from '../Icons/FilterIcon';
-import { apiService, Restaurant } from '../../services/api';
-import { AnimatedLoader } from '../Loader';
+import QuickFilters from '../components/Common/QuickFilters';
+import RestaurantDisplay from '../components/Common/RestaurantDisplay';
+import FilterModal from '../components/Common/FilterModal';
+import FilterIcon from '../components/Icons/FilterIcon';
+import { apiService, Restaurant } from '../services/api';
+import { AnimatedLoader } from '../components/Loader';
 
 // Debounce hook for search
 const useDebounce = (value: string, delay: number) => {

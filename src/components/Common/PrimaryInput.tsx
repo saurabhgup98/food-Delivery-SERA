@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-interface PrimaryInputProps {
+export interface PrimaryInputProps {
   type?: 'text' | 'email' | 'tel' | 'password' | 'number';
   value: string;
   onChange: (value: string) => void;

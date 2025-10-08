@@ -72,14 +72,14 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     } finally {
       setLoading(false);
     }
-  }, []); // Remove dependencies to prevent re-fetching
+  }, [countryCode, onCountryCodeChange]); // Include dependencies
 
   useEffect(() => {
     // Only fetch once when component mounts
     if (countries.length === 0) {
       fetchCountryCodes();
     }
-  }, []); // Empty dependency array
+  }, [countries.length, fetchCountryCodes]); // Include dependencies
 
   const handleCountrySelect = (country: CountryCode) => {
     setSelectedCountry(country);
