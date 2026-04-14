@@ -1,18 +1,9 @@
+import { INITIAL_ADDRESS_FORM_DATA, INITIAL_FORM_DATA } from '../components/Address/AddressConstant';
+import { DropdownOptionI } from '../components/Dropdown/PrimaryDropdown';
 import { Address } from '../services/api';
-import { addressLabelOptions } from '../data/dropdownOptions';
 
-export const INITIAL_FORM_DATA = {
-  label: '',
-  fullName: '',
-  phone: '',
-  address: '',
-  country: 'IN',
-  state: '',
-  city: '',
-  pincode: '',
-  isDefault: false,
-  instructions: ''
-};
+// Export INITIAL_FORM_DATA for backward compatibility
+export { INITIAL_FORM_DATA };
 
 export const createFormDataFromAddress = (address: Address) => ({
   label: address.type, // Map type to label for form
@@ -28,7 +19,7 @@ export const createFormDataFromAddress = (address: Address) => ({
 });
 
 // Transform form data to Address type for API calls
-export const transformFormDataToAddress = (formData: typeof INITIAL_FORM_DATA) => ({
+export const transformFormDataToAddress = (formData: typeof INITIAL_ADDRESS_FORM_DATA) => ({
   type: formData.label as 'home' | 'work' | 'other',
   name: formData.fullName,
   phone: formData.phone,
@@ -42,89 +33,8 @@ export const transformFormDataToAddress = (formData: typeof INITIAL_FORM_DATA) =
 });
 
 // Function to reset form data to initial state
-export const resetFormData = () => ({ ...INITIAL_FORM_DATA });
+export const resetFormData = () => ({ ...INITIAL_ADDRESS_FORM_DATA });
 
-// Enhanced form field configurations with component types
-export const FORM_FIELD_CONFIGS: Record<string, any> = {
-  label: {
-    component: 'PrimaryDropdown',
-    label: 'Address Label',
-    placeholder: 'Select label',
-    required: true,
-    options: addressLabelOptions,
-    fieldName: 'label'
-  },
-  fullName: {
-    component: 'PrimaryInput',
-    label: 'Full Name',
-    placeholder: 'Enter full name',
-    required: true,
-    type: 'text',
-    fieldName: 'fullName'
-  },
-  phone: {
-    component: 'PrimaryInput',
-    label: 'Phone Number',
-    placeholder: 'Enter phone number',
-    required: true,
-    type: 'tel',
-    fieldName: 'phone'
-  },
-  address: {
-    component: 'PrimaryInput',
-    label: 'Street Address',
-    placeholder: 'Enter street address',
-    required: true,
-    type: 'text',
-    fieldName: 'address'
-  },
-  country: {
-    component: 'LocationDropdown',
-    label: 'Country',
-    placeholder: 'Select country',
-    required: true,
-    locationType: 'country',
-    fieldName: 'country',
-    resetFields: ['state', 'city'] // Fields to reset when this changes
-  },
-  state: {
-    component: 'LocationDropdown',
-    label: 'State',
-    placeholder: 'Select state',
-    required: true,
-    locationType: 'state',
-    fieldName: 'state',
-    dependsOn: 'country', // This field depends on country
-    resetFields: ['city'] // Fields to reset when this changes
-  },
-  city: {
-    component: 'LocationDropdown',
-    label: 'City',
-    placeholder: 'Select city',
-    required: true,
-    locationType: 'city',
-    fieldName: 'city',
-    dependsOn: ['country', 'state'] // This field depends on both country and state
-  },
-  pincode: {
-    component: 'PrimaryInput',
-    label: 'Pincode',
-    placeholder: 'Enter pincode',
-    required: true,
-    type: 'text',
-    fieldName: 'pincode'
-  },
-  instructions: {
-    component: 'textarea',
-    label: 'Delivery Instructions (Optional)',
-    placeholder: 'Any special instructions for delivery...',
-    required: false,
-    rows: 3,
-    fieldName: 'instructions'
-  }
-};
-
-// Field rendering order
 export const FORM_FIELD_ORDER = [
   'label',
   'fullName',

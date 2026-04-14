@@ -1,6 +1,6 @@
 // Cart utility functions
 
-import { MenuItem as ApiMenuItem } from '../../services/api';
+import { MenuItemI as ApiMenuItem } from '../../components/Restaurant/Config/RestaurantInterfaces';
 import { CartItem, Customization } from '../types';
 import { createHash } from '../shared/utils';
 

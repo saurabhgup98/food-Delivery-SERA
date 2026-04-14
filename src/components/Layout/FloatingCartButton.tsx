@@ -1,11 +1,8 @@
 import React from 'react';
 import { useCart } from '../../contexts/CartContext';
-import { useCartModal } from '../../hooks/useCartModal';
-import CartModal from '../Cart/CartModal';
 
 const FloatingCartButton: React.FC = () => {
-  const { state: cartState } = useCart();
-  const { isOpen, open, close } = useCartModal();
+  const { state: cartState, openModal } = useCart();
 
   if (cartState.totalItems === 0) return null;
 
@@ -13,7 +10,7 @@ const FloatingCartButton: React.FC = () => {
     <>
       <div className="fixed bottom-6 right-6 z-50">
         <button 
-          onClick={open}
+          onClick={openModal}
           className="relative w-16 h-16 bg-gradient-to-r from-sera-blue to-sera-blue/90 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center group border-2 border-white/20"
         >
           <svg className="w-7 h-7 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,8 +29,6 @@ const FloatingCartButton: React.FC = () => {
           </div>
         </button>
       </div>
-
-      <CartModal isOpen={isOpen} onClose={close} />
     </>
   );
 };

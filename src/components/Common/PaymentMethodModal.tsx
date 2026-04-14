@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import PrimaryInput from './PrimaryInput';
-import PrimaryDropdown from './PrimaryDropdown';
+import PrimaryDropdown from '../Dropdown/PrimaryDropdown';
+import PrimaryInput from '../Input/PrimaryInput';
 import ValidationModal from './ValidationModal';
 
 interface PaymentMethodModalProps {

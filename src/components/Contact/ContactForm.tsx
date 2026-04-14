@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
-import PrimaryInput from '../Common/PrimaryInput';
-import PrimaryDropdown from '../Common/PrimaryDropdown';
-import PhoneInput from '../Common/PhoneInput';
 import { useAuth } from '../../contexts/AuthContext';
+import PrimaryCenteredActionBtn from '../Button/PrimaryCenteredActionBtn';
+import { PrimaryForm } from '../Form';
+import {
+  getInitialContactFormData,
+  getStep1FormFieldsConfig,
+  getStep2FormFieldsConfig,
+  getStep3FormFieldsConfig,
+  getStep1ButtonsConfig,
+  getStep2ButtonsConfig,
+  getStep3ButtonsConfig,
+  getCloseButtonConfig,
+  contactMethods,
+  getFloatingFoodIcons,
+  issueCategories,
+  ContactFormData
+} from './ContactFormConfig';
 
 
 interface ContactFormProps {
@@ -13,99 +26,17 @@ interface ContactFormProps {
 
 const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    whatsappNumber: '',
-    countryCode: 'IN',
-    preferredContact: 'email',
-    category: '',
-    orderReference: '',
-    priority: 'medium',
-    bestTime: 'afternoon',
-    subject: '',
-    message: '',
-  });
+  const [formData, setFormData] = useState<ContactFormData>(getInitialContactFormData(user));
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [attachments, setAttachments] = useState<File[]>([]);
 
   // Auto-fill user details when component mounts or user changes
   useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        name: user.username || '',
-        email: user.email || '',
-        phone: '',
-      }));
-    }
+    setFormData(getInitialContactFormData(user));
   }, [user]);
 
-  const issueCategories = [
-    { value: 'order-problems', label: 'Order Problems', icon: '📦' },
-    { value: 'account-issues', label: 'Account Issues', icon: '👤' },
-    { value: 'payment-problems', label: 'Payment Problems', icon: '💳' },
-    { value: 'partnership-inquiries', label: 'Partnership Inquiries', icon: '🤝' },
-    { value: 'technical-support', label: 'Technical Support', icon: '🔧' },
-    { value: 'feedback-suggestions', label: 'Feedback/Suggestions', icon: '💭' },
-    { value: 'other', label: 'Other', icon: '❓' },
-  ];
 
-  const contactMethodOptions = [
-    { value: 'email', label: 'Email', icon: '📧' },
-    { value: 'phone', label: 'Phone', icon: '📞' },
-    { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
-  ];
-
-  const priorityOptions = [
-    { value: 'low', label: 'Low', icon: '🟢' },
-    { value: 'medium', label: 'Medium', icon: '🟡' },
-    { value: 'high', label: 'High', icon: '🟠' },
-    { value: 'urgent', label: 'Urgent', icon: '🔴' },
-  ];
-
-  const bestTimeOptions = [
-    { value: 'morning', label: 'Morning', icon: '🌅' },
-    { value: 'afternoon', label: 'Afternoon', icon: '☀️' },
-    { value: 'evening', label: 'Evening', icon: '🌆' },
-  ];
-
-  const contactMethods = [
-    {
-      icon: '📞',
-      title: 'Phone Support',
-      primary: '+1 (555) SERA-123',
-      secondary: '24/7 Support',
-      response: 'Immediate',
-      action: () => window.open('tel:+1555SERA123'),
-    },
-    {
-      icon: '📧',
-      title: 'Email Support',
-      primary: 'hello@serafood.com',
-      secondary: '< 2 hours response',
-      response: 'Quick',
-      action: () => window.open('mailto:hello@serafood.com'),
-    },
-    {
-      icon: '💬',
-      title: 'Live Chat',
-      primary: 'Available 24/7',
-      secondary: '2 people ahead',
-      response: 'Instant',
-      action: () => console.log('Open live chat'),
-    },
-    {
-      icon: '📍',
-      title: 'Visit Us',
-      primary: '123 Food Street, City',
-      secondary: '9 AM - 6 PM',
-      response: 'In-person',
-      action: () => console.log('Show office location'),
-    },
-  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -139,20 +70,20 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // Prepare contact data with WhatsApp number if applicable
       const contactData = {
         ...formData,
         attachments: attachments,
         // Use WhatsApp number if provided and WhatsApp is preferred method
-        contactNumber: formData.preferredContact === 'whatsapp' && formData.whatsappNumber 
-          ? formData.whatsappNumber 
+        contactNumber: formData.preferredContact === 'whatsapp' && formData.whatsappNumber
+          ? formData.whatsappNumber
           : formData.phone
       };
-      
+
       const response = await apiService.submitContactForm(contactData);
-      
+
       if (response.success) {
         console.log('Contact form submitted successfully:', response.data);
         alert(`Thank you! Your message has been submitted successfully.`);
@@ -179,12 +110,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
         <div className="bg-dark-800 rounded-2xl shadow-2xl border border-dark-700">
           {/* Header */}
           <div className="relative p-4 md:p-6 bg-gradient-to-r from-sera-blue to-sera-darkBlue">
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
+            <button 
+              onClick={onClose} 
+              className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+            >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            
+
             <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Contact SERA</h2>
               <p className="text-sm md:text-base text-white/80">We're here to help! Choose your preferred way to reach us.</p>
@@ -220,277 +154,113 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
                 <span>{Math.round((currentStep / 3) * 100)}% Complete</span>
               </div>
               <div className="w-full bg-dark-700 rounded-full h-2">
-                <div 
+                <div
                   className="bg-gradient-to-r from-sera-blue to-sera-pink h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(currentStep / 3) * 100}%` }}
                 ></div>
               </div>
             </div>
 
-                         {/* Step 1: Personal Information */}
-             {currentStep === 1 && (
-               <div className="space-y-6 animate-fade-in">
-                 <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Personal Information</h3>
-                 
-                 {/* Line 1: Name and Email - Always visible */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   {user ? (
-                     <>
-                       <div>
-                         <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                         <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
-                           {formData.name || 'Not provided'}
-                         </div>
-                       </div>
-                       <div>
-                         <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                         <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
-                           {formData.email || 'Not provided'}
-                         </div>
-                       </div>
-                     </>
-                   ) : (
-                     <>
-                       <PrimaryInput
-                         type="text"
-                         value={formData.name}
-                         onChange={(value) => handleInputChange('name', value)}
-                         placeholder="Enter your full name"
-                         label="Full Name"
-                         required
-                       />
-                       <PrimaryInput
-                         type="email"
-                         value={formData.email}
-                         onChange={(value) => handleInputChange('email', value)}
-                         placeholder="Enter your email"
-                         label="Email Address"
-                         required
-                       />
-                     </>
-                   )}
-                 </div>
+            {/* Step 1: Personal Information */}
+            {currentStep === 1 && (
+              <div className="space-y-6 animate-fade-in">
+                <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Personal Information</h3>
+                
+                <PrimaryForm
+                  columns={2}
+                  fields={getStep1FormFieldsConfig(formData, setFormData, user)}
+                  className="mb-6"
+                />
 
-                 {/* Line 2: Preferred Contact Method - Single Line */}
-                 <div>
-                   <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact Method</label>
-                   <PrimaryDropdown
-                     value={formData.preferredContact}
-                     onChange={(value) => handleInputChange('preferredContact', value)}
-                     options={contactMethodOptions}
-                     placeholder="Select contact method"
-                   />
-                 </div>
-
-                 {/* Line 3: Contact Number Section - Conditional based on selection */}
-                 {formData.preferredContact === 'whatsapp' && (
-                   <div>
-                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                       WhatsApp Number <span className="text-gray-400">(if different from your registered phone)</span>
-                     </label>
-                     <PhoneInput
-                       value={formData.whatsappNumber}
-                       onChange={(value) => handleInputChange('whatsappNumber', value)}
-                       countryCode={formData.countryCode}
-                       onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
-                       placeholder="Enter your WhatsApp number"
-                       label=""
-                     />
-                   </div>
-                 )}
-
-                 {formData.preferredContact === 'phone' && (
-                   <div>
-                     <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
-                     {user ? (
-                       <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
-                         {formData.phone || 'Not provided'}
-                       </div>
-                     ) : (
-                       <PhoneInput
-                         value={formData.phone}
-                         onChange={(value) => handleInputChange('phone', value)}
-                         countryCode={formData.countryCode}
-                         onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
-                         placeholder="Enter your phone number"
-                         label=""
-                       />
-                     )}
-                   </div>
-                 )}
-
-                 {formData.preferredContact === 'email' && (
-                   <div>
-                     <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number (for account verification)</label>
-                     {user ? (
-                       <div className="px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white/90">
-                         {formData.phone || 'Not provided'}
-                       </div>
-                     ) : (
-                       <PhoneInput
-                         value={formData.phone}
-                         onChange={(value) => handleInputChange('phone', value)}
-                         countryCode={formData.countryCode}
-                         onCountryCodeChange={(value) => handleInputChange('countryCode', value)}
-                         placeholder="Enter your phone number"
-                         label=""
-                       />
-                     )}
-                   </div>
-                 )}
                 <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={!formData.name || !formData.email || (formData.preferredContact === 'whatsapp' && !formData.whatsappNumber)}
-                    className="btn-secondary px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next Step
-                  </button>
+                  {getStep1ButtonsConfig(nextStep, formData).map((buttonProps, index) => (
+                    <PrimaryCenteredActionBtn
+                      key={index}
+                      {...buttonProps}
+                    />
+                  ))}
                 </div>
               </div>
             )}
 
-                         {/* Step 2: Issue Details */}
-             {currentStep === 2 && (
-               <div className="space-y-6 animate-fade-in">
-                 <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Issue Details</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Issue Category *
-                    </label>
-                    <PrimaryDropdown
-                      value={formData.category}
-                      onChange={(value) => handleInputChange('category', value)}
-                      options={issueCategories}
-                      placeholder="Select an issue category"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <PrimaryInput
-                      type="text"
-                      value={formData.orderReference}
-                      onChange={(value) => handleInputChange('orderReference', value)}
-                      placeholder="Order # (optional)"
-                      label="Order Reference"
-                    />
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Priority Level</label>
-                      <PrimaryDropdown
-                        value={formData.priority}
-                        onChange={(value) => handleInputChange('priority', value)}
-                        options={priorityOptions}
-                        placeholder="Select priority level"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Best Time to Contact</label>
-                      <PrimaryDropdown
-                        value={formData.bestTime}
-                        onChange={(value) => handleInputChange('bestTime', value)}
-                        options={bestTimeOptions}
-                        placeholder="Select best time"
-                      />
-                    </div>
-                  </div>
-                </div>
+            {/* Step 2: Issue Details */}
+            {currentStep === 2 && (
+              <div className="space-y-6 animate-fade-in">
+                <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Issue Details</h3>
+                
+                <PrimaryForm
+                  columns={3}
+                  fields={getStep2FormFieldsConfig(formData, setFormData)}
+                  className="mb-6"
+                />
+
                 <div className="flex justify-between">
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="btn-secondary px-6 py-2"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={!formData.category}
-                    className="btn-secondary px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next Step
-                  </button>
+                  {getStep2ButtonsConfig(prevStep, nextStep, formData).map((buttonProps, index) => (
+                    <PrimaryCenteredActionBtn
+                      key={index}
+                      {...buttonProps}
+                    />
+                  ))}
                 </div>
               </div>
             )}
 
-                         {/* Step 3: Message */}
-             {currentStep === 3 && (
-               <div className="space-y-6 animate-fade-in">
-                 <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Your Message</h3>
-                <div className="space-y-4">
-                  <PrimaryInput
-                    type="text"
-                    value={formData.subject}
-                    onChange={(value) => handleInputChange('subject', value)}
-                    placeholder="Subject line"
-                    label="Subject"
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Message *</label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={(e) => handleInputChange('message', e.target.value)}
-                      required
-                      rows={6}
-                      className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sera-orange focus:border-transparent resize-none transition-all duration-300 hover:border-dark-500"
-                      placeholder="Please describe your issue or inquiry in detail..."
+            {/* Step 3: Message */}
+            {currentStep === 3 && (
+              <div className="space-y-6 animate-fade-in">
+                <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Your Message</h3>
+                
+                <PrimaryForm
+                  columns={1}
+                  fields={getStep3FormFieldsConfig(formData, setFormData)}
+                  className="mb-6"
+                />
+
+                {/* File Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Attachments</label>
+                  <div className="border-2 border-dashed border-dark-600 rounded-lg p-4">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="file-upload"
+                      accept="image/*,.pdf,.doc,.docx"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Attachments</label>
-                    <div className="border-2 border-dashed border-dark-600 rounded-lg p-4">
-                      <input
-                        type="file"
-                        multiple
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="file-upload"
-                        accept="image/*,.pdf,.doc,.docx"
-                      />
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <div className="text-center">
-                          <div className="text-2xl mb-2">📎</div>
-                          <p className="text-gray-400">Click to upload files or drag and drop</p>
-                          <p className="text-xs text-gray-500 mt-1">Images, PDF, DOC (max 5MB each)</p>
-                        </div>
-                      </label>
-                    </div>
-                    {attachments.length > 0 && (
-                      <div className="mt-2 space-y-2">
-                        {attachments.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between bg-dark-700 p-2 rounded">
-                            <span className="text-sm text-gray-300">{file.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeAttachment(index)}
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ))}
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <div className="text-center">
+                        <div className="text-2xl mb-2">📎</div>
+                        <p className="text-gray-400">Click to upload files or drag and drop</p>
+                        <p className="text-xs text-gray-500 mt-1">Images, PDF, DOC (max 5MB each)</p>
                       </div>
-                    )}
+                    </label>
                   </div>
+                  {attachments.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {attachments.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between bg-dark-700 p-2 rounded">
+                          <span className="text-sm text-gray-300">{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
                 <div className="flex justify-between">
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="btn-secondary px-6 py-2"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading || !formData.message}
-                    className="btn-primary px-8 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? 'Sending...' : 'Send Message'}
-                  </button>
+                  {getStep3ButtonsConfig(prevStep, () => handleSubmit(new Event('submit') as any), formData, isLoading).map((buttonProps, index) => (
+                    <PrimaryCenteredActionBtn
+                      key={index}
+                      {...buttonProps}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -498,29 +268,27 @@ const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
 
-             {/* Floating Food Icons - Hidden on mobile */}
-       <div className="hidden md:block absolute inset-0 pointer-events-none">
-         <div className="absolute top-20 left-10 animate-bounce-gentle">
-           <div className="w-8 h-8 bg-sera-pink/20 rounded-full flex items-center justify-center">
-             <span className="text-lg">🍕</span>
-           </div>
-         </div>
-         <div className="absolute top-40 right-20 animate-bounce-gentle" style={{ animationDelay: '1s' }}>
-           <div className="w-6 h-6 bg-sera-blue/20 rounded-full flex items-center justify-center">
-             <span className="text-sm">🍔</span>
-           </div>
-         </div>
-         <div className="absolute bottom-40 left-20 animate-bounce-gentle" style={{ animationDelay: '2s' }}>
-           <div className="w-7 h-7 bg-sera-orange/20 rounded-full flex items-center justify-center">
-             <span className="text-base">🍜</span>
-           </div>
-         </div>
-         <div className="absolute bottom-20 right-10 animate-bounce-gentle" style={{ animationDelay: '0.5s' }}>
-           <div className="w-5 h-5 bg-sera-yellow/20 rounded-full flex items-center justify-center">
-             <span className="text-xs">🍣</span>
-           </div>
-         </div>
-       </div>
+      {/* Floating Food Icons - Hidden on mobile */}
+      <div className="hidden md:block absolute inset-0 pointer-events-none">
+        {getFloatingFoodIcons().map((foodIcon) => (
+          <div 
+            key={foodIcon.id}
+            className={`absolute ${foodIcon.position} animate-bounce-gentle`}
+            style={{ animationDelay: foodIcon.animationDelay }}
+          >
+            <div className={`${foodIcon.size} ${foodIcon.bgColor} rounded-full flex items-center justify-center`}>
+              <span className={`${
+                foodIcon.size === 'w-8 h-8' ? 'text-lg' :
+                foodIcon.size === 'w-6 h-6' ? 'text-sm' :
+                foodIcon.size === 'w-7 h-7' ? 'text-base' :
+                'text-xs'
+              }`}>
+                {foodIcon.icon}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

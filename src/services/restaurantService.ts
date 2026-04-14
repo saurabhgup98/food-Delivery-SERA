@@ -1,15 +1,59 @@
 import { ApiClient } from './base/apiClient';
 import { 
-  Restaurant, 
-  MenuItem, 
-  RestaurantsResponse, 
+  RestaurantsResponse,
   RestaurantResponse, 
   MenuResponse 
-} from '../types/restaurant.types';
+} from '../components/Restaurant/Config/RestaurantInterfaces';
+import { ExploreFiltersI } from '../pages/interfaces/ExploreInterfaces';
 
 export class RestaurantService extends ApiClient {
-  // Get all restaurants with optional filters
-  async getRestaurants(params?: {
+  // Fetch restaurants with filters - builds params from ExploreFiltersI and mode
+  async fetchRestaurantsWithFilters(
+    filters: ExploreFiltersI,
+    mode: 'all' | 'favorites' = 'all'
+  ): Promise<RestaurantsResponse> {
+    const params: any = {};
+
+    // Add mode-specific parameters
+    if (mode === 'favorites') {
+      params.favorites = true;
+    }
+
+    // Add common parameters from filters
+    if (filters.search.trim()) {
+      params.search = filters.search.trim();
+    }
+    
+    // Backend expects single cuisine value, send first one if multiple selected
+    if (filters.cuisine.length > 0) {
+      params.cuisine = filters.cuisine[0];
+    }
+    
+    if (filters.status !== 'all') {
+      params.status = filters.status;
+    }
+    
+    // Handle dietary: In favorites mode with vegFilter, use 'vegetarian', otherwise use first dietary option
+    if (mode === 'favorites' && filters.vegFilter) {
+      params.dietary = 'vegetarian';
+    } else if (filters.dietary.length > 0) {
+      // Backend expects single dietary value, send first one if multiple selected
+      params.dietary = filters.dietary[0];
+    }
+    
+    if (filters.priceRange !== 'all') {
+      params.priceRange = filters.priceRange;
+    }
+    
+    if (filters.sortBy) {
+      params.sortBy = filters.sortBy;
+    }
+
+    return this._getRestaurants(params);
+  }
+
+  // Private method to make API request with raw params
+  private async _getRestaurants(params?: {
     status?: string;
     cuisine?: string;
     dietary?: string;
@@ -36,7 +80,7 @@ export class RestaurantService extends ApiClient {
 
   // Get a specific restaurant by ID
   async getRestaurant(id: string): Promise<RestaurantResponse> {
-    return this.makeRequest<RestaurantResponse>(`/restaurants/${id}`);
+    return this.makeRequest<RestaurantResponse>(`/restaurants?id=${id}`);
   }
 
   // Get menu items for a specific restaurant
@@ -65,121 +109,6 @@ export class RestaurantService extends ApiClient {
     return this.makeRequest<MenuResponse>(endpoint);
   }
 
-  // Get popular food items for a restaurant (mock data for now)
-  async getRestaurantFoodItems(restaurantId: string): Promise<{ success: boolean; data: { foodItems: MenuItem[] } }> {
-    
-    // Mock food data based on restaurant cuisine
-    const mockFoodData: Record<string, MenuItem[]> = {
-      'indian': [
-        {
-          _id: '1',
-          restaurantId,
-          name: 'Butter Chicken',
-          description: 'Creamy tomato-based curry with tender chicken pieces',
-          price: '₹320',
-          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
-          category: 'mains',
-          dietary: 'non-veg',
-          spiceLevel: 'medium',
-          prepTime: '25 min',
-          calories: '450 cal',
-          rating: 4.5,
-          isPopular: true,
-          isChefSpecial: false,
-          isQuickOrder: true,
-          isTrending: true,
-          isAvailable: true,
-          customizationOptions: {
-            sizes: [
-              { name: 'Regular', price: '₹320' },
-              { name: 'Large', price: '₹450' }
-            ],
-            spiceLevels: [
-              { name: 'Mild', price: '₹0' },
-              { name: 'Medium', price: '₹0' },
-              { name: 'Hot', price: '₹0' }
-            ]
-          }
-        },
-        {
-          _id: '2',
-          restaurantId,
-          name: 'Dal Makhani',
-          description: 'Rich and creamy black lentils cooked with butter and cream',
-          price: '₹280',
-          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
-          category: 'mains',
-          dietary: 'veg',
-          prepTime: '30 min',
-          calories: '380 cal',
-          rating: 4.3,
-          isPopular: true,
-          isChefSpecial: true,
-          isQuickOrder: false,
-          isTrending: false,
-          isAvailable: true
-        }
-      ],
-      'italian': [
-        {
-          _id: '3',
-          restaurantId,
-          name: 'Margherita Pizza',
-          description: 'Classic pizza with tomato sauce, mozzarella, and fresh basil',
-          price: '₹450',
-          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
-          category: 'mains',
-          dietary: 'veg',
-          prepTime: '20 min',
-          calories: '520 cal',
-          rating: 4.4,
-          isPopular: true,
-          isChefSpecial: false,
-          isQuickOrder: true,
-          isTrending: true,
-          isAvailable: true,
-          customizationOptions: {
-            sizes: [
-              { name: 'Small (8")', price: '₹350' },
-              { name: 'Medium (10")', price: '₹450' },
-              { name: 'Large (12")', price: '₹550' }
-            ]
-          }
-        }
-      ],
-      'chinese': [
-        {
-          _id: '4',
-          restaurantId,
-          name: 'Chicken Manchurian',
-          description: 'Crispy chicken balls in tangy Manchurian sauce',
-          price: '₹380',
-          image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400',
-          category: 'mains',
-          dietary: 'non-veg',
-          spiceLevel: 'medium',
-          prepTime: '25 min',
-          calories: '420 cal',
-          rating: 4.2,
-          isPopular: true,
-          isChefSpecial: false,
-          isQuickOrder: true,
-          isTrending: false,
-          isAvailable: true
-        }
-      ]
-    };
-
-    // Default to Indian cuisine if not found
-    const cuisine = 'indian';
-    const foodItems = mockFoodData[cuisine] || mockFoodData['indian'];
-    
-
-    return {
-      success: true,
-      data: { foodItems }
-    };
-  }
 }
 
 export const restaurantService = new RestaurantService();

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { DietaryPreferences, CuisinePreferences } from '../components/Profile/interfaces/foodPreferenceInterfaces';
 import {
   INITIAL_DIETARY_PREFERENCES,
   INITIAL_CUISINE_PREFERENCES,
@@ -7,12 +6,13 @@ import {
   DEFAULT_CALORIE_PREFERENCE,
   VALIDATION_MESSAGES,
   FOOD_PREFERENCES_STORAGE_KEY
-} from '../config/foodPreferenceConfig';
+} from '../components/Profile/config/FoodPreferenceConfig';
+import { CuisinePreferencesI, DietaryPreferencesI } from '../components/Profile/ProfilePageInterfaces';
 
 export const useFoodPreferences = () => {
   // State management
-  const [dietaryPreferences, setDietaryPreferences] = useState<DietaryPreferences>(INITIAL_DIETARY_PREFERENCES);
-  const [cuisinePreferences, setCuisinePreferences] = useState<CuisinePreferences>(INITIAL_CUISINE_PREFERENCES);
+  const [dietaryPreferences, setDietaryPreferences] = useState<DietaryPreferencesI>(INITIAL_DIETARY_PREFERENCES);
+  const [cuisinePreferences, setCuisinePreferences] = useState<CuisinePreferencesI>(INITIAL_CUISINE_PREFERENCES);
   const [spiceLevel, setSpiceLevel] = useState(DEFAULT_SPICE_LEVEL);
   const [caloriePreference, setCaloriePreference] = useState(DEFAULT_CALORIE_PREFERENCE);
   const [allergies, setAllergies] = useState<string[]>([]);
@@ -22,14 +22,14 @@ export const useFoodPreferences = () => {
   const [missingFields, setMissingFields] = useState<string[]>([]);
 
   // Handler functions
-  const handleDietaryChange = (key: keyof DietaryPreferences) => {
+  const handleDietaryChange = (key: keyof DietaryPreferencesI) => {
     setDietaryPreferences(prev => ({
       ...prev,
       [key]: !prev[key]
     }));
   };
 
-  const handleCuisineChange = (key: keyof CuisinePreferences) => {
+  const handleCuisineChange = (key: keyof CuisinePreferencesI) => {
     setCuisinePreferences(prev => ({
       ...prev,
       [key]: !prev[key]

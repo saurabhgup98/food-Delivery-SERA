@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { authApi } from '../services/api/index';
-import { User, LoginRequest, RegisterRequest, AuthResponse } from '../services/api/types';
+import { loginUser, registerUser, logoutUser, getUserProfile, checkAuthentication } from './auth/authService';
+import { User, LoginCredentials, RegisterCredentials, AuthResponse } from '../components/Auth/authInterfaces';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginRequest) => Promise<AuthResponse>;
-  register: (userData: RegisterRequest) => Promise<AuthResponse>;
+  login: (credentials: LoginCredentials) => Promise<AuthResponse>;
+  register: (userData: RegisterCredentials) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   error: string | null;
   clearError: () => void;
@@ -49,16 +49,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const isAuth = authApi.isAuthenticated();
-        const currentUser = authApi.getCurrentUser();
+        const response = await checkAuthentication();
 
-        if (isAuth && currentUser) {
-          setUser(currentUser);
+        if (response.success && response.data) {
+          setUser(response.data);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
         // Clear invalid tokens
-        authApi.logout();
+        await logoutUser();
       } finally {
         setIsLoading(false);
       }
@@ -67,39 +66,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
+  const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await authApi.login(credentials);
+      const response = await loginUser(credentials);
 
-      if (response.success && response.data.user) {
-        // Create user object with role information from response
-        const userWithRole = {
-          ...response.data.user,
-          role: response.data.role,
-          availableRoles: response.data.availableRoles,
-          appIdentifier: response.data.appIdentifier,
-          authMethod: response.data.authMethod
-        };
-        setUser(userWithRole);
+      if (response.success && response.data) {
+        setUser(response.data);
         localStorage.setItem("isLoggedIn", "true");
         // Close login modal on successful login
         setIsLoginModalOpen(false);
+        
+        // Return AuthResponse format for compatibility
+        return {
+          success: true,
+          message: "Login successful",
+          data: {
+            user: response.data,
+            role: response.data.role,
+            availableRoles: response.data.availableRoles,
+            appIdentifier: response.data.appIdentifier,
+            authMethod: response.data.authMethod
+          }
+        };
       }
 
-      return response;
+      throw new Error(response.error || 'Login failed');
     } catch (error: any) {
-      // Handle different types of errors
+      // Handle different types of errors with specific user-friendly messages
       let errorMessage = "Login failed";
       
-      if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
+      // Get the actual error message from the response
+      const serverMessage = error?.response?.data?.message || error?.message || error;
+      
+      // Map server messages to user-friendly messages
+      if (serverMessage.includes('Invalid email or password') || serverMessage.includes('Invalid credentials')) {
+        errorMessage = "Invalid email or password. Please check your credentials and try again.";
+      } else if (serverMessage.includes('Account is deactivated')) {
+        errorMessage = "Your account has been deactivated. Please contact support for assistance.";
+      } else if (serverMessage.includes('Email and password are required')) {
+        errorMessage = "Please enter both email and password.";
+      } else if (serverMessage.includes('User not found')) {
+        errorMessage = "No account found with this email address. Please check your email or sign up for a new account.";
+      } else if (serverMessage.includes('Too many requests') || serverMessage.includes('Too many authentication attempts')) {
+        errorMessage = "Too many login attempts. Please wait 15 minutes before trying again.";
+      } else if (serverMessage.includes('Token expired')) {
+        errorMessage = "Your session has expired. Please log in again.";
+      } else if (serverMessage.includes('Invalid token')) {
+        errorMessage = "Invalid session. Please log in again.";
+      } else if (serverMessage.includes('Network error') || serverMessage.includes('Failed to fetch')) {
+        errorMessage = "Network connection error. Please check your internet connection and try again.";
+      } else if (serverMessage.includes('Server error') || serverMessage.includes('Internal server error')) {
+        errorMessage = "Server error. Please try again later or contact support if the problem persists.";
+      } else if (typeof serverMessage === 'string' && serverMessage.trim()) {
+        // Use the server message if it's a meaningful string
+        errorMessage = serverMessage;
+      } else {
+        errorMessage = "Login failed. Please check your credentials and try again.";
       }
       
       setError(errorMessage);
@@ -109,39 +134,63 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
+  const register = async (userData: RegisterCredentials): Promise<AuthResponse> => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await authApi.register(userData);
+      const response = await registerUser(userData);
 
-      if (response.success && response.data.user) {
-        // Create user object with role information from response
-        const userWithRole = {
-          ...response.data.user,
-          role: response.data.role,
-          availableRoles: response.data.availableRoles,
-          appIdentifier: response.data.appIdentifier,
-          authMethod: response.data.authMethod
-        };
-        setUser(userWithRole);
+      if (response.success && response.data) {
+        setUser(response.data);
         localStorage.setItem("isLoggedIn", "true");
         // Close signup modal on successful registration
         setIsSignupModalOpen(false);
+        
+        // Return AuthResponse format for compatibility
+        return {
+          success: true,
+          message: "Registration successful",
+          data: {
+            user: response.data,
+            role: response.data.role,
+            availableRoles: response.data.availableRoles,
+            appIdentifier: response.data.appIdentifier,
+            authMethod: response.data.authMethod
+          }
+        };
       }
 
-      return response;
+      throw new Error(response.error || 'Registration failed');
     } catch (error: any) {
-      // Handle different types of errors
+      // Handle different types of errors with specific user-friendly messages
       let errorMessage = "Registration failed";
       
-      if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
+      // Get the actual error message from the response
+      const serverMessage = error?.response?.data?.message || error?.message || error;
+      
+      // Map server messages to user-friendly messages
+      if (serverMessage.includes('Email already exists') || serverMessage.includes('email already exists')) {
+        errorMessage = "An account with this email already exists. Please use a different email or try logging in.";
+      } else if (serverMessage.includes('Password too weak') || serverMessage.includes('Password does not meet requirements')) {
+        errorMessage = "Password is too weak. Please use at least 8 characters with a mix of letters, numbers, and symbols.";
+      } else if (serverMessage.includes('Invalid email format') || serverMessage.includes('Invalid email')) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (serverMessage.includes('Name is required') || serverMessage.includes('Name required')) {
+        errorMessage = "Please enter your full name.";
+      } else if (serverMessage.includes('Phone number already exists') || serverMessage.includes('phone already exists')) {
+        errorMessage = "An account with this phone number already exists. Please use a different phone number.";
+      } else if (serverMessage.includes('Validation failed') || serverMessage.includes('validation error')) {
+        errorMessage = "Please fill in all required fields correctly.";
+      } else if (serverMessage.includes('Network error') || serverMessage.includes('Failed to fetch')) {
+        errorMessage = "Network connection error. Please check your internet connection and try again.";
+      } else if (serverMessage.includes('Server error') || serverMessage.includes('Internal server error')) {
+        errorMessage = "Server error. Please try again later or contact support if the problem persists.";
+      } else if (typeof serverMessage === 'string' && serverMessage.trim()) {
+        // Use the server message if it's a meaningful string
+        errorMessage = serverMessage;
+      } else {
+        errorMessage = "Registration failed. Please check your information and try again.";
       }
       
       setError(errorMessage);
@@ -154,7 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await authApi.logout();
+      await logoutUser();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {

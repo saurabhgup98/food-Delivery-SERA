@@ -13,9 +13,7 @@ export * from './shared/localStorage';
 export * from './shared/utils';
 
 // Export auth utilities
-export * from './auth/tokenManager';
 export * from './auth/userUtils';
-export * from './auth/modalManager';
 export * from './auth/authService';
 
 // Export cart utilities

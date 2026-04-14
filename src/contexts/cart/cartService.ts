@@ -1,8 +1,9 @@
 // Cart service functions
 
-import { MenuItem as ApiMenuItem } from '../../services/api';
+import { MenuItemI as ApiMenuItem } from '../../components/Restaurant/Config/RestaurantInterfaces';
 import { CartItem, Customization } from '../types';
 import { convertToCartItem, validateCartItem } from './cartUtils';
+
 
 /**
  * Add item to cart

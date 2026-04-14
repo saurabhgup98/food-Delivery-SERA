@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { PROFILE_TABS, TabType } from '../config/profileConfig';
 import { useProfileData } from '../hooks/useProfileData';
-import ProfileOverview from '../components/Profile/ProfileOverview';
+import { 
+  PROFILE_TABS, 
+  TabType, 
+  getUserInitials, 
+  getUserDisplayName, 
+  getUserEmail, 
+  isUserVerified, 
+  getUserMembershipLevel, 
+  formatCurrency, 
+  getTabContent, 
+  getTabButtonClasses, 
+  getProfileOverviewClasses, 
+  getAvatarClasses, 
+  getOnlineIndicatorClasses, 
+  getStatusBadgeClasses 
+} from './config/ProfilePageConfig';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
@@ -24,22 +38,17 @@ const ProfilePage: React.FC = () => {
   }
 
   const renderTabContent = () => {
-    const tab = PROFILE_TABS.find(t => t.id === activeTab);
-    if (!tab) return null;
-    
-    const Component = React.lazy(tab.component);
-    return (
-      <React.Suspense fallback={<div className="text-center text-white">Loading...</div>}>
-        <Component />
-      </React.Suspense>
-    );
+    return getTabContent(activeTab, PROFILE_TABS);
   };
 
+  // Get user membership level
+  const membershipLevel = getUserMembershipLevel(totalSpent);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 pt-12">
-      <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 pt-5">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-5">
+        {/* Header - Reduced spacing by 60% */}
+        <div className="mb-3 sm:mb-4">
           <div className="text-center sm:text-left">
             <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-sera-orange to-sera-yellow bg-clip-text text-transparent">
               My Profile
@@ -50,8 +59,39 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Profile Overview Card */}
-        <ProfileOverview user={user} totalSpent={totalSpent} />
+        {/* Profile Overview Card - Integrated directly */}
+        <div className={getProfileOverviewClasses()}>
+          <div className="flex flex-col items-center sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="relative">
+              <div className={getAvatarClasses()}>
+                {getUserInitials(user)}
+              </div>
+              <div className={getOnlineIndicatorClasses()}>
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse m-auto mt-1"></div>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">{getUserDisplayName(user)}</h2>
+              <p className="text-gray-300 text-sm sm:text-base mb-3">{getUserEmail(user)}</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                {isUserVerified(user) && (
+                  <span className={getStatusBadgeClasses('verified')}>
+                    ✓ Verified
+                  </span>
+                )}
+                <span className={`${getStatusBadgeClasses('membership')} ${membershipLevel.bgColor} ${membershipLevel.borderColor}`}>
+                  {membershipLevel.icon} {membershipLevel.level}
+                </span>
+              </div>
+            </div>
+            <div className="text-center sm:text-right w-full sm:w-auto">
+              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sera-orange to-orange-500 bg-clip-text text-transparent">
+                {formatCurrency(totalSpent)}
+              </div>
+              <div className="text-gray-400 text-sm">Total Spent</div>
+            </div>
+          </div>
+        </div>
 
         {/* Tabs */}
         <div className="bg-gradient-to-br from-dark-800 to-dark-700 rounded-2xl border border-dark-600 overflow-hidden shadow-2xl">
@@ -62,11 +102,7 @@ const ProfilePage: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center justify-center space-x-2 px-4 sm:px-6 lg:px-8 py-4 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-300 flex-1 min-w-0 relative ${
-                    activeTab === tab.id
-                      ? 'text-sera-orange border-b-2 border-sera-orange bg-gradient-to-r from-sera-orange/10 to-orange-500/10'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
+                  className={getTabButtonClasses(activeTab === tab.id)}
                 >
                   <span className="text-base sm:text-lg flex-shrink-0">{tab.icon}</span>
                   <span className="hidden sm:inline truncate">{tab.label}</span>

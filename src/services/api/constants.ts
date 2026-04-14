@@ -5,11 +5,12 @@ export const API_BASE_URL = API_CONFIG.baseURL;
 
 export const API_ENDPOINTS = {
   // Auth endpoints
-  register: '/api/auth/register',
-  login: '/api/auth/login',
-  logout: '/api/auth/logout',
-  refresh: '/api/auth/refresh',
-  profile: '/api/user/profile',
+  register: '/api/register',
+  login: '/api/login',
+  logout: '/api/logout',
+  refresh: '/api/refresh',
+  profile: '/api/me',
+  changePassword: '/api/change-password',
 
   // OAuth endpoints
   googleAuth: '/api/oauth/google',

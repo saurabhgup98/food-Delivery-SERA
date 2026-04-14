@@ -1,9 +1,0 @@
-export { default as PersonalInfo } from './PersonalInfo';
-export { default as DeliveryAddresses } from './DeliveryAddresses';
-export { default as DeliveryAddressForm } from './DeliveryAddressForm';
-export { default as AddressList } from './AddressList';
-export { default as FoodPreferences } from './FoodPreferences';
-export { default as OrderHistory } from './OrderHistory';
-export { default as PaymentMethods } from './PaymentMethods';
-export { default as NotificationSettings } from './NotificationSettings';
-export { default as ProfileOverview } from './ProfileOverview';

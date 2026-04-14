@@ -26,16 +26,9 @@ export const useProfileData = (user: any) => {
         }
       } catch (error) {
         console.error('Error fetching orders:', error);
-        // Fallback to mock data if API fails
-        const mockOrders = [
-          { status: 'delivered', total: 590 },
-          { status: 'delivered', total: 570 },
-          { status: 'delivered', total: 430 },
-          { status: 'delivered', total: 530 },
-          { status: 'delivered', total: 600 }
-        ];
-        setOrders(mockOrders);
-        setTotalSpent(2720);
+        // Set empty data if API fails
+        setOrders([]);
+        setTotalSpent(0);
       } finally {
         setIsLoadingOrders(false);
       }

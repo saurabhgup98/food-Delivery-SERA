@@ -10,4 +10,7 @@ declare module 'lucide-react' {
   export const X: LucideIcon;
   export const MapPin: LucideIcon;
   export const Bell: LucideIcon;
+  export const ArrowLeft: LucideIcon;
+  export const Heart: LucideIcon;
+  export const Share2: LucideIcon;
 }

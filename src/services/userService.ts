@@ -1,4 +1,6 @@
 import { ApiClient } from './base/apiClient';
+import { API_CONFIG } from '../config/environment';
+import { userStorage } from '../contexts/auth/authStorage';
 
 export class UserService extends ApiClient {
   // Complete user profile
@@ -26,10 +28,32 @@ export class UserService extends ApiClient {
     currentPassword: string;
     newPassword: string;
   }): Promise<{ success: boolean; message: string }> {
-    return this.makeRequest('/user/change-password', {
+    const currentUser = userStorage.getUser();
+    if (!currentUser?.email) {
+      throw new Error('User email not found. Please login again.');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/api/change-password`, {
       method: 'POST',
-      body: JSON.stringify(passwordData)
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: currentUser.email,
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      }),
     });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || data?.message || 'Failed to change password');
+    }
+
+    return {
+      success: data.success,
+      message: data.message || 'Password changed successfully',
+    };
   }
 }
 

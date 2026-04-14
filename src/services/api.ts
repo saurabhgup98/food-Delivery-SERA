@@ -1,5 +1,4 @@
 // Import all services for the unified API service
-import { restaurantService } from './restaurantService';
 import { orderService } from './orderService';
 import { userService } from './userService';
 import { addressService } from './addressService';
@@ -8,9 +7,10 @@ import { locationService } from './locationService';
 import { notificationService } from './notificationService';
 import { promotionService } from './promotionService';
 import { chatService } from './chatService';
+import { restaurantService } from './RestaurantService';
 
 // Re-export all types
-export * from '../types/restaurant.types';
+export * from '../components/Restaurant/Config/RestaurantInterfaces';
 export * from '../types/order.types';
 export * from '../types/address.types';
 export * from '../types/common.types';
@@ -19,7 +19,6 @@ export * from '../types/common.types';
 export { API_BASE_URL } from './api/constants';
 
 // Re-export individual services
-export { restaurantService } from './restaurantService';
 export { orderService } from './orderService';
 export { userService } from './userService';
 export { addressService } from './addressService';
@@ -31,10 +30,9 @@ export { chatService } from './chatService';
 
 class ApiService {
   // Restaurant methods
-  getRestaurants = restaurantService.getRestaurants.bind(restaurantService);
+  fetchRestaurantsWithFilters = restaurantService.fetchRestaurantsWithFilters.bind(restaurantService);
   getRestaurant = restaurantService.getRestaurant.bind(restaurantService);
   getRestaurantMenu = restaurantService.getRestaurantMenu.bind(restaurantService);
-  getRestaurantFoodItems = restaurantService.getRestaurantFoodItems.bind(restaurantService);
 
   // Order methods
   createOrder = orderService.createOrder.bind(orderService);

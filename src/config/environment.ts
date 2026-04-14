@@ -20,16 +20,16 @@ export const getApiConfig = () => {
   switch (environment) {
     case ENVIRONMENT.DEVELOPMENT:
       return {
-        baseURL: 'https://simple-authentication-service.vercel.app', // Auth always uses deployed
+        baseURL: 'https://centralized-auth-app.vercel.app',
         appEndpoint: 'http://127.0.0.1:3001',
-        backendURL: 'http://localhost:5000/api', // Local backend for development
+        backendURL: 'https://food-delivery-backend-sera.vercel.app/api', // Always use Vercel endpoint
         timeout: 10000,
         retryAttempts: 3
       };
     
     case ENVIRONMENT.PRODUCTION:
       return {
-        baseURL: 'https://simple-authentication-service.vercel.app', // Auth always uses deployed
+        baseURL: 'https://centralized-auth-app.vercel.app',
         appEndpoint: 'https://food-delivery-sera.vercel.app',
         backendURL: 'https://food-delivery-backend-sera.vercel.app/api', // Deployed backend for production
         timeout: 10000,
@@ -38,9 +38,9 @@ export const getApiConfig = () => {
     
     default:
       return {
-        baseURL: 'https://simple-authentication-service.vercel.app',
+        baseURL: 'https://centralized-auth-app.vercel.app',
         appEndpoint: 'http://127.0.0.1:3001',
-        backendURL: 'http://localhost:5000/api',
+        backendURL: 'https://food-delivery-backend-sera.vercel.app/api', // Always use Vercel endpoint
         timeout: 10000,
         retryAttempts: 3
       };

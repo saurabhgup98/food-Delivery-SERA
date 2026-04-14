@@ -100,7 +100,7 @@ const Navigation: React.FC<NavigationProps> = ({
           </Link>
           
           <Link 
-            to="/favorites" 
+            to="/explore?mode=favorites" 
             className="flex items-center space-x-3 px-4 py-3 text-white/90 font-medium transition-all duration-300 hover:bg-white/10 rounded-lg group"
             onClick={handleLinkClick}
           >
@@ -118,7 +118,7 @@ const Navigation: React.FC<NavigationProps> = ({
 
   // Desktop Navigation
   return (
-    <nav className="hidden md:flex items-center space-x-1">
+    <nav className="hidden md:flex items-center space-x-1 mr-8">
       <Link 
         to="/" 
         className={`relative px-3 py-1 text-white font-semibold transition-all duration-500 hover:text-sera-yellow group overflow-hidden ${isActive('/') ? 'text-sera-yellow' : 'text-white/95'}`}

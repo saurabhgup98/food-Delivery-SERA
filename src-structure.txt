@@ -1,0 +1,251 @@
+src
+├── App.tsx
+├── CommonMockData.tsx
+├── index.css
+├── index.tsx
+├── Style.ts
+├── components
+│   ├── Address
+│   │   ├── components
+│   │   │   ├── AddressList.tsx
+│   │   │   ├── AddressSelectionModal.tsx
+│   │   │   └── DeliveryAddressForm.tsx
+│   │   ├── AddressConfig.ts
+│   │   ├── AddressConstant.ts
+│   │   ├── AddressInterfaces.ts
+│   │   └── index.ts
+│   ├── Auth
+│   │   ├── components
+│   │   │   ├── AuthForm.tsx
+│   │   │   ├── AuthModals.tsx
+│   │   │   └── ChangePasswordModal.tsx
+│   │   ├── authInterfaces.ts
+│   │   ├── AuthStyles.ts
+│   │   ├── AuthUtils.ts
+│   │   └── FormConfig.ts
+│   ├── Button
+│   │   ├── index.ts
+│   │   ├── PrimaryActionBtn.tsx
+│   │   ├── PrimaryCenteredActionBtn.tsx
+│   │   ├── PrimarySelectBtn.tsx
+│   │   ├── ToggleBtnPrimary.tsx
+│   │   ├── ViewModeToggle.tsx
+│   ├── buttons
+│   │   ├── index.ts
+│   │   └── PrimaryActionBtn.tsx
+│   ├── Cart
+│   │   ├── CartConfig.ts
+│   │   ├── CartIcon.tsx
+│   │   ├── CartModal.tsx
+│   │   ├── index.ts
+│   │   └── OrderSuccessModal.tsx
+│   ├── Chat
+│   │   └── ChatWidget.tsx
+│   ├── Common
+│   │   ├── Icons
+│   │   │   └── CloseIcon.tsx
+│   │   ├── utils
+│   │   │   └── ButtonConfigUtils.ts
+│   │   ├── BrandNameAndLogo.tsx
+│   │   ├── index.ts
+│   │   ├── ItemContainer.tsx
+│   │   ├── MessageDisplay.tsx
+│   │   ├── PaymentMethodModal.tsx
+│   │   ├── QuickFilters.tsx
+│   │   ├── StateDisplay.tsx
+│   │   ├── ValidationModal.tsx
+│   │   └── VerticalDetailsTextCard.tsx
+│   ├── Contact
+│   │   ├── ContactForm.tsx
+│   │   └── ContactFormConfig.ts
+│   ├── Container
+│   │   ├── index.ts
+│   │   ├── PrimaryContentContainer.tsx
+│   │   └── SecondaryContentContainer.tsx
+│   ├── Dropdown
+│   │   ├── DatePrimary.tsx
+│   │   ├── LocationDropdown.tsx
+│   │   ├── MultiSelectDropdown.tsx
+│   │   └── PrimaryDropdown.tsx
+│   ├── Explore
+│   │   ├── config
+│   │   │   └── RestaurantConfig.ts
+│   │   ├── style
+│   │   │   └── RestaurantCardStyle.ts
+│   │   ├── RestaurantGridViewCard.tsx
+│   │   ├── RestaurantListViewCard.tsx
+│   │   └── RestaurantStatus.tsx
+│   ├── Form
+│   │   ├── index.ts
+│   │   └── PrimaryForm.tsx
+│   ├── Header
+│   │   ├── CommonHeaderConfig.ts
+│   │   ├── HeaderConfig.ts
+│   │   ├── HeaderMain.tsx
+│   │   ├── RestaurantFilterSearchHeaderConfig.ts
+│   │   ├── RestaurantsSearchAndFilterHeader.tsx
+│   │   ├── SectionHeadingSecondary.tsx
+│   │   └── UserMenu.tsx
+│   ├── HeroSection
+│   │   ├── FloatingElement.tsx
+│   │   └── HeroSection.tsx
+│   ├── Icon
+│   │   ├── Arrows
+│   │   │   ├── ArrowDownIcon.tsx
+│   │   │   ├── ArrowDownLongIcon.tsx
+│   │   │   ├── ArrowLeftIcon.tsx
+│   │   │   ├── ArrowLeftLongIcon.tsx
+│   │   │   ├── ArrowRightIcon.tsx
+│   │   │   ├── ArrowRightLongIcon.tsx
+│   │   │   ├── ArrowUpIcon.tsx
+│   │   │   ├── ArrowUpLongIcon.tsx
+│   │   │   └── index.ts
+│   │   ├── BellIcon.tsx
+│   │   ├── CartIcon.tsx
+│   │   ├── ChatIcon.tsx
+│   │   ├── ClockIcon.tsx
+│   │   ├── FilterIcon.tsx
+│   │   ├── HalfStarIcon.tsx
+│   │   ├── HeartIcon.tsx
+│   │   ├── LocationIcon.tsx
+│   │   ├── OAuthIcons.tsx
+│   │   ├── SearchIcon.tsx
+│   │   ├── SettingsIcon.tsx
+│   │   ├── StarIcon.tsx
+│   │   ├── StarRating.tsx
+│   │   ├── TickIcon.tsx
+│   │   ├── TimingIcon.tsx
+│   │   └── XIcon.tsx
+│   ├── Input
+│   │   ├── index.ts
+│   │   ├── PhoneInput.tsx
+│   │   ├── PrimaryCheckbox.tsx
+│   │   ├── PrimaryInput.tsx
+│   │   ├── PrimarySearchBar.tsx
+│   │   ├── PrimarySearchBarUtils.ts
+│   │   └── PrimaryTextarea.tsx
+│   ├── Layout
+│   │   └── FloatingCartButton.tsx
+│   ├── Loader
+│   │   ├── AnimatedLoader.tsx
+│   │   ├── index.ts
+│   │   └── LoadingSpinner.tsx
+│   ├── Modal
+│   │   ├── config
+│   │   │   ├── DishCustomizationModalUtils.ts
+│   │   │   └── RestaurantFilterModalConfig.ts
+│   │   ├── interfaces
+│   │   │   └── RestaurantFilterModalInterface.ts
+│   │   ├── DishCustomizationModal.tsx
+│   │   ├── MenuFilterUtils.ts
+│   │   └── RestaurantFilterModal.tsx
+│   ├── Modals
+│   │   ├── config
+│   │   │   └── RestaurantFilterModalConfig.ts
+│   │   └── RestaurantFilterModal.tsx
+│   ├── Navigation
+│   │   ├── index.ts
+│   │   └── Navigation.tsx
+│   ├── Notification
+│   │   ├── NotificationsDropdown.tsx
+│   │   └── NotificationsPage.tsx
+│   ├── Order
+│   │   ├── OrderHistory.tsx
+│   │   └── OrderHistoryPage.tsx
+│   ├── Profile
+│   │   ├── components
+│   │   │   ├── DeliveryAddressTab.tsx
+│   │   │   ├── FoodPreferenceTab.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── PaymentMethodsTab.tsx
+│   │   │   └── PersonalInfoTab.tsx
+│   │   ├── config
+│   │   │   ├── DeliveryAddressConfig.ts
+│   │   │   ├── FoodPreferenceConfig.ts
+│   │   │   ├── NotificationSettingsTab.tsx
+│   │   │   └── PersonalInfoConfig.ts
+│   │   ├── ProfilePageConstants.ts
+│   │   └── ProfilePageInterfaces.ts
+│   └── Restaurant
+│       ├── Config
+│       │   ├── RestaurantButtonConfig.tsx
+│       │   ├── RestaurantInterfaces.ts
+│       │   ├── RestaurantMenuConfig.ts
+│       │   └── RestaurantMenuFilterModalConfig.ts
+│       ├── MenuFilterModal.tsx
+│       ├── RestaurantDetail.tsx
+│       ├── RestaurantDetailsHeroSection.tsx
+│       └── RestaurantItemCard.tsx
+├── config
+│   ├── addressConfig.ts
+│   ├── environment.ts
+│   ├── routeConfig.tsx
+│   └── routes.ts
+├── contexts
+│   ├── auth
+│   │   ├── authFormService.ts
+│   │   ├── authService.ts
+│   │   ├── authStorage.ts
+│   │   ├── index.ts
+│   │   ├── modalManager.ts
+│   │   ├── oauthService.ts
+│   │   ├── tokenManager.ts
+│   │   └── userUtils.ts
+│   ├── cart
+│   │   ├── cartReducer.ts
+│   │   ├── cartService.ts
+│   │   └── cartUtils.ts
+│   ├── shared
+│   │   ├── apiService.ts
+│   │   ├── localStorage.ts
+│   │   └── utils.ts
+│   ├── AuthContext.tsx
+│   ├── CartContext.tsx
+│   ├── index.ts
+│   └── types.ts
+├── hooks
+│   ├── useAddressManagement.ts
+│   ├── useCartModal.ts
+│   ├── useFoodPreferences.ts
+│   ├── useProfileData.ts
+│   └── useSearch.ts
+├── pages
+│   ├── config
+│   │   ├── ExploreConfig.tsx
+│   │   ├── HomePageConfig.ts
+│   │   └── ProfilePageConfig.ts
+│   ├── constant
+│   │   ├── ExploreConstants.ts
+│   │   └── ExploreStyles.ts
+│   ├── interfaces
+│   │   └── ExploreInterfaces.ts
+│   ├── explore.tsx
+│   ├── HomePage.tsx
+│   └── ProfilePage.tsx
+├── services
+│   ├── api
+│   │   ├── constants.ts
+│   │   ├── httpClient.ts
+│   │   ├── index.ts
+│   │   ├── types.ts
+│   │   └── utils.ts
+│   ├── base
+│   │   └── apiClient.ts
+│   ├── addressService.ts
+│   ├── api.ts
+│   ├── chatService.ts
+│   ├── contactService.ts
+│   ├── locationService.ts
+│   ├── notificationService.ts
+│   ├── orderService.ts
+│   ├── promotionService.ts
+│   ├── RestaurantService.ts
+│   └── userService.ts
+├── types
+│   ├── address.types.ts
+│   ├── common.types.ts
+│   ├── index.ts
+│   ├── lucide-react.d.ts
+│   └── order.types.ts
+└── utils
+    └── restaurantUtils.ts

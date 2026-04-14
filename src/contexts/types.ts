@@ -41,7 +41,7 @@ export interface User {
   username: string;
   name?: string; // For backward compatibility
   email: string;
-  role: 'user' | 'business-user' | 'admin' | 'superadmin';
+  role?: 'user' | 'business-user' | 'admin' | 'superadmin';
   appEndpoint: string;
   appIdentifier: string;
   phone?: string;
@@ -67,6 +67,9 @@ export interface CartContextType {
   clearCart: () => void;
   getItemQuantity: (itemId: string, customization?: Customization) => number;
   getCustomizedItemQuantity: (uniqueId: string) => number;
+  isModalOpen: boolean;
+  openModal: () => void;
+  closeModal: () => void;
 }
 
 export interface CartState {
@@ -145,5 +148,5 @@ export type CartAction =
   | { type: 'CLEAR_CART' };
 
 // ===== API CONFIGURATION =====
-export const AUTH_API_BASE_URL = 'https://simple-authentication-service.vercel.app/api';
+export const AUTH_API_BASE_URL = 'https://centralized-auth-app.vercel.app/api';
 export const FOOD_DELIVERY_APP_URL = 'https://food-delivery-app-frontend.vercel.app';

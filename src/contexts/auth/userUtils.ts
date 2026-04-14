@@ -27,7 +27,7 @@ export const createUserFromApiData = (userData: any): User => {
     username: userData.username || userData.name || '',
     name: userData.username || userData.name || '', // For backward compatibility
     email: userData.email,
-    role: userData.role || 'user',
+    role: userData.role,
     appEndpoint: FOOD_DELIVERY_APP_URL,
     appIdentifier: userData.appIdentifier || 'sera-food-customer-app',
   };
@@ -58,7 +58,7 @@ export const hasRole = (user: User | null, role: string): boolean => {
  */
 export const hasAnyRole = (user: User | null, roles: string[]): boolean => {
   if (!user) return false;
-  return roles.includes(user.role);
+  return !!user.role && roles.includes(user.role);
 };
 
 /**

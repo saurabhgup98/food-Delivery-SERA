@@ -20,7 +20,7 @@ export const makeApiCall = async <T = any>(
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> => {
   const {
-    baseURL = 'https://simple-authentication-service.vercel.app/api', // Updated to new auth service
+    baseURL = 'https://centralized-auth-app.vercel.app/api',
     timeout = 10000,
     headers = {},
     ...fetchOptions

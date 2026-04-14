@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { MenuItem as ApiMenuItem } from '../services/api';
+import React, { createContext, useContext, useReducer, ReactNode, useState } from 'react';
+import { MenuItemI as ApiMenuItem } from '../components/Restaurant/Config/RestaurantInterfaces';
 import { CartContextType, CartItem, Customization } from './types';
 import { cartReducer } from './cart/cartReducer';
 import * as cartService from './cart/cartService';
@@ -13,6 +13,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     totalItems: 0,
     totalAmount: 0
   });
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const addItem = (item: ApiMenuItem | CartItem) => {
     try {
@@ -43,6 +46,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return cartUtils.getItemQuantityById(state.items, uniqueId);
   };
 
+  // Modal functions
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <CartContext.Provider value={{
       state,
@@ -51,7 +58,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateQuantity,
       clearCart,
       getItemQuantity,
-      getCustomizedItemQuantity
+      getCustomizedItemQuantity,
+      isModalOpen,
+      openModal,
+      closeModal
     }}>
       {children}
     </CartContext.Provider>
