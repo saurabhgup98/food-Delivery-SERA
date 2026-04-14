@@ -1,5 +1,6 @@
 // Import API configuration
 import { API_CONFIG } from '../../config/environment';
+import { tokenStorage } from '../../contexts/auth/authStorage';
 
 // Use backend URL from environment config
 const API_BASE_URL = API_CONFIG.backendURL;
@@ -11,12 +12,14 @@ export class ApiClient {
     
     // No token management needed in new authentication system
     try {
+      const accessToken = tokenStorage.getAccessToken();
       const response = await fetch(url, {
         method: options?.method || 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Origin': window.location.origin,
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
           ...options?.headers,
         },
         mode: 'cors',
